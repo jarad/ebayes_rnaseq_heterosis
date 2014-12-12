@@ -16,3 +16,5 @@
 # LaTeX files
 *.log
 *.synctex.gz
+*.fff
+*.ttt
