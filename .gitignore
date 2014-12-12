@@ -12,3 +12,7 @@
 .Rproj.user
 
 *.Rproj
+
+# LaTeX files
+*.log
+*.synctex.gz
