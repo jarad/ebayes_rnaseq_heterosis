@@ -11,9 +11,9 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-\title[eBayes for heterosis in RNAseq]{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
+\title{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
 
-\author{Jarad Niemi $^*$\email{niemi@iastate.edu}, 
+\author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
 Eric Mittman, 
 Will Landau, and 
 Dan Nettleton \\
@@ -51,11 +51,23 @@ Empirical Bayes; Heterosis; Hierarchical Model; Negative binomial; RNAseq.
 \section{Heterosis}
 \label{s:heterosis}
 
-\section{Empirical Bayes}
+Well before heterosis was scientifically described by \cite{darwin1876effects}, humans had been using heterosis for various practical purposes. Within the last century, heterosis has been used to improve many species for food, feed, and fuel industries. A few relatively recent examples include rice \cite{yu1997importance}, alfalfa \cite{riday2002heterosis}, tomatoes \cite{krieger2010flowering}, and fish \cite{wohlfarth1993heterosis}. Despite the intensive study and successful utilization of heterosis, the basic genomic mechanisms responsible for heterosis remain unclear \cite{lippman2007heterosis}.
+
+\cite{shull1952beginnings} coined the term heterosis and defined it as 
+\begin{quote}
+the interpretation of increased vigor, size, fruitfulness, speed of development, resistance to disease and to insect pests, or to climatic rigors of any kind, manifested by crossbred organisms as compared with corresponding inbreds, as the specific results of unlikeness in the constitutions of the uniting parental gametes.
+\end{quote}
+
+For example, the maize hybrid produced from a cross of parental inbred lines B73 and Mo17 is larger in size, has lower maturation time, and has higher grain yield than both of its parents \cite{hallauer2010quantitative}.
+
+\section{Empirical Bayes identification of gene heterosis from RNAseq counts}
+
+To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
+
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
 
-Let $Y_{gvi}$ be the count for gene $g=1,\ldots,F$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. Here $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$. 
+Let $Y_{gvi}$ be the count for gene $g=1,\ldots,F$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. Here $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$ and $ind$ indicates the observations are conditionally independent.
 
 \begin{equation} 
 Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\delta_{vi}},\psi_g) 
@@ -64,17 +76,30 @@ Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\delta_{vi}},\psi_g)
 
 A hierarchical model is constructed for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\delta_{vi} \stackrel{ind}{\sim} N(0,\tau_\delta^2)$. The logarithm of the gene-specific over-dispersion parameters also follow a normal distribution $\log(\psi_g) \stackrel{ind}{\sim} N(\zeta_\psi,\tau_\psi^2)$. The variety-specific effects for each gene, $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$ are assumed to have a joint normal distribution $\mu_g \stackrel{ind}{\sim} N(\eta, \Sigma)$. We consider an \emph{independent} model where $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_V^2$ and a \emph{covariance} model where we estimate all parameters in $\Sigma$. 
 
-We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations, e.g. $\tau_\delta, \tau_\psi \stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters on the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+1$ and an identity scale matrix. 
+We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations, e.g. $\tau_\delta, \tau_\psi \stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+1$ and an identity scale matrix. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-The parameters can be group by gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ and $\theta_g = (\mu_g,\psi_g)$ and non-gene-specific parameters $\phi = (\delta_{11},\ldots,\delta_{Vn_v}, \zeta_\psi, \tau_\psi^2, \Sigma)$. We employ an optimization procedure to obtain the \emph{maximum a posterior} (MAP) estimate for $\phi$, i.e. $\hat{\phi}_{MAP}$ and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Fortunately, conditional on the hyperparameters the gene specific parameters are conditionally independent as in equation \eqref{e:condind}. 
-
+The parameters from the model in Section \ref{s:model} can be group by gene-specific parameters $\theta_g = (\mu_g,\psi_g)$, collectively $\theta = (\theta_1,\ldots,\theta_G)$, and hyperparameter $\phi = (\delta, \zeta_\psi, \tau_\psi^2, \Sigma)$ where $\delta = (\delta_{11},\ldots,\delta_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\phi$ and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Conditional on the hyperparameters, the gene specific parameters are conditionally independent as in equation \eqref{e:condind}. 
 \begin{equation}
-p(\theta|y,\hat{\phi}_{MAP}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\phi}_{MAP}) 
+p(\theta|y,\hat{\phi}_{MAP}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\phi}_{MAP}) \propto \prod_{g=1}^G NB(y_g|\theta_g,\hat{\delta}_{MAP})p(\theta_g|\hat{\phi}_{MAP}) 
 \label{e:condind}
 \end{equation}
+Thus, conditional posterior inference for the gene specific parameters can be obtained independently and in parallel. 
+
+
+
+\subsection{Gene heterosis}
+\label{s:gene_heterosis}
+
+As defined in Section \ref{s:heterosis}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
+\begin{align}
+\label{e:hypotheses}
+H_0:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
+H_1:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}.
+\end{align}
+
 
 \section{Simulation study}
 \label{s:simulation}
