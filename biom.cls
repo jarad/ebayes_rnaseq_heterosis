@@ -1435,7 +1435,7 @@ Key words:\hskip1em}\ignorespaces}
 \else
   \def\@printed{}
 \fi
-\gdef\@journal{\vbox{\fontsize{10}{10}\selectfont\vbox{\hsize\textwidth{\sc Biometrics}
+\gdef\@journal{\vbox{\fontsize{10}{10}\selectfont\vbox{\hsize\textwidth{\sc JABES}
 {\@volume},  \@pagerange\hfill\ifx\@doi\@empty\else{DOI:}\ \@doi\fi}\par
 \vbox{\@month\ \@pubyear}}}
 % (\number\year) \@microfiche\@printed}
@@ -1451,7 +1451,7 @@ Key words:\hskip1em}\ignorespaces}
    \rm\@ddell\hbox to 0pt{\small\thepage}}
  \def\@oddfoot{}%\small\copyright\ \@pubyear\ RAS, MNRAS {\bf \@volume}, \@pagerange\hfil}
  \def\@evenhead{\Large\@ddell\hbox to
- 0pt{\small\thepage}\hspace{1.5em}\hfill\small{\it Biometrics, \@month}\ \@pubyear\hfill}
+ 0pt{\small\thepage}\hspace{1.5em}\hfill\small{\it JABES, \@month}\ \@pubyear\hfill}
  \def\@evenfoot{}%\hfil\small\copyright\ \@pubyear\ RAS, MNRAS {\bf \@volume}, \@pagerange}
  \def\sectionmark##1{\markboth{##1}{}}
  \def\subsectionmark##1{\markright{##1}}}
