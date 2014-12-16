@@ -3,7 +3,7 @@
 \usepackage{amsmath}
 \usepackage[figuresright]{rotating}
 
-\graphicspath{{../temp/rna-seq-stan/fig-rm-stan_laplace/}}
+\graphicspath{{include/}}
 
 %%%%% PLACE YOUR OWN MACROS HERE %%%%%
 
@@ -133,7 +133,7 @@ Existing methods are not designed to identify gene heterosis, but we adapted the
 The approach used by {\tt edgeR} naturally provides testing of hypotheses for differential expression amongst two varieties. If the hybrid's mean expression does not differ from a parent, then the hybrid does not exhibit heterosis. We can calculate two pvalues: one for the null hypothesis that the hybrid's mean expression is the same as parent 1 and the second for the null hypothesis that the hybrid's mean expression is the same as parent 2. But, even if both pvalues are small, the hybrid's mean expression could be between the two parents, i.e. mid-parent heterosis, and therefore not be exhibiting extreme heterosis. We construct a statistic that is 1 if the estimate of mean expression 
 for the hybrid is between the estimates for the parents and, otherwise, is selected from the pvalues from above by whichever parent's mean estimate is closer to that of the hybrid. 
 
-
+The approach used by {\tt baySeq} allows for a wider range of hypothesis to be tested including 
 
 
 
