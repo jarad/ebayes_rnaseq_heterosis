@@ -40,7 +40,7 @@ This is the summary for this paper.
 \end{abstract}
 
 \begin{keywords}
-Empirical Bayes; Heterosis; Hierarchical Model; Negative binomial; RNAseq.
+Empirical Bayes; Gene expression; Heterosis; Hierarchical model; Negative binomial; RNAseq.
 \end{keywords}
 
 \maketitle
@@ -50,19 +50,24 @@ Empirical Bayes; Heterosis; Hierarchical Model; Negative binomial; RNAseq.
 \section{Introduction}
 \label{s:intro}
 
-\section{Heterosis}
-\label{s:heterosis}
+% Need to udpate as this is directly from Tieming's paper
+Heterosis, or hybrid vigor, refers to the enhances phenotype of hybrid progeny relative to their inbred parents. Taking maize as an example, the offspring from crossing the inbred lines B73 and Mo17 are taller, mature faster, and produce greater yields than their parent lines \citep{hallauer1981quantitative, hallauer2010quantitative}. Since heterosis was scientifically documented by \cite{darwin1876effects}, it has been successfully manipulated to improve many species for food, feed, and fuel industries, such as rice \citep{yu1997importance}, alfalfa \citep{riday2002heterosis}, tomatoes \citep{krieger2010flowering}, and fish \citep{wohlfarth1993heterosis}. Despite the intensive study and successful utilization of heterosis, the basic genomic mechanisms remain unclear \citep{coors1999genetics, lippman2007heterosis}. Researchers speculate that gene-expression heterosis could be among the mechanisms responsible for the phenotypic heterosis \citep{swanson2006all, springer2007allelic}.
 
-Well before heterosis was scientifically described by \cite{darwin1876effects}, humans had been using heterosis for various practical purposes. Within the last century, heterosis has been used to improve many species for food, feed, and fuel industries. A few relatively recent examples include rice \cite{yu1997importance}, alfalfa \cite{riday2002heterosis}, tomatoes \cite{krieger2010flowering}, and fish \cite{wohlfarth1993heterosis}. Despite the intensive study and successful utilization of heterosis, the basic genomic mechanisms responsible for heterosis remain unclear \cite{lippman2007heterosis}.
+Recently \citep{ji2014estimation} provided an approach to assess heterosis using micro-array data using a hierarchical model for the ...
 
-\cite{shull1952beginnings} coined the term heterosis and defined it as 
-\begin{quote}
-the interpretation of increased vigor, size, fruitfulness, speed of development, resistance to disease and to insect pests, or to climatic rigors of any kind, manifested by crossbred organisms as compared with corresponding inbreds, as the specific results of unlikeness in the constitutions of the uniting parental gametes. 
-\end{quote}
+%\section{Heterosis}
+%\label{s:heterosis}
 
-For example, the maize hybrid produced from a cross of parental inbred lines B73 and Mo17 is larger in size, has lower maturation time, and has higher grain yield than both of its parents \cite{hallauer2010quantitative}. Data from \citep{paschold2012complementation}
-
-\citep{ji2014estimation}
+% Well before heterosis was scientifically described by , humans had been using heterosis for various practical purposes. Within the last century, heterosis has been used to improve many species for food, feed, and fuel industries. A few relatively recent examples include rice , alfalfa , tomatoes . Despite the intensive study and successful utilization of heterosis, the basic genomic mechanisms responsible for heterosis remain unclear .
+% 
+% \cite{shull1952beginnings} coined the term heterosis and defined it as 
+% \begin{quote}
+% the interpretation of increased vigor, size, fruitfulness, speed of development, resistance to disease and to insect pests, or to climatic rigors of any kind, manifested by crossbred organisms as compared with corresponding inbreds, as the specific results of unlikeness in the constitutions of the uniting parental gametes. 
+% \end{quote}
+% 
+% For example, the maize hybrid produced from a cross of parental inbred lines B73 and Mo17 is larger in size, has lower maturation time, and has higher grain yield than both of its parents \cite{hallauer2010quantitative}. Data from \citep{paschold2012complementation}
+% 
+% \citep{ji2014estimation}
 
 
 \section{Empirical Bayes identification of gene heterosis from RNAseq counts}
@@ -144,7 +149,7 @@ for the hybrid is between the estimates for the parents. Otherwise, the statisti
 
 The {\tt baySeq} approach allows for a wider range of hypotheses including $H_1: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H_2: \mu_{g1}=\mu_{g2}$, $H_3: \mu_{g1}=\mu_{g3}$, $H_4: \mu_{g2}=\mu_{g3}$, and $H_5:$ all $\mu_g$'s are distinct \citep{hardcastle2010bayseq, hardcastle2012baySeq}. Hypotheses $H_2$ and $H_5$ are the only two that indicate the possibility of heterosis. Similar to the {\tt edgeR} approach, we construct a statistic that is 0 if the estimated hybrid mean, based on the MLE's from {\tt edgeR}, is between the parental means and otherwise is the sum of the posterior probabilities for hypotheses $H_2$ and $H_5$. 
 
-The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors rather than the full posterior. Thus we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2})$. To circumvent this limitation, we reparameterized the independence model in Section \ref{s:model} following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We implemented this model using {\tt ShrinkBayes} and constructed a statistic based on posterior median of these parameters. Specifically, the statistic is 0 if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.
+The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors for parameters or linear combinations of parameters rather than an approximation to the full posterior. Thus, we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2}))$. To circumvent this limitation, we reparameterized the independence model in Section \ref{s:model} following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We estimated this model using {\tt ShrinkBayes} and constructed a statistic based on the posterior mean of these parameters. Specifically, the statistic is 0 if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$. 
 
 \subsection{Results}
 
@@ -162,12 +167,14 @@ Figure \ref{f:auc} provides the area under the ROC below a false positive rate o
 \caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different sample sizes for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
 \label{f:auc}
 \end{figure}
-The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approaches outperforming the other two. While there does not appear to be a significant difference between the independence model using RStan or ShrinkBayes, there does appear to be a significant decreased performance, at least for sample sizes, when using the model where a covariance is estimated. 
-
+The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approaches outperforming the other two. While there does not appear to be a significant difference between the independence model using RStan or ShrinkBayes, there does appear to be a significant decreased performance, at least for smaller sample sizes, when using the model where a covariance is estimated. 
 
 
 \section{Heterosis in maize ??}
 \label{s:corn}
+
+
+
 
 \section{Discussion}
 \label{s:discuss}
@@ -182,7 +189,7 @@ Put your final comments here.
 
 \section*{Acknowledgements}
 
-The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBayes}.
+The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
 
 %  If your paper refers to supplementary web material, then you MUST
 %  include this section!!  See Instructions for Authors at the journal
