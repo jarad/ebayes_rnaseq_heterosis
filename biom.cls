@@ -1469,7 +1469,7 @@ Key words:\hskip1em}\ignorespaces}
 to 7.75pt{\tiny C}}}
 \def\ps@titlepage{\let\@mkboth\@gobbletwo
  \def\@oddhead{\footnotesize\@journal\hfill}
- \def\@oddfoot{\hfill{\reset@font\ This paper has been submitted for consideration for publication in the {\it Journal of Agricultural, Biological, and Environmental Statistics}}\hfill}
+ \def\@oddfoot{\hfill{\reset@font\ This paper has been submitted for consideration for publication in the {\it JABES}}\hfill}
 %\hfill{\reset@font\thepage}\hfill}
  \def\@evenhead{\footnotesize\@journal\hfill}
  %\def\@evenfoot{\hfil\small\copyright\ \@pubyear\ The Society for the Study
