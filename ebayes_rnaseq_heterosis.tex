@@ -11,6 +11,8 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
+
+
 \title{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
 
 \author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
@@ -76,23 +78,27 @@ Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\delta_{vi}},\psi_g)
 \label{e:data}
 \end{equation}
 
-A hierarchical model is constructed for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\delta_{vi} \stackrel{ind}{\sim} N(0,\tau_\delta^2)$. The logarithm of the gene-specific over-dispersion parameters also follow a normal distribution $\log(\psi_g) \stackrel{ind}{\sim} N(\zeta_\psi,\tau_\psi^2)$. The variety-specific effects for each gene, $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$ are assumed to have a joint normal distribution $\mu_g \stackrel{ind}{\sim} N(\eta, \Sigma)$. We consider an \emph{independent} model where $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_V^2$ and a \emph{covariance} model where we estimate all parameters in $\Sigma$. 
+A hierarchical model is constructed for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\delta_{vi} \stackrel{ind}{\sim} N(0,\tau_\delta^2)$. The logarithm of the gene-specific over-dispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
+$\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
+where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model where $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model where we estimate all parameters in $\Sigma$. 
 
-We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations \citep{gelman2006prior}, e.g. $\tau_\delta, \tau_\psi \stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+1$ and an identity scale matrix. 
+We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations \citep{gelman2006prior}, e.g. $\tau_\delta\stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements of $\Sigma$ while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+2$ and an identity scale matrix which results in marginally uniform correlations. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-The parameters from the model in Section \ref{s:model} can be group by gene-specific parameters $\theta_g = (\mu_g,\psi_g)$, collectively $\theta = (\theta_1,\ldots,\theta_G)$, and hyperparameter $\phi = (\delta, \zeta_\psi, \tau_\psi^2, \Sigma)$ where $\delta = (\delta_{11},\ldots,\delta_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\phi$ and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Conditional on the hyperparameters, the gene specific parameters are conditionally independent as in equation \eqref{e:condind}. 
-\begin{equation}
-p(\theta|y,\hat{\phi}_{MAP}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\phi}_{MAP}) \propto \prod_{g=1}^G NB(y_g|\theta_g,\hat{\delta}_{MAP})N(\theta_g|\hat{\mu}_{MAP}, \hat{Sigma}_{MAP}) 
+The parameters from the model in Section \ref{s:model} can be group by gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$, and hyperparameter $\phi = (\delta,\eta, \Sigma)$ where $\delta = (\delta_{11},\ldots,\delta_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\phi$, denoted $\hat{\phi}$, and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Conditional on the hyperparameters, the gene-specific parameters are conditionally independent as in equation \eqref{e:condind}. Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
+\begin{align}
+p\left(\theta\left|y,\hat{\phi}\right.\right) 
+%&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\phi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\delta}\right.\right) p\left(\theta_g\left|\hat{\phi}\right.\right) \nonumber \\
+&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\delta}_{vi}},\psi_g\right.\right) \right] N\left(\left.\left[\mu_g, \log(\psi_g) \right]^\top\right|\hat{\eta}, \hat{\Sigma} \right) 
 \label{e:condind}
-\end{equation}
-Thus, conditional posterior inference for the gene specific parameters can be obtained independently and in parallel.
+\end{align}
 
-To perform the optimization, we use the statistical software {\tt Stan} \citep{stan-software:2014} run through the RStan interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows construction of general Bayesian models with the primary restriction that all unknown parameters must be continuous. Once a model is constructed, the software can be used to obtain MAP estimates \cite[see Section 50.3]{stan-manual:2014} using the {\tt optimizing} function in RStan. We found it necessary to use the L-BFGS algorithm \cite[see Section 55]{stan-manual:2014}. Alternatively, the software can be used to run a Markov chain Monte Carlo (MCMC) algorithm to obtain samples from the posterior using the {\tt sampling} function in RStan. By default, Stan uses a variant of Hamiltonion Monte Carlo \citep{neal2011mcmc} called the No-U-turn sampler \citep{hoffman2013no}. 
 
-As we have not integrated out the gene-specific parameters when obtaining the MAP estimate, we actually receive a joint MAP estimate for $\theta$ and $\phi$. We explicitly use the MAP estimate for $\phi$ when obtaining empirical Bayes posterior samples for the gene specific parameters. The MAP estimate for $\theta$ can also be used in this step as initial values for the MCMC. 
+To perform the optimization, we use the statistical software {\tt Stan} \citep{stan-software:2014} run through the RStan interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows construction of general Bayesian models with the primary restriction that all unknown parameters must be continuous. Once a model is constructed, the software can be used to obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in RStan. We found it necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} presumably due to the large dimension of the optimization. The {\tt Stan} software can also be used to run a Markov chain Monte Carlo (MCMC) algorithm to obtain samples from the posterior using the {\tt sampling} function in RStan. By default, Stan uses a variant of Hamiltonion Monte Carlo \citep{neal2011mcmc} called the no-U-turn sampler \citep{hoffman2013no}. 
+
+As we have not integrated out the gene-specific parameters when obtaining the MAP estimate, we actually receive a joint MAP estimate for $\theta$ and $\phi$. We explicitly use the MAP estimate for $\phi$ when obtaining empirical Bayes posterior samples for the gene-specific parameters as in equation \eqref{e:condind}. The MAP estimate for $\theta$ can also be used in this step as initial values for the MCMC. 
 
 \subsection{Gene heterosis}
 \label{s:gene_heterosis}
@@ -118,42 +124,49 @@ where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ 
 
 To assess the efficacy of our method to identify genes demonstrating heterosis, we used a maize data set with parental varieties B73 and Mo17 and the hybrid variety (B73 $\times$ Mo17) \citep{paschold2012complementation}. We compared our approach to approaches using {\tt edgeR}, {\tt baySeq}, and {\tt ShrinkBayes}.
 
-\subsection{Construct simulated data}
+\subsection{Constructing simulated data}
+\label{s:sim_data}
 
 Initially, the maize experiment had RNAseq counts for 39,656 genes and 4 replicates per variety. We eliminated low count genes by removing any gene with three or more zeros for any variety and genes whose mean count across the varieties was less than one which resulted in 27,888 genes remaining.
 
-To obtain gene-variety-specific location parameters and gene-specific dispersion parameters, we used {\tt edgeR} in order to maintain existing covariance structure amongst the gene-variety means. We estimated sample-specific normalization factors to account for sequencing depth. Then, we estimated common a common dispersion for each gene, but shared across the samples. Finally, we obtained independent estimates for the gene-variety specific location parameters. The location parameters, dispersion parameters, and normalization factors were then treated as the truth for the simulation study. A gene with $\mu_{g3} < \min(\mu_{g1}, \mu_{g2})$ was considered to have low parent heterosis while a gene with $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$ was considered to have high parent heterosis.
+To obtain gene-variety-specific location parameters and gene-specific dispersion parameters, we used {\tt edgeR} in order to maintain existing covariance structure amongst the gene-variety means. We estimated sample-specific normalization factors to account for sequencing depth. Then, we estimated common a common dispersion for each gene, but shared across the samples. Finally, we obtained independent estimates for the gene-variety specific location parameters. The location parameters, dispersion parameters, and normalization factors were then treated as the truth for the simulation study, i.e. a gene with $\mu_{g3} < \min(\mu_{g1}, \mu_{g2})$ was considered to have LPH while a gene with $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$ was considered to have HPH.
 
-Using these parameters and normalization factors, we simulated data according to the negative-binomial model in equation \eqref{e:data} independently for each gene. For each simulation, low count genes, i.e. those with three or more zeros in any variety or whose mean count across the varieties was less than one, were removed. A random subset of 25,000 genes was retained from those with high enough counts. This simulation process was repeated 10 times for each of 4, 8, and 16 replicates per variety (reusing normalization factors for the higher number of replicates). 
+Using these parameters and normalization factors, we simulated data according to the negative-binomial model in equation \eqref{e:data} independently for each gene. For each simulation, low count genes, i.e. those with three or more zeros in any variety or whose mean count across the varieties was less than one, were removed. A random set of 25,000 genes was retained from those with high enough counts. This simulation process was repeated 10 times for each of 4, 8, and 16 replicates per variety (reusing normalization factors when necessary). 
 
 \subsection{Alternative methods}
+\label{s:alternative}
 
-Existing methods are not designed to identify gene heterosis, but we adapted the approaches in {\tt edgeR}, {\tt baySeq}. and {\tt ShrinkBayes} to provide a statistic representing the plausibility of heterosis.
+Existing RNAseq methods are not designed to identify gene heterosis, but we adapted the approaches in {\tt edgeR}, {\tt baySeq}. and {\tt ShrinkBayes} to provide a statistic representing the plausibility of heterosis, i.e. higher values indicating higher plausibility.
 
 The approach used by {\tt edgeR} naturally provides testing of hypotheses for differential expression amongst two varieties \citep{robinson2007moderated, robinson2010edgeR}. If the hybrid's mean expression does not differ from a parent, then the hybrid does not exhibit heterosis. We can calculate two pvalues: one for the null hypothesis that the hybrid's mean expression is the same as parent 1 and the second for the null hypothesis that the hybrid's mean expression is the same as parent 2. But, even if both pvalues are small, the hybrid's mean expression could be between the two parents, i.e. mid-parent heterosis, and therefore not be exhibiting extreme heterosis. We construct a statistic that is 0 if the estimate of mean expression 
 for the hybrid is between the estimates for the parents. Otherwise, the statistic is one minus the pvalue above corresponding to whichever parent's mean estimate is closer to that of the hybrid. 
+% NEED MLE
 
-The {\tt baySeq} approach allows for a wider range of hypotheses including $H_1: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H_2: \mu_{g1}=\mu_{g2}$, $H_3: \mu_{g1}=\mu_{g3}$, $H_4: \mu_{g2}=\mu_{g3}$, and $H_5:$ all $\mu_g$'s are distinct \citep{hardcastle2010bayseq, hardcastle2012baySeq}. Hypotheses $H_2$ and $H_5$ are the only two that indicate the possibility of heterosis. Similar to the {\tt edgeR} approach, we construct a statistic that is 0 if the estimated hybrid mean is between the parental means and otherwise is the sum of the posterior probabilities for hypotheses $H_2$ and $H_5$. 
+The {\tt baySeq} approach allows for a wider range of hypotheses including $H_1: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H_2: \mu_{g1}=\mu_{g2}$, $H_3: \mu_{g1}=\mu_{g3}$, $H_4: \mu_{g2}=\mu_{g3}$, and $H_5:$ all $\mu_g$'s are distinct \citep{hardcastle2010bayseq, hardcastle2012baySeq}. Hypotheses $H_2$ and $H_5$ are the only two that indicate the possibility of heterosis. Similar to the {\tt edgeR} approach, we construct a statistic that is 0 if the estimated hybrid mean, based on the MLE's from {\tt edgeR}, is between the parental means and otherwise is the sum of the posterior probabilities for hypotheses $H_2$ and $H_5$. 
 
-The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors rather than the full posterior. Thus we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2})$. To circumvent this limitation, we reparameterized following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We implemented this model using {\tt ShrinkBayes} and constructed a statistic based on posterior median of these parameters. Specifically, the statistic is 0 if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.
+The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors rather than the full posterior. Thus we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2})$. To circumvent this limitation, we reparameterized the independence model in Section \ref{s:model} following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We implemented this model using {\tt ShrinkBayes} and constructed a statistic based on posterior median of these parameters. Specifically, the statistic is 0 if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.
 
 \subsection{Results}
 
-For each of the methods above as well as the method described in Section \label{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
+For each of the methods above as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
-\caption{Example ROC curves for the first simulation for false positive rates below 0.1.}
+\caption{Repersentative ROC curves for false positive rates below 0.1 for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}.}
 \label{f:roc}
 \end{figure}
+For this simulation, we can see the approaches based on the model in Section \ref{s:model}, i.e. both RStan approaches and the ShrinkBayes approach, provide the best true positive rate for a given false positive rate. Also, as expected, as the sample size increases our ability to distinguish genes with heterosis from genes without improves.
 
-
-
+Figure \ref{f:auc} provides the area under the ROC below a false positive rate of 0.1 across the 10 simulations for each of the 3 different sample sizes. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{auc-facet-TRUE}}
-\caption{Area under the ROC curves (AUC) for 3 different sample sizes (facets) for the methods under comparison for false positive rates below 0.1. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
+\caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different sample sizes for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
+\label{f:auc}
 \end{figure}
+The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approaches outperforming the other two. While there does not appear to be a significant difference between the independence model using RStan or ShrinkBayes, there does appear to be a significant decreased performance, at least for sample sizes, when using the model where a covariance is estimated. 
 
-\section{Heterosis in corn ??}
+
+
+\section{Heterosis in maize ??}
 \label{s:corn}
 
 \section{Discussion}
