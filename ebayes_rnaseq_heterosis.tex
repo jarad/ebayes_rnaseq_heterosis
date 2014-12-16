@@ -135,22 +135,21 @@ for the hybrid is between the estimates for the parents. Otherwise, the statisti
 
 The {\tt baySeq} approach allows for a wider range of hypotheses including $H_1: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H_2: \mu_{g1}=\mu_{g2}$, $H_3: \mu_{g1}=\mu_{g3}$, $H_4: \mu_{g2}=\mu_{g3}$, and $H_5:$ all $\mu_g$'s are distinct \citep{hardcastle2010bayseq, hardcastle2012baySeq}. Hypotheses $H_2$ and $H_5$ are the only two that indicate the possibility of heterosis. Similar to the {\tt edgeR} approach, we construct a statistic that is 0 if the estimated hybrid mean is between the parental means and otherwise is the sum of the posterior probabilities for hypotheses $H_2$ and $H_5$. 
 
-The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors rather than the full posterior. Thus we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2})$. To circumvent this limitation, we reparameterized following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We implemented this model using {\tt ShrinkBayes} and constructed a statistic based on posterior median of these parameters. Specifically, the statistic is 0 if $\left|\hat{\delta}_f  \right| \le \left| \hat{\alpha}_f \right|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.
+The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation with INLA is that it only provides approximations to marginal posteriors rather than the full posterior. Thus we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2})$. To circumvent this limitation, we reparameterized following \cite{ji2014estimation}. Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. We implemented this model using {\tt ShrinkBayes} and constructed a statistic based on posterior median of these parameters. Specifically, the statistic is 0 if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.
 
 \subsection{Results}
 
-
-
-
-
+For each of the methods above as well as the method described in Section \label{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=0.8\textwidth]{exampleROC0_1}}
-\caption{Example ROC curves for the first simulation}
+\centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
+\caption{Example ROC curves for the first simulation for false positive rates below 0.1.}
 \label{f:roc}
 \end{figure}
 
+
+
 \begin{figure}
-\centerline{\includegraphics[width=0.8\textwidth]{auc-facet-TRUE}}
+\centerline{\includegraphics[width=\textwidth]{auc-facet-TRUE}}
 \caption{Area under the ROC curves (AUC) for 3 different sample sizes (facets) for the methods under comparison for false positive rates below 0.1. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
 \end{figure}
 
