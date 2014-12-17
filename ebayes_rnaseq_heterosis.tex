@@ -15,6 +15,16 @@
 
 \title{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
 
+% WML: general comments:
+%
+% I rewrote the paragraphs on edgeR, baySeq, and ShrinkBayes. Please let me know what you think. Other than that, I modified the actual text in some places, but most of my feedback is in LaTeX comment form.
+%
+% Notation: there are some discrepancies, mainly between the phi-alpha-delta parameterization in ShrinkBayes and other usages of the greek letters delta and phi. To avoid this, you could use entirely different letters in that one ShrinkBayes paragraph. Also, you use the "f" subscript in and F to denote the number of genes when I think you're trying to stick to g and G, respectively. I didn't correct this because I wasn't exactly sure if you wanted to switch to f and F.
+%
+% The bibtex file didn't compile for me. I think an easy fix is to rename jarad.bib => ebayes_rnaseq_heterosis.bib and change \bibliography{jarad} => \bibliography{ebayes_rnaseq_heterosis}, but I did not make this change.
+%
+% Please let me know if/when you would like another iteration of edits from me.
+
 \author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
 Eric Mittman, 
 Will Landau, and 
@@ -235,7 +245,7 @@ Put your final comments here.
 
 \section*{Acknowledgements}
 
-% WML: I'm really glad you went ahead and added Andy's name. I couldn't have done it without him.
+% WML: I'm so glad you went ahead and added Andy's name! I couldn't have done it without him.
 
 The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
 
