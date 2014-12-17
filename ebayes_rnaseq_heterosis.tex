@@ -78,6 +78,11 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 
 To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
 
+\subsection{RNAseq experiment to identify genes demonstrating heterosis}
+\label{s:experiment}
+
+
+
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
 
@@ -176,6 +181,19 @@ The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approache
 \section{Heterosis in maize ??}
 \label{s:corn}
 
+
+
+\begin{figure}
+\centerline{\includegraphics[width=\textwidth]{maize_volcano}}
+\caption{A two-dimensional histogram of the probability of heterosis versus effect size, $\mu_{g3}-\max(\mu_{g1},\mu_{g3})$ if $P(HPH|y)>P(LPH|y)$ or $\mu_{g3}-\min(\mu_{g1},\mu_{g2})$ if $P(HPH|y)<P(LPH|y)$ for the B73 $\times$ Mo17 maize experiment.}
+\label{f:volcano}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=\textwidth]{normality}}
+\caption{One and two-dimensional histograms for gene-specific parameters from a single MCMC iteration, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the one dimensional histograms have the marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
+\label{f:normality}
+\end{figure}
 
 
 
