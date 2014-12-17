@@ -202,6 +202,7 @@ With posteriors for all parameters, we can calculate empirical Bayes posterior p
 
 Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the probabilities for LPH and HPH versus estimated effect size. The figure shows a line at zero, for probabilities less than 0.5, due to the estimated effect size being set to 0 for the vast majority of genes. Above a probability of 0.5, we see a prototypical volcano pattern with increased extreme heterosis probability corresponding to larger estimated effect sizes and no estimated effect sizes near zero for genes with high extreme heterosis probability. Assymetry can also be observed with larger negative effect sizes compared with positive effect sizes which is due to genes whose parental counts are relatively high and hybrid counts near zero. Genes with high probability of extreme heterosis and large estimated effect sizes are candidates for further investigation.
 
+% Compare independence and volcano plots
 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{volcano}}
@@ -209,18 +210,20 @@ Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the p
 \label{f:volcano}
 \end{figure}
 
+With almost 30,000 genes in our data set, we can evaluate the normality assumption for the gene-specific parameters. Figure \ref{f:normality} provides histograms of components of $\theta$ from a single MCMC iteration. If the prior assumption of normality is correct, we would expect these histograms to show approximate normality. The marginal histograms show a bimodal distribution for $\mu$ with a secondary peak around relatively small values. The bivariate histograms amongst the components of $\mu$ show a high correlation but with a heavy-tail toward small values of both components of $\mu$. With stricter gene-inclusion criterion, it is possible both the secondary peak and the heavy-tailedness could be eliminated. The histogram for $\log(\psi)$ displays a heavy-tail to the right and the bivariate histograms show a pattern of near independence between $\log(\psi)$ and $\mu_g$ until $\mu_g$ passes a threshold at which point $\log(\psi)$ appears to decrease. Both of these phenomenon are consistent with observations in the literature that the negative-binomial overdispersion parameter decreases as the mean increases, but the bivariate histograms appear to indicate a nonlinear relationship between the means and the log of the overdispersion parameter.
+
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{normality}}
-\caption{One and two-dimensional histograms for gene-specific parameters from a single MCMC iteration, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the one dimensional histograms have the marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
+\caption{Marginal and bivariate histograms for gene-specific parameters from a single MCMC iteration, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
 \label{f:normality}
 \end{figure}
 
-
+Marginal and bivariate histograms for the model with an estimated covariance look similar although the estimated distribution $N(\hat{\eta},\hat{\Sigma})$ has increased variance for $\mu$ and decreased variance for $\log(\psi)$ as was previously seen in Table \ref{t:map} (results not shown). 
 
 \section{Discussion}
 \label{s:discuss}
 
-Put your final comments here. 
+
 
 
 
