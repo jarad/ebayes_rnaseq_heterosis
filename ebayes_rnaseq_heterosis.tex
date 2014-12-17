@@ -210,7 +210,9 @@ Marginal and bivariate histograms for the model with an estimated covariance loo
 Gene expression heterosis is speculated to be one possible explanation for phenotypic
 heterosis of traits like plant height or grain yield. Existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis due to the composite null hypothesis in equation \eqref{e:hypotheses}. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters which can be done efficienctly via parallelization. This methodology can be conveniently implemented in the statistical software {\tt Stan} which also allows for much more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
 
-Through a simulation study, we demonstarted that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably with an implementation of our model in ShrinkBayes which estimates the full posterior via INLA. 
+Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably with an implementation of our model in ShrinkBayes which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment where phenotypic heterosis is well known. 
+% Estimates of heterosis to compare with Ji et. al.
+In addition to providing estimates of heterosis probabilities and effect sizes, this real data analysis demonstrated violation of normality assumptions that suggest model improvements to improve power for detection of gene heterosis. Developing the details of such an extension is the subject of some of our ongoing and future research. 
 
 
 
