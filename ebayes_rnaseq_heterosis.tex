@@ -71,6 +71,8 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 % 
 % \citep{ji2014estimation}
 
+The remainder of the paper proceeds as follows. Section \ref{s:method} presents the proposed hierarchical model, an empirical Bayes method of estimating the parameters, and calculation of posterior probabilities of gene heterosis. Section \ref{s:simulation} presents a simulation study based on a maize experiment and compares our approach to alternative methods. Section \ref{s:maize} analyzes a maize experiment where phenotypic heterosis is well established and identifies genes demonstrating heterosis. The data and code necessary to perform this analysis is available in the Supplemental Material. Section \ref{s:discussion} summarizes the work and suggests directions for future research.
+
 
 \section{Empirical Bayes identification of gene heterosis from RNAseq counts}
 \label{s:method}
@@ -177,7 +179,7 @@ The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approache
 
 
 \section{Heterosis in maize experiment}
-\label{s:corn}
+\label{s:maize}
 
 We used our method to analyze a maize data set on gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17). The data are available in the Supplemental Materials. Each variety had four biological replicates measured with Illumina methodology and equipment. Reads were mapped to the whole reference genome using the short reads aligner NOVOALIGN. For more specific details, please see \cite{paschold2012complementation}. 
 
@@ -221,11 +223,12 @@ With almost 30,000 genes in our data set, we can evaluate the normality assumpti
 Marginal and bivariate histograms for the model with an estimated covariance look similar although the estimated distribution $N(\hat{\eta},\hat{\Sigma})$ has increased variance for $\mu$ and decreased variance for $\log(\psi)$ as was previously seen in Table \ref{t:map} (results not shown). 
 
 \section{Discussion}
-\label{s:discuss}
+\label{s:discussion}
 
 Gene expression heterosis is speculated to be one possible explanation for phenotypic
 heterosis of traits like plant height or grain yield. Existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis due to the composite null hypothesis in equation \eqref{e:hypotheses}. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters which can be done efficienctly via parallelization. This methodology can be conveniently implemented in the statistical software {\tt Stan} which also allows for much more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
 
+Through a simulation study, we demonstarted that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably with an implementation of our model in ShrinkBayes which estimates the full posterior via INLA. 
 
 
 
