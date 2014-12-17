@@ -15,16 +15,6 @@
 
 \title{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
 
-% WML: general comments:
-%
-% I rewrote the paragraphs on edgeR, baySeq, and ShrinkBayes. Please let me know what you think. Other than that, I modified the actual text in some places, but most of my feedback is in LaTeX comment form.
-%
-% Notation: there are some discrepancies, mainly between the phi-alpha-delta parameterization in ShrinkBayes and other usages of the greek letters delta and phi. To avoid this, you could use entirely different letters in that one ShrinkBayes paragraph. Also, you use the "f" subscript in and F to denote the number of genes when I think you're trying to stick to g and G, respectively. I didn't correct this because I wasn't exactly sure if you wanted to switch to f and F.
-%
-% The bibtex file didn't compile for me. I think an easy fix is to rename jarad.bib => ebayes_rnaseq_heterosis.bib and change \bibliography{jarad} => \bibliography{ebayes_rnaseq_heterosis}, but I did not make this change.
-%
-% Please let me know if/when you would like another iteration of edits from me.
-
 \author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
 Eric Mittman, 
 Will Landau, and 
@@ -88,36 +78,23 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 
 To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
 
-% WML: "borrowing information" is intuitive and informal. I agree that the term should be used, but there might be a slightly more appropriate use. Not a big deal. 
-
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
 
-% WML: We were debating whether to use g for gene or f for feature, and either choice would work. But we use g, we should probably also use G to denote the number of genes, rather than F. 
-
-Let $Y_{gvi}$ be the count for gene $g=1,\ldots,F$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. Here $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$ and $ind$ indicates the observations are conditionally independent.
+Let $Y_{gvi}$ be the count for gene $g=1,\ldots,G$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. Here $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$ and $ind$ indicates the observations are conditionally independent.
 \begin{equation} 
 Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\delta_{vi}},\psi_g) 
 \label{e:data}
 \end{equation}
 
-% WML: Are the sequencing depths c_{vi} or \delta_{vi}? I think c_{vi} is better because \delta is used in the phi-alpha-delta parameterization of gene expression effects.
-
 A hierarchical model is constructed for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\delta_{vi} \stackrel{ind}{\sim} N(0,\tau_\delta^2)$. The logarithm of the gene-specific over-dispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
 $\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model where $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model where we estimate all parameters in $\Sigma$. 
 
-% WML: Is \mu_g the vector of \mu_{gv} values? If so, please clarify.
-
-
-We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations \citep{gelman2006prior}, e.g. $\tau_\delta\stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements of $\Sigma$ while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+2$ and an identity scale matrix which results in marginally uniform correlations. 
-
-% WML: I assume the "hierarchical means" are the hyperparameters in the \eta vector and the "marginally uniform correlations" are the ones derived from the off-diagonal covariance elements of \Sigma. Small clarifications might be helpful in passing. 
+We assume improper uniform priors for $\eta$ and $\tau_\delta\stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also $Ca^+(0,3)$ on the diagonal elements of $\Sigma$ while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+2$ and an identity scale matrix which results in marginally uniform correlations. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
-
-% WML: The use of \phi in this section conflicts with the phi-alpha-delta parameterization in other heterosis models. Maybe you could replace phi, alpha, and delta by other letters in the ShrinkBayes section to avoid this conflict.
 
 The parameters from the model in Section \ref{s:model} can be group by gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$, and hyperparameter $\phi = (\delta,\eta, \Sigma)$ where $\delta = (\delta_{11},\ldots,\delta_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\phi$, denoted $\hat{\phi}$, and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Conditional on the hyperparameters, the gene-specific parameters are conditionally independent as in equation \eqref{e:condind}. Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
 \begin{align}
@@ -135,15 +112,7 @@ As we have not integrated out the gene-specific parameters when obtaining the MA
 \subsection{Gene heterosis}
 \label{s:gene_heterosis}
 
-% WML: \ref{s:intro} or \ref{s:heterosis}?
-
-% WML: the first two sentences are unclear. I would delete the first sentence altogether and compare "varieties" to treatment groups or blocks for the sake of clarity. 
-
-As defined in Section \ref{s:heterosis}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, 
-
-% WML: For mid-parent heterosis, you need \mu_{g3} \ne \frac{\mu_{g1} + \mu_{g2}}{2}. I don't know whether you need \mu_{g1}\le \mu_{g3}\le \mu_{g2} or \mu_{g2}\le \mu_{g3}\le \mu_{g1}, and I have doubts. It might be good to check with Dan on this. 
-
-mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event of LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
+As defined in Section \ref{s:intro}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event of LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
 \begin{align}
 \label{e:hypotheses}
 H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
@@ -154,9 +123,7 @@ We evaluate these hypotheses based on empirical Bayes estimates of their posteri
 P\left(H_{g1}|y, \hat{\phi}_{MAP}\right) &= P\left(\left.\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}\right| y, \hat{\phi}_{MAP}\right) \nonumber \\
 &\approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\mu_{g3}^{(m)}< \min\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) \mbox{ or } \max\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) < \mu_{g3}^{(m)}\right) \label{e:probs}
 \end{align}
-where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. The set of probabilities $P\left(H_{g1}|y, \hat{\phi}_{MAP}\right)$ for $g=1,\ldots,G$ can be used to provide a sorted list of genes potentially involved in phenotypic heterosis. 
-
-% WML: You may want to clarify that the genes in the list are ranked by the strength of EH and then justify the lists's utility for geneticists and in the comparison study to follow. This could be a good segue.
+where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. The set of probabilities $P\left(H_{g1}|y, \hat{\phi}_{MAP}\right)$ for $g=1,\ldots,G$ can be used to provide a list of genes sorted by the relative strength of evidence for extreme heterosis. This list can be used by geneticists to prioritize future experiments to understand the genetic mechanism for heterosis.  
 
 \section{Simulation study based on maize experiment}
 \label{s:simulation}
@@ -164,52 +131,32 @@ where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ 
 % \subsection{Coverage for our model}
 % \input{../temp/analyze-heterosis/FIGURES/coverage}
 
-To assess the efficacy of our method to identify genes demonstrating heterosis, we used a maize data set with parental varieties B73 and Mo17 and the hybrid variety (B73 $\times$ Mo17) \citep{paschold2012complementation}. We compared our approach to approaches using {\tt edgeR}, {\tt baySeq}, and {\tt ShrinkBayes}.
-
-% WML: Please clarify that {\tt edgeR}, {\tt baySeq}, and {\tt ShrinkBayes} are R packages. You may even want to cite R somewhere.
+To assess the efficacy of our method to identify genes demonstrating heterosis, we used a maize data set with parental varieties B73 and Mo17 and the hybrid variety (B73 $\times$ Mo17) \citep{paschold2012complementation}. We compared our method to approaches using the R packages {\tt edgeR}, {\tt baySeq}, and {\tt ShrinkBayes}.
 
 \subsection{Constructing simulated data}
 \label{s:sim_data}
 
 Initially, the maize experiment had RNAseq counts for 39,656 genes and 4 replicates per variety. We eliminated low count genes by removing any gene with three or more zeros for any variety and genes whose mean count across the varieties was less than one, which resulted in 27,888 genes remaining.
 
-% WML: Sentences 2-4 in the paragraph below are redundant with sentence 1. I commented out the paragraph below and inserted a modified one afterwards
-%To obtain gene-variety-specific location parameters and gene-specific dispersion parameters, we used {\tt edgeR} in order to maintain existing covariance structure amongst the gene-variety means. We estimated sample-specific normalization factors to account for sequencing depth. Then, we estimated common a common dispersion for each gene, but shared across the samples. Finally, we obtained independent estimates for the gene-variety specific location parameters. The location parameters, dispersion parameters, and normalization factors were then treated as the truth for the simulation study, i.e. a gene with $\mu_{g3} < \min(\mu_{g1}, \mu_{g2})$ was considered to have LPH while a gene with $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$ was considered to have HPH.
-
-To begin, we applied the {\tt edgeR} package from Bioconductor (citation needed) to the maize data to obtain sample-specific normalization factors, then gene-specific dispersions, and finally gene-variety-specific location parameters. We treated all parameters as truth for the simulation study:  i.e. a gene with $\mu_{g3} < \min(\mu_{g1}, \mu_{g2})$ was considered to have LPH, while a gene with $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$ was considered to have HPH. This technique ensured that our simulated datasets maintained the existing covariance structure among the gene-variety means of the original maize data.
+To begin, we applied the {\tt edgeR} package from Bioconductor (citation needed) to the maize data to obtain sample-specific normalization factors, then gene-specific dispersions, and finally gene-variety-specific location parameters. We treated these parameters as the truth for the simulation study: i.e. a gene with $\mu_{g3} < \min(\mu_{g1}, \mu_{g2})$ was considered to have LPH, while a gene with $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$ was considered to have HPH. This technique ensured that our simulated datasets maintained the existing covariance structure among the gene-variety means of the original maize data.
 
 Using these parameters and normalization factors, we simulated data according to the negative-binomial model in equation \eqref{e:data} independently for each gene. For each simulation, low count genes, i.e. those with three or more zeros in any variety or whose mean count across the varieties was less than one, were removed. A random set of 25,000 genes was retained from those with high enough counts. This simulation process was repeated 10 times for each of 4, 8, and 16 replicates per variety (reusing normalization factors when necessary).
 
 \subsection{Alternative methods}
 \label{s:alternative}
 
-Existing RNAseq data analysis methods are not specifically designed to identify gene heterosis, but we adapted the approaches in {\tt edgeR}, {\tt baySeq}. and {\tt ShrinkBayes} to provide statistics to measure the strength of heterosis of each gene.
-
-% WML: "... provide a statistic representing the plausibility of heterosis, i.e. higher values indicating higher plausibility." => "...provide statistics to measure the strength of heterosis of each gene."
-
-% WML: I rewrote the paragraph on edgeR.
+Existing RNAseq data analysis methods are not specifically designed to identify gene heterosis, but we adapted the approaches in {\tt edgeR}, {\tt baySeq}. and {\tt ShrinkBayes} to provide statistics to measure the strength of extreme heterosis of each gene.
 
 {\tt edgeR} is designed to apply a negative binomial loglinear model to test for differential expression between any two varieties \citep{robinson2007moderated, robinson2010edgeR}, and we used this capability to construct a pseudo-probability of heterosis for each gene. We first computed the maximum likelihood estimates of the mean expression effects of all genes using {\tt edgeR}'s built-in Fisher scoring algorithm, and then we used the likelihood ratio test functionality to calculate two legitimate p-values for each gene: one for the null hypothesis that the hybrid's mean expression is the same as that of parent 1 and the second for the analogous test involving parent 2. For each gene, if the estimated mean expression level of the hybrid is not between the estimated mean expression levels of the parents, we set the pseudo-probability of heterosis to be one minus the p-value corresponding to the parent with estimated expression level closer to that of the hybrid. Otherwise, the pseudo-probability is zero.
 
-% NEED MLE
-
-% WML: I rewrote the baySeq paragraph.
-
 The {\tt baySeq} approach allows for a wider range of hypotheses for each gene, including $H_1: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H_2: \mu_{g1}=\mu_{g2}$, $H_3: \mu_{g1}=\mu_{g3}$, $H_4: \mu_{g2}=\mu_{g3}$, and $H_5:$ all $\mu_g$'s are distinct \citep{hardcastle2010bayseq, hardcastle2012baySeq}. In a technique similar to our application of {\tt edgeR}, we used used the posterior probabilities of these hypotheses to construct a pseudo-probability of heterosis for each gene. We set this pseudo-probability to zero if the hybrid's maximum likelihood estimate of the mean expression level calculated with {\tt edgeR} is between those of the parents. Otherwise, the pseudo-probability is the sum of the posterior probabilities of $H_2$ and $H_5$. Note that $H_2$ and $H_5$ are the only hypotheses that allow for heterosis.
 
-The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation of INLA is that it only provides approximations to marginal posteriors for parameters or linear combinations of parameters rather than an approximation to the full posterior. Thus, we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2}))$. To circumvent this limitation, we reparameterized the independence model in Section \ref{s:model} following \cite{ji2014estimation}. 
-
-% WML: your use of "following" in this last sentence is not clear to me.
-
-% WML: Here, you use the phi-alpha-delta parameterization. You already defined phi and delta in previous sections. To avoid a conflict, you could easily change the notation here. It doesn't even have to be super intuitive because you only use it in this one paragraph.
-
- Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\delta_g = \mu_{g3} - \phi_g$ be the hybrid effect. After fitting the model with {\tt ShrinkBayes}, we constructed a pseudo-probability of heterosis for each gene. For gene $g$, we used the estimated posterior means $\hat{\delta}_g$ and $\hat{\alpha}_g$ of $\delta_g$ and $\alpha_g$, respectively, along with appropriate posterior probabilities $P(\cdot \mid y)$. Specifically, the pseudo-probability of heterosis for gene $g$ is zero if $|\hat{\delta}_f| \le |\hat{\alpha}_f|$, $P(\delta_f + \alpha_f > 0 |y)$ if $\hat{\delta}_f > -\hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f > 0 |y)$ if $\hat{\delta}_f > \hat{\alpha}_f \ge 0$, $P(\delta_f - \alpha_f < 0 |y)$ if $\hat{\delta}_f < \hat{\alpha}_f \le 0$, and $P(\delta_f + \alpha_f < 0 |y)$ if $\hat{\delta}_f < -\hat{\alpha}_f \le 0$.  
+The {\tt ShrinkBayes} package implements fully Bayesian inference through integrated nested Laplace approximation (INLA) \citep{rue2009approximate,van2014shrinkbayes}. A limitation of INLA is that it only provides approximations to marginal posteriors for parameters or linear combinations of parameters rather than an approximation to the full posterior. Thus, we cannot directly estimate nonlinear quantities such as $P(\mu_{g3} < \min(\mu_{g1},\mu_{g2}))$. To circumvent this limitation, we reparameterized the independence model in Section \ref{s:model} using the approach in \cite{ji2014estimation}. 
+Let $\gamma_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_{g2}-\mu_{g1})/2$ be the half parental difference, and $\zeta_g = \mu_{g3} - \gamma_g$ be the hybrid effect. After fitting the model with {\tt ShrinkBayes}, we constructed a pseudo-probability of heterosis for each gene. For gene $g$, we used the estimated posterior means $\hat{\zeta}_g$ and $\hat{\alpha}_g$ of $\zeta_g$ and $\alpha_g$, respectively, along with appropriate posterior probabilities $P(\cdot \mid y)$. Specifically, the pseudo-probability of heterosis for gene $g$ is zero if $|\hat{\zeta}_g| \le |\hat{\alpha}_g|$, $P(\zeta_g + \alpha_g > 0 |y)$ if $\hat{\zeta}_g > -\hat{\alpha}_g \ge 0$, $P(\zeta_g - \alpha_g > 0 |y)$ if $\hat{\zeta}_g > \hat{\alpha}_g \ge 0$, $P(\zeta_g - \alpha_g < 0 |y)$ if $\hat{\zeta}_g < \hat{\alpha}_g \le 0$, and $P(\zeta_g + \alpha_g < 0 |y)$ if $\hat{\zeta}_g < -\hat{\alpha}_g \le 0$.  
 
 \subsection{Results}
 
-% WML: You might want want to cite a more detailed explanation of the construction of ROC curves. My master's project (Landau and Liu (2013) at http://will-landau.com/research.html) is one example, but there are other resources.
-
-For each of the methods above as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
+For each of the methods above as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}, \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
 \caption{Repersentative ROC curves for false positive rates below 0.1 for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}.}
@@ -244,8 +191,6 @@ Put your final comments here.
 
 
 \section*{Acknowledgements}
-
-% WML: I'm so glad you went ahead and added Andy's name! I couldn't have done it without him.
 
 The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
 

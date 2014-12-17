@@ -15,6 +15,7 @@
 
 # LaTeX files
 *.bbl
+*.blg
 *.log
 *.synctex.gz
 *.fff
