@@ -107,6 +107,8 @@ We assume improper uniform priors for all hierarchical means and half-Cauchy pri
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
+% WML: The use of \phi in this section conflicts with the phi-alpha-delta parameterization in other heterosis models. Maybe you could replace phi, alpha, and delta by other letters in the ShrinkBayes section to avoid this conflict.
+
 The parameters from the model in Section \ref{s:model} can be group by gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$, and hyperparameter $\phi = (\delta,\eta, \Sigma)$ where $\delta = (\delta_{11},\ldots,\delta_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\phi$, denoted $\hat{\phi}$, and then base gene-specific inference on the posterior conditional on this estimated hyperparameter. Conditional on the hyperparameters, the gene-specific parameters are conditionally independent as in equation \eqref{e:condind}. Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
 \begin{align}
 p\left(\theta\left|y,\hat{\phi}\right.\right) 
@@ -123,7 +125,15 @@ As we have not integrated out the gene-specific parameters when obtaining the MA
 \subsection{Gene heterosis}
 \label{s:gene_heterosis}
 
-As defined in Section \ref{s:heterosis}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
+% WML: \ref{s:intro} or \ref{s:heterosis}?
+
+% WML: the first two sentences are unclear. I would delete the first sentence altogether and compare "varieties" to treatment groups or blocks for the sake of clarity. 
+
+As defined in Section \ref{s:heterosis}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, 
+
+% WML: For mid-parent heterosis, you need \mu_{g3} \ne \frac{\mu_{g1} + \mu_{g2}}{2}. I don't know whether you need \mu_{g1}\le \mu_{g3}\le \mu_{g2} or \mu_{g2}\le \mu_{g3}\le \mu_{g1}, and I have doubts. It might be good to check with Dan on this. 
+
+mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event of LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
 \begin{align}
 \label{e:hypotheses}
 H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
@@ -135,6 +145,8 @@ P\left(H_{g1}|y, \hat{\phi}_{MAP}\right) &= P\left(\left.\mu_{g3}< \min(\mu_{g1}
 &\approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\mu_{g3}^{(m)}< \min\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) \mbox{ or } \max\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) < \mu_{g3}^{(m)}\right) \label{e:probs}
 \end{align}
 where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. The set of probabilities $P\left(H_{g1}|y, \hat{\phi}_{MAP}\right)$ for $g=1,\ldots,G$ can be used to provide a sorted list of genes potentially involved in phenotypic heterosis. 
+
+% WML: You may want to clarify that the genes in the list are ranked by the strength of EH and then justify the lists's utility for geneticists and in the comparison study to follow. This could be a good segue.
 
 \section{Simulation study based on maize experiment}
 \label{s:simulation}
