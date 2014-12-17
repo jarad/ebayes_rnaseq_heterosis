@@ -1,0 +1,8 @@
+data.csv: the B73-Mo17 data set
+script.R: an R script to run the data analysis
+
+model_ind.txt: all genes Stan model assuming independence
+model_cov.txt: all genes Stan model with covariance
+sg_model_ind.txt: single gene Stan model assuming independence
+sg_model_cov.txt: single gene Stan model with covariance
+

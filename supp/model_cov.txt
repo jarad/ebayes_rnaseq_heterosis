@@ -1,0 +1,30 @@
+data{
+  int N; //total # obs
+  int G; // # genes
+  int S; // # samples
+  int<lower=0> y[N];
+  int<lower=1,upper=G> g[N]; //obs -> gene
+  int<lower=1,upper=3> t[N]; //obs -> genotype
+  int<lower=1,upper=S> s[N]; //obs -> sample (genotype*rep)
+  row_vector[4] X[3]; // mean structure (genotype)
+}
+parameters{
+  vector[4] B[G];         //mu1, mu2, mu3, lpsi by gene
+  vector[S] c;            //lane sequencing depth
+  vector<lower=-20,upper=20>[4] mu;
+  cov_matrix[4] Sigma;
+  real<lower=0,upper=5> sigma_c;
+}
+
+model{
+  vector[4] x;
+  for(i in 1:G){
+    B[i] ~ multi_normal(mu, Sigma);
+  }
+  c ~ normal(0,sigma_c);
+  for(n in 1:N){
+    y[n] ~ neg_binomial_2_log(X[t[n]]*B[g[n]] + c[s[n]], 1 / exp(B[g[n],4]));
+  }
+  x <-rep_vector(1,4);
+  Sigma ~ inv_wishart(5.0,diag_matrix(x));
+}
