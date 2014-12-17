@@ -53,7 +53,7 @@ Empirical Bayes; Gene expression; Heterosis; Hierarchical model; Negative binomi
 % Need to udpate as this is directly from Tieming's paper
 Heterosis, or hybrid vigor, refers to the enhances phenotype of hybrid progeny relative to their inbred parents. Taking maize as an example, the offspring from crossing the inbred lines B73 and Mo17 are taller, mature faster, and produce greater yields than their parent lines \citep{hallauer1981quantitative, hallauer2010quantitative}. Since heterosis was scientifically documented by \cite{darwin1876effects}, it has been successfully manipulated to improve many species for food, feed, and fuel industries, such as rice \citep{yu1997importance}, alfalfa \citep{riday2002heterosis}, tomatoes \citep{krieger2010flowering}, and fish \citep{wohlfarth1993heterosis}. Despite the intensive study and successful utilization of heterosis, the basic genomic mechanisms remain unclear \citep{coors1999genetics, lippman2007heterosis}. Researchers speculate that gene-expression heterosis $-$ i.e, enhanced expression of one or more genes in the hybrid relative to the inbred parents $-$ could be among the mechanisms responsible for the phenotypic heterosis \citep{swanson2006all, springer2007allelic}.
 
-% WL: Since you mainly talk about phenotypic heterosis, I added a little clarification about gene-expression heterosis. However, the reader will still be mostly focused on phenotypic heterosis, and more may need to be done to refocus on the transcriptome. Do we have good real-world examples of heterosis in the expression important or interesting genes? This may be a good question for Dan.
+% WML: Since you mainly talk about phenotypic heterosis, I added a little clarification about gene-expression heterosis. However, the reader will still be mostly focused on phenotypic heterosis, and more may need to be done to refocus on the transcriptome. Do we have good real-world examples of heterosis in the expression important or interesting genes? This may be a good question for Dan.
 
 Recently \citep{ji2014estimation} provided an approach to assess heterosis using micro-array data using a hierarchical model for the ...
 
@@ -74,10 +74,16 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 
 \section{Empirical Bayes identification of gene heterosis from RNAseq counts}
 
+% WML: Maybe it would be good to quickly clarify what a formal heterosis RNA-seq experiment is. 
+
 To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
+
+% WML: "borrowing information" is intuitive and informal. I agree that the term should be used, but there might be a slightly more appropriate use. Not a big deal. 
 
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
+
+% WML: We were debating whether to use g for gene or f for feature, and either choice would work. But we use g, we should probably also use G to denote the number of genes, rather than F. 
 
 Let $Y_{gvi}$ be the count for gene $g=1,\ldots,F$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. Here $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$ and $ind$ indicates the observations are conditionally independent.
 \begin{equation} 
@@ -85,11 +91,18 @@ Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\delta_{vi}},\psi_g)
 \label{e:data}
 \end{equation}
 
+% WML: Are the sequencing depths c_{vi} or \delta_{vi}? I think c_{vi} is better because \delta is used in the phi-alpha-delta parameterization of gene expression effects.
+
 A hierarchical model is constructed for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\delta_{vi} \stackrel{ind}{\sim} N(0,\tau_\delta^2)$. The logarithm of the gene-specific over-dispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
 $\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model where $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model where we estimate all parameters in $\Sigma$. 
 
+% WML: Is \mu_g the vector of \mu_{gv} values? If so, please clarify.
+
+
 We assume improper uniform priors for all hierarchical means and half-Cauchy priors for standard deviations \citep{gelman2006prior}, e.g. $\tau_\delta\stackrel{ind}{\sim} Ca^+(0,3)$ where 0 and 3 are the location and scale parameters of the untruncated distribution. In the independent model, we also assume $Ca^+(0,3)$ on the diagonal elements of $\Sigma$ while in the covariance model, we assume a conjugate, proper inverse Wishart with degrees of freedom $V+2$ and an identity scale matrix which results in marginally uniform correlations. 
+
+% WML: I assume the "hierarchical means" are the hyperparameters in the \eta vector and the "marginally uniform correlations" are the ones derived from the off-diagonal covariance elements of \Sigma. Small clarifications might be helpful in passing. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
