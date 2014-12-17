@@ -179,10 +179,17 @@ The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approache
 \section{Heterosis in maize experiment}
 \label{s:corn}
 
+We used our method to analyze a maize data set on gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17). The data are available in the Supplemental Materials. Each variety had four biological replicates measured with Illumina methodology and equipment. Reads were mapped to the whole reference genome using the short reads aligner NOVOALIGN. For more specific details, please see \cite{paschold2012complementation}. 
 
+A total of 39,656 genes among $V=3$ varieties each with $n_v=4$ replicates were available for analysis. As before, we eliminated any genes with three or more zeros for any variety and any genes with mean expression less than one across all samples resulting in a total of $G=27,888$ genes present in the analysis. 
 
-We calculate an estimated effect size using the posterior means for the gene-specific parameters using the formula 
-\[
+We found MAP estimates for both the independence and covariance models as shown in Table \ref{t:map}. 
+% Need MAP estimates table and discussion
+
+Independently for each gene, we ran an MCMC conditional on the hyperparameters to obtain empirical Bayes posterior distributions for all gene-specific parameters. Each MCMC was run using 4 chains with initial values randomly drawn by {\tt Stan} for a total of 2000 iterations, each chain with 1000 iterations of burn-in, and the remaining 1000 draws for each chain thinned by a factor of 4 (for storage reasons). The potential scale reduction factor, $\hat{R}$, was computed for each parameter in the in the chain \citep{Gelm:Rubi:infe:1992, Broo:Gelm:gene:1997}. If the maximum value of $\hat{R}$ was larger than 1.1, the total length was increased by 500 with the burn-in increased proportionally and the chain was rerun. This process was repeated until the maximum $\hat{R}$ was less than 1.1 for all parameters.
+
+With posteriors for all parameters, we can calculate empirical Bayes posterior probabilities for LPH and HPH. For each gene, the quantity of interest is likely to be the maximum of these two probabilities. For those genes with high probabilities for one of these two, it is of interest to see the magnitude of the effect. Thus, we calculate an estimated effect size using the posterior means for the gene-specific parameters using the formula 
+\begin{equation}
 \mbox{estimated effect size} = \left\{ 
 \begin{array}{ll}
 \hat{\mu}_{g3} - \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} < \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
@@ -190,12 +197,15 @@ We calculate an estimated effect size using the posterior means for the gene-spe
 0 & \mbox{otherwise}.
 \end{array} 
 \right. 
-\]
-Figure \ref{f:volcano} provides a volcano plot to visualize the probability of heterosis versus estimated effect size. 
+\label{e:effect_size}
+\end{equation}
+
+Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the probabilities for LPH and HPH versus estimated effect size. The figure shows a line at zero, for probabilities less than 0.5, due to the estimated effect size being set to 0 for the vast majority of genes. Above a probability of 0.5, we see a prototypical volcano pattern with increased extreme heterosis probability corresponding to larger estimated effect sizes and no estimated effect sizes near zero for genes with high extreme heterosis probability. Assymetry can also be observed with larger negative effect sizes compared with positive effect sizes which is due to genes whose parental counts are relatively high and hybrid counts near zero. Genes with high probability of extreme heterosis and large estimated effect sizes are candidates for further investigation.
+
 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{volcano}}
-\caption{A two-dimensional histogram of the maximum of LPH and HPH probabilities versus estimated effect size, $\mu_{g3}-\max(\mu_{g1},\mu_{g3})$ if $P(HPH|y)>P(LPH|y)$ or $\mu_{g3}-\min(\mu_{g1},\mu_{g2})$ if $P(HPH|y)<P(LPH|y)$ for the B73 $\times$ Mo17 maize experiment.}
+\caption{A two-dimensional histogram of the maximum of LPH and HPH probabilities versus estimated effect size defined in equation \ref{e:effect_size} for the B73 $\times$ Mo17 maize experiment using the independence model.}
 \label{f:volcano}
 \end{figure}
 
@@ -228,6 +238,7 @@ The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBa
 
 \section*{Supplementary Materials}
 
+The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and {\tt Stan} models: all genes independent (\verb@\tt model_ind.txt\verb@) and covariance (\verb@model_cov.txt\verb@) models used in obtaining MAP estimates and single gene independent (\verb@\tt sg_model_ind.txt\verb@) and covariance (\verb@sg_model_cov.txt\verb@) models used in performing the MCMC on single genes. 
 
 \bibliography{jarad}
 \bibliographystyle{biom}
