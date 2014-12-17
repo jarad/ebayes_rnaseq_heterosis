@@ -73,17 +73,12 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 
 
 \section{Empirical Bayes identification of gene heterosis from RNAseq counts}
+\label{s:method}
 
-To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
+An RNAseq experiment to identify genes demonstrating heterosis consists of three genetic varieties: two parental varieties (P1 and P2) and a cross between these two varieties called the hybrid (H). For each variety, replicate RNA samples are isolated and assessed for quality. cDNA libraries, i.e. short cDNA fragments, are constructed and next generation sequencing technology is used to determine the \emph{reads}, i.e. nucleotide sequences in the cDNA libraries. These reads are processed using bioinformatic algorithms to match the reads to genes, or specific gene transcripts, exons, microRNAs, etc. The result of matching reads to features are summarized by a gene $\times$ sample matrix of counts. For more details on RNAseq experiments see \cite{nettleton2014design} and for biological background on the details of these steps see \cite{paschold2012complementation}.
 
-\subsection{RNAseq experiment to identify genes demonstrating heterosis}
-\label{s:experiment}
+To identify genes displaying heterosis using RNAseq counts, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate empirical Bayes posterior probabilities for heterosis. 
 
-An RNAseq experiment to identify genes demonstrating heterosis consists of three genetic varieties: two parental varieties (P1 and P2) and a cross between these two varieties called the hybrid (H). For each variety, replicate RNA samples are isolated and assessed for quality. cDNA libraries are constructed and the samples are sequenced. These libraries are sequenced
-
-loaded on flow cells, and sequenced. The raw sequencing reads 
-
-\cite{nettleton2014design} and \cite{paschold2012complementation}
 
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
@@ -183,11 +178,21 @@ The pattern appears to hold with the {\tt RStan} and {\tt ShrinkBayes} approache
 \section{Heterosis in maize ??}
 \label{s:corn}
 
-
+We calculate an estimated effect size using the posterior means for the gene-specific parameters using the formula 
+\[
+\mbox{estimated effect size} = \left\{ 
+\begin{array}{ll}
+\hat{\mu}_{g3} - \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} < \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
+\hat{\mu}_{g3} - \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} > \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
+0 & \mbox{otherwise}.
+\end{array} 
+\right. 
+\]
+Figure \ref{f:volcano} provides a volcano plot to visualize the probability of heterosis versus estimated effect size. 
 
 \begin{figure}
-\centerline{\includegraphics[width=\textwidth]{maize_volcano}}
-\caption{A two-dimensional histogram of the probability of heterosis versus effect size, $\mu_{g3}-\max(\mu_{g1},\mu_{g3})$ if $P(HPH|y)>P(LPH|y)$ or $\mu_{g3}-\min(\mu_{g1},\mu_{g2})$ if $P(HPH|y)<P(LPH|y)$ for the B73 $\times$ Mo17 maize experiment.}
+\centerline{\includegraphics[width=\textwidth]{volcano}}
+\caption{A two-dimensional histogram of the maximum of LPH and HPH probabilities versus estimated effect size, $\mu_{g3}-\max(\mu_{g1},\mu_{g3})$ if $P(HPH|y)>P(LPH|y)$ or $\mu_{g3}-\min(\mu_{g1},\mu_{g2})$ if $P(HPH|y)<P(LPH|y)$ for the B73 $\times$ Mo17 maize experiment.}
 \label{f:volcano}
 \end{figure}
 
