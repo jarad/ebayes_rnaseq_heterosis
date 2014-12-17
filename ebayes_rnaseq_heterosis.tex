@@ -74,14 +74,16 @@ Recently \citep{ji2014estimation} provided an approach to assess heterosis using
 
 \section{Empirical Bayes identification of gene heterosis from RNAseq counts}
 
-% WML: Maybe it would be good to quickly clarify what a formal heterosis RNA-seq experiment is. 
-
 To identify genes displaying heterosis using RNAseq data, we build a hierarchical model to borrow information on gene-variety means as well as overdispersion parameters, estimate the parameters using a empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate posterior probabilities for heterosis. 
 
 \subsection{RNAseq experiment to identify genes demonstrating heterosis}
 \label{s:experiment}
 
+An RNAseq experiment to identify genes demonstrating heterosis consists of three genetic varieties: two parental varieties (P1 and P2) and a cross between these two varieties called the hybrid (H). For each variety, replicate RNA samples are isolated and assessed for quality. cDNA libraries are constructed and the samples are sequenced. These libraries are sequenced
 
+loaded on flow cells, and sequenced. The raw sequencing reads 
+
+\cite{nettleton2014design} and \cite{paschold2012complementation}
 
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
