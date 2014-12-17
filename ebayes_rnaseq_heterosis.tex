@@ -117,9 +117,9 @@ As we have not integrated out the gene-specific parameters when obtaining the MA
 
 As defined in Section \ref{s:intro}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are three varieties of interest, i.e. $V=3$. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) which is the event of LPH or HPH. Of interest is to evaluate the hypotheses shown in equation \eqref{e:hypotheses} where $H_0$ indicates no EH and $H_1$ indicates EH. 
 \begin{align}
-\label{e:hypotheses}
 H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
 H_{g1}:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}.
+\label{e:hypotheses}
 \end{align}
 We evaluate these hypotheses based on empirical Bayes estimates of their posterior probability, e.g. 
 \begin{align}
@@ -159,7 +159,7 @@ Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_
 
 \subsection{Results}
 
-For each of the methods above as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}, \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
+For each of the methods above as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}  \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
 \caption{Repersentative ROC curves for false positive rates below 0.1 for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}.}
@@ -222,6 +222,9 @@ Marginal and bivariate histograms for the model with an estimated covariance loo
 
 \section{Discussion}
 \label{s:discuss}
+
+Gene expression heterosis is speculated to be one possible explanation for phenotypic
+heterosis of traits like plant height or grain yield. Existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis due to the composite null hypothesis in equation \eqref{e:hypotheses}. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters which can be done efficienctly via parallelization. This methodology can be conveniently implemented in the statistical software {\tt Stan} which also allows for much more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
 
 
 
