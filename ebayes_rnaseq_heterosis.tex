@@ -1,3 +1,23 @@
+% WML: Throughout, I made several scattered grammatical and clarity fixes without documentation since I couldn't contribute much else. I have far fewer comments this time around, so I just grouped them all together here at the top.
+%
+% In section 2.1, your first mention of the sequencing depth terms uses c_{vi}, but those sequencing depths are \gamma_{vi} everywhere else. I didn't change this.
+%
+% I still can't compile jarad.bib. The console tells me that it couldn't find jarad.aux.
+%
+% Please decide between "over-dispersion" and "overdispersion".
+%
+% The definition of MPH is unchanged, and I wonder if we even need to include it.
+%
+% From sections 3 onward, I think you should stick to the present tense.
+%
+% First paragraph of the discussion: "We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses." This sentence suggests to me that the paper actually took this additional step, which it didn't. I think that we should be clear that we only made this future goal more reachable. 
+%
+% The short paragraph in the Supplementary Materials section was unclear. I tried to clear it up, but I may have changed the original intended meaning.
+%
+% WML: End of comments.
+
+
+
 \documentclass[useAMS,usenatbib,referee]{biom}
 
 \usepackage{amsmath}
@@ -146,7 +166,7 @@ Let $\phi_g = (\mu_{g1}+\mu_{g2})/2$ be the parental log-mean, $\alpha_g = (\mu_
 For each of the methods above, as well as the method described in Section \ref{s:gene_heterosis}, we sorted genes according to the plausibility of heterosis. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to identify genes with heterosis, as defined in Section \ref{s:sim_data}  \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
-\caption{Repersentative ROC curves for false positive rates below 0.1 for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}.}
+\caption{Repersentative ROC curves for false positive rates below 0.1 for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative}, along with the independent and covariance methods using {\tt RStan} described in Section \ref{s:gene_heterosis}.}
 \label{f:roc}
 \end{figure}
 For this simulation, we can see that the approaches based on the model in Section \ref{s:model} $-$ i.e. both RStan approaches and the ShrinkBayes approach $-$ provide the best true positive rate for a given false positive rate. Also, as expected, as the sample size increases, our ability to distinguish genes with heterosis from genes without improves.
@@ -154,7 +174,7 @@ For this simulation, we can see that the approaches based on the model in Sectio
 Figure \ref{f:auc} provides the area under the ROC curve below a false positive rate of 0.1 across the 10 simulations for each of the 3 different sample sizes. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{auc-facet-TRUE}}
-\caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different sample sizes for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} and the method using {\tt RStan} assuming independence and with a covariance described in Section \ref{s:gene_heterosis}. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
+\caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different sample sizes for the approaches using {\tt edgeR}, {\tt baySeq},  and {\tt ShrinkBayes} described in Section \ref{s:alternative} , along with the independent and covariance methods using {\tt RStan} described in Section \ref{s:gene_heterosis}. Each line is a different simulation while the blue box indicates mean AUC and its standard error across the simulations.}
 \label{f:auc}
 \end{figure}
 The pattern appears to hold, with the {\tt RStan} and {\tt ShrinkBayes} techniques outperforming the other two. While there does not appear to be a significant difference between {\tt ShrinkBayes} and the independence model using {\tt RStan}, performance appears to decrease for the model where a covariance is estimated, at least for smaller sample sizes.
@@ -190,7 +210,7 @@ Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the p
 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{volcano}}
-\caption{A two-dimensional histogram of the maximum of LPH and HPH probabilities versus estimated effect size defined in equation \ref{e:effect_size} for the B73 $\times$ Mo17 maize experiment using the independence model.}
+\caption{A two-dimensional histogram of the maximum of the LPH and HPH probabilities versus estimated effect size defined in equation \ref{e:effect_size} for the B73 $\times$ Mo17 maize experiment using the independence model.}
 \label{f:volcano}
 \end{figure}
 
@@ -198,7 +218,7 @@ With almost 30,000 genes in our data set, we can evaluate the normality assumpti
 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{normality}}
-\caption{Marginal and bivariate histograms for gene-specific parameters from a single MCMC iteration, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
+\caption{Marginal and bivariate histograms for gene-specific parameters from a single MCMC sample, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
 \label{f:normality}
 \end{figure}
 
@@ -207,12 +227,12 @@ Marginal and bivariate histograms for the model with an estimated covariance loo
 \section{Discussion}
 \label{s:discussion}
 
-Gene expression heterosis is speculated to be one possible explanation for phenotypic
-heterosis of traits like plant height or grain yield. Existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis due to the composite null hypothesis in equation \eqref{e:hypotheses}. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters which can be accomplished efficiently via parallelization. This methodology can be conveniently implemented in the statistical software {\tt Stan} which also allows for much more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
+Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic
+heterosis of traits, such as plant height or grain yield. Because of the unwieldy composite null hypothesis in equation \eqref{e:hypotheses}, existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters, followed by an MCMC to estimate gene-specific parameters that can be accomplished efficiently via parallelization. This methodology can be conveniently implemented in the statistical software, {\tt Stan}, which also allows for far more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
 
-Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably with an implementation of our model in ShrinkBayes which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment where phenotypic heterosis is well known. 
+Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably well with an implementation of our model in {\tt ShrinkBayes}, which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment in which phenotypic heterosis is well known. 
 % Estimates of heterosis to compare with Ji et. al.
-In addition to providing estimates of heterosis probabilities and effect sizes, this real data analysis demonstrated violation of normality assumptions that suggest model improvements to improve power for detection of gene heterosis. Developing the details of such an extension is the subject of some of our ongoing and future research. 
+In addition to providing estimates of heterosis probabilities and effect sizes, this real data analysis exposed violations of our normality assumptions, indicating room to improve the model and increase the power to detect gene heterosis. Some of our ongoing and future research will develop the details of such an extension.
 
 
 
@@ -221,7 +241,7 @@ In addition to providing estimates of heterosis probabilities and effect sizes, 
 
 \section*{Acknowledgements}
 
-The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+The authors thank Andrew Lithio for help in implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
 
 %  If your paper refers to supplementary web material, then you MUST
 %  include this section!!  See Instructions for Authors at the journal
@@ -229,7 +249,7 @@ The authors thank Andrew Lithio for help implementing our model in {\tt ShrinkBa
 
 \section*{Supplementary Materials}
 
-The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and {\tt Stan} models: all genes independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates and single gene independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
+The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and the {\tt Stan} models: the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
 
 \bibliography{jarad}
 \bibliographystyle{biom}
