@@ -9,15 +9,17 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-
+\newcommand{\blind}{1} % 0 = not blind, 1 = blind
 
 \title{Empirical Bayes analysis for detection of gene heterosis in RNAseq data}
 
+\if0\blind{
 \author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
 Eric Mittman, 
 Will Landau, and 
 Dan Nettleton \\
 Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
+} \fi
 
 \begin{document}
 
@@ -218,9 +220,11 @@ In addition to providing estimates of heterosis probabilities and effect sizes, 
 
 \backmatter %  Please keep this command in your document in this position 
 
+\if0\blind{
 \section*{Acknowledgements}
 
 The authors thank Andrew Lithio for help in implementing our model in {\tt ShrinkBayes}. Research reported in this publication was supported by National Institute of General Medical Sciences of the National Institutes of Health under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+} \fi
 
 %  If your paper refers to supplementary web material, then you MUST
 %  include this section!!  See Instructions for Authors at the journal
