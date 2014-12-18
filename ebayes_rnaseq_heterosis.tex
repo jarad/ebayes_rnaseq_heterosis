@@ -1,31 +1,9 @@
-% WML: Throughout, I made several scattered grammatical and clarity fixes without documentation since I couldn't contribute much else. I have far fewer comments this time around, so I just grouped them all together here at the top.
-%
-% In section 2.1, your first mention of the sequencing depth terms uses c_{vi}, but those sequencing depths are \gamma_{vi} everywhere else. I didn't change this.
-%
-% I still can't compile jarad.bib. The console tells me that it couldn't find jarad.aux.
-%
-% Please decide between "over-dispersion" and "overdispersion".
-%
-% The definition of MPH is unchanged, and I wonder if we even need to include it.
-%
-% From sections 3 onward, I think you should stick to the present tense.
-%
-% First paragraph of the discussion: "We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses." This sentence suggests to me that the paper actually took this additional step, which it didn't. I think that we should be clear that we only made this future goal more reachable. 
-%
-% The short paragraph in the Supplementary Materials section was unclear. I tried to clear it up, but I may have changed the original intended meaning.
-%
-% WML: End of comments.
-
-
-
 \documentclass[useAMS,usenatbib,referee]{biom}
 
 \usepackage{amsmath}
 \usepackage[figuresright]{rotating}
 
 \graphicspath{{include/}}
-
-%%%%% PLACE YOUR OWN MACROS HERE %%%%%
 
 \def\bSig\mathbf{\Sigma}
 \newcommand{\VS}{V\&S}
@@ -87,14 +65,14 @@ To use RNAseq counts to identify genes displaying heterosis, we build a hierarch
 \subsection{Hierarchical model for RNAseq counts}
 \label{s:model}
 
-Let $Y_{gvi}$ be the count for gene $g=1,\ldots,G$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $c_{vi}$ and a gene-specific over-dispersion $\psi_g$. 
+Let $Y_{gvi}$ be the count for gene $g=1,\ldots,G$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$. As shown in equation \eqref{e:data}, we assume a negative binomial for the counts with a mean that depends on the gene-variety combination through $\mu_{gv}$ and the sequencing depth $\gamma_{vi}$ and a gene-specific overdispersion $\psi_g$. 
 \begin{equation} 
 Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\gamma_{vi}},\psi_g) 
 \label{e:data}
 \end{equation}
 where $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$, and $ind$ indicates the observations are conditionally independent.
 
-We present a hierarchical model for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau_\gamma^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific over-dispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
+We present a hierarchical model for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau_\gamma^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific overdispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
 $\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model in which $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model in which we estimate all parameters in $\Sigma$.
 
@@ -119,7 +97,9 @@ As we have not integrated out the gene-specific parameters when obtaining the MA
 \subsection{Gene heterosis}
 \label{s:gene_heterosis}
 
-As defined in Section \ref{s:intro}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are $V=3$ varieties of interest. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of a gene in the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) to be the event of LPH or HPH. Equation \eqref{e:hypotheses} shows the most important hypotheses, where $H_0$ indicates no EH and $H_1$ indicates EH. 
+As defined in Section \ref{s:intro}, heterosis is increased (or decreased) phenotypic expression in a hybrid relative to its inbred parents. Thus, when attempting to identify heterosis, there are $V=3$ varieties of interest. We let $v=1,2$ be the two parental varieties and $v=3$ be the hybrid. We define gene heterosis to be the differential expression of a gene in the hybrid relative to its parents. For a specific gene $g$, low-parent gene heteorisis (LPH) occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$ 
+%, mid-parent gene heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), 
+and high-parent gene heterosis (HPH) occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{extreme gene heterosis} (EH) to be the event of LPH or HPH. Equation \eqref{e:hypotheses} shows the most important hypotheses, where $H_0$ indicates no EH and $H_1$ indicates EH. 
 \begin{align}
 H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
 H_{g1}:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}.
@@ -228,7 +208,7 @@ Marginal and bivariate histograms for the model with an estimated covariance loo
 \label{s:discussion}
 
 Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic
-heterosis of traits, such as plant height or grain yield. Because of the unwieldy composite null hypothesis in equation \eqref{e:hypotheses}, existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters, followed by an MCMC to estimate gene-specific parameters that can be accomplished efficiently via parallelization. This methodology can be conveniently implemented in the statistical software, {\tt Stan}, which also allows for far more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
+heterosis of traits, such as plant height or grain yield. Because of the unwieldy composite null hypothesis in equation \eqref{e:hypotheses}, existing methods for identifying gene expression heterosis based on RNAseq data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach modified slightly to allow for any number of varieties and therefore, possibly, even more complex hypotheses. We presented an empirical Bayes method to obtain MAP estimates for hyperparameters, followed by an MCMC to estimate gene-specific parameters that can be accomplished efficiently via parallelization. This methodology can be conveniently implemented in the statistical software, {\tt Stan}, which also allows for far more complex models. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. 
 
 Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably well with an implementation of our model in {\tt ShrinkBayes}, which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment in which phenotypic heterosis is well known. 
 % Estimates of heterosis to compare with Ji et. al.
