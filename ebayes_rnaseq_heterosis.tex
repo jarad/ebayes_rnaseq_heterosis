@@ -74,11 +74,11 @@ Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\gamma_{vi}},\psi_g)
 \end{equation}
 where $NB(\eta,\psi)$ indicates a negative-binomial with expectation $\eta$ and variance $\eta+\psi\eta^2$, and $ind$ indicates the observations are conditionally independent.
 
-We present a hierarchical model for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau_\gamma^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific overdispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
+We present a hierarchical model for the sequencing depth, overdispersion, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific overdispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
 $\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model in which $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model in which we estimate all parameters in $\Sigma$.
 
-We assume improper uniform priors for $\eta$ and take $\tau_\gamma\stackrel{ind}{\sim} Ca^+(0,3)$, where 0 and 3 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independent model, we also assign the $Ca^+(0,3)$ prior to the diagonal elements of $\Sigma$. In the covariance model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
+We assume improper uniform priors for $\eta$ and take $\tau\stackrel{ind}{\sim} Ca^+(0,3)$, where 0 and 3 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independent model, we also assign the $Ca^+(0,3)$ prior to the diagonal elements of $\Sigma$. In the covariance model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
@@ -169,8 +169,9 @@ We used our method to analyze a maize data set on gene expression in parental li
 
 A total of 39,656 genes among $V=3$ varieties, each with $n_v=4$ replicates, were available for analysis. As before, we eliminated genes with three or more zeros for any variety and genes with mean expression less than one across all samples, resulting in a total of $G=27,888$ genes present in the analysis. 
 
-We found MAP estimates for both the independence and covariance models as shown in Table \ref{t:map}. 
-% Need MAP estimates table and discussion
+We found MAP estimates for both the independent and covariance models as shown in Table \ref{t:map}. 
+\input{include/map}
+The MAP estimates for the hierarchical expression means, $\eta_i = E[\mu_{gi}]$ for $i=1,2,3$, are consistent between the the independent and covariance model while the mean for the overdispersion parameter, $\eta_4=E[\log(\psi)]$, is a bit large in the covariance model. The standard deviation around the expression means are approximately twice as large in the covariance model as in the independent model while the standard deviation for the overdispersion is half as large. The sequencing depth terms are consistent between the two models and indicate that there is about a 25\% increase in counts between the least and most thoroughly sequenced samples. In the covariance model, there appears to be moderate correlation amongst the expression means and the expression means are negatively correlated with the (log) overdispersion parameter.  
 
 Independently for each gene, we ran an MCMC conditional on the hyperparameters to obtain empirical Bayes posterior distributions for all gene-specific parameters. Each MCMC was run using 4 chains with initial values randomly drawn by {\tt Stan}. Each chain ran for a total of 2000 iterations, with 1000 iterations of burn-in and the remaining 1000 draws thinned by a factor of 4 for storage reasons. The potential scale reduction factor, $\hat{R}$, was computed for each parameter \citep{Gelm:Rubi:infe:1992, Broo:Gelm:gene:1997}. If the maximum value of $\hat{R}$ was larger than 1.1, the total length was increased by 500, with the burn-in increased proportionally, and the chain was rerun. This process was repeated until the maximum $\hat{R}$ was less than 1.1 for all parameters.
 
