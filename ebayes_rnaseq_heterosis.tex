@@ -78,7 +78,12 @@ We present a hierarchical model for the sequencing depth, overdispersion, and ge
 $\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independent} model in which $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{covariance} model in which we estimate all parameters in $\Sigma$.
 
-We assume improper uniform priors for $\eta$ and take $\tau\stackrel{ind}{\sim} Ca^+(0,3)$, where 0 and 3 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independent model, we also assign the $Ca^+(0,3)$ prior to the diagonal elements of $\Sigma$. In the covariance model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
+We assume improper uniform priors for $\eta$ and take 
+%In fact, the prior on \tau is just Unif(0,5)
+$\tau\stackrel{ind}{\sim} Ca^+(0,3)$, where 0 and 3 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independent model, we also assign the $Ca^+(0,3)$ prior to the
+diagonal elements
+%square root of diagonal elements?
+of $\Sigma$. In the covariance model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
