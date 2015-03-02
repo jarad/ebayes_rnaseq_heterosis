@@ -70,20 +70,18 @@ To use RNA-seq counts to identify genes displaying expression heterosis, we buil
 
 Let $Y_{gvi}$ be the count for gene $g=1,\ldots,G$, variety $v=1,\ldots,V$, and replicate $i=1,\ldots,n_v$.  We assume
 \begin{equation} 
-Y_{gvi} \stackrel{ind}{\sim} NB(e^{\mu_{gv}+\gamma_{vi}},\psi_g), 
+Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right), 
 \label{e:data}
 \end{equation}
-where $NB(\eta,\psi)$ indicates a negative binomial distribution with expectation $\eta$ and variance $\eta+\psi\eta^2$, and $ind$ indicates the observations are conditionally independent.  As shown in equation \eqref{e:data}, our data model involves gene-specific overdispersion $\psi_g$ and a mean that depends on the gene-variety combination through $\mu_{gv}$ and on the sample though  $\gamma_{vi}$.  The $\mu_{gv}$ terms are of primary scientific interest; the $\gamma_{vi}$ terms are normalization factors that account for differences in the thoroughness of sequencing from sample to sample.  Practitioners typically compute normalization factors for each sample and then treat them as known constants in further analysis.  In contrast, we include normalization factors in our model as unknowns that we estimate along with other parameters.     
+where $NB(\eta,e^\psi)$ indicates a negative binomial distribution with expectation $\eta$ and variance $\eta+e^\psi\eta^2$, and $ind$ indicates the observations are conditionally independent.  As shown in equation \eqref{e:data}, our data model involves gene-specific overdispersion $\psi_g$ and a mean that depends on the gene-variety combination through $\mu_{gv}$ and on the sample though  $\gamma_{vi}$.  The $\mu_{gv}$ terms are of primary scientific interest; the $\gamma_{vi}$ terms are normalization factors that account for differences in the thoroughness of sequencing from sample to sample.  Practitioners typically compute normalization factors for each sample and then treat them as known constants in further analysis.  In contrast, we include normalization factors in our model as unknowns that we estimate along with other parameters.     
 
 
 We present a hierarchical model for the normalization factors, overdispersions, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific overdispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
-$\theta_g = [\mu_g, \log(\psi_g)]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
+$\theta_g = [\mu_g, \psi_g]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
 where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independence} model in which $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{dependence} model in which $\Sigma$ is a general positive definite matrix.
 % JBN: Switch mu and eta throughout
 
-We assume improper uniform priors for $\eta$ and take 
-%In fact, the prior on \tau is just Unif(0,5)
-$\tau\stackrel{ind}{\sim} Ca^+(0,3)$, where 0 and 3 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independence model, we also assign the $Ca^+(0,3)$ prior to the
+We assume improper uniform priors for $\eta$ and take $\tau\stackrel{ind}{\sim} Ca^+(0,1)$, where 0 and 1 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independence model, we also assign the $Ca^+(0,3)$ prior to the
 diagonal elements
 %square root of diagonal elements?
 of $\Sigma$. In the dependence model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
@@ -97,7 +95,7 @@ We separate the parameters of the model in Section \ref{s:model} into gene-speci
 \begin{align}
 p\left(\theta\left|y,\hat{\pi}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
-&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},\psi_g\right.\right) \right] N\left(\left.\left[\mu_g, \log(\psi_g) \right]^\top\right|\hat{\eta}, \hat{\Sigma} \right). 
+&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] N\left(\left.\left[\mu_g, \psi_g \right]^\top\right|\hat{\eta}, \hat{\Sigma} \right). 
 \label{e:condind}
 \end{align}
 Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
@@ -190,7 +188,7 @@ As explained in Section~\ref{s:sim_data}, we analyzed a set of $G=27,888$ genes 
 
 We found MAP estimates for both the independence and dependence models as shown in Table \ref{t:map}. 
 \input{include/map}
-The MAP estimates for the hierarchical means, $\eta$, and standard deviations, $\sigma$, are consistent between the independence and dependence models with, perhaps, a slightly larger mean and smaller standard deviation for the logarithm of the overdispersion parameter, $\log(\psi_g)$, in the dependence model relative to the independence model. In the dependence model, there appears to be high correlation amongst $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$, and negative correlation between $\log(\psi_g)$ and each of $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$. The normalization factors, and their variance, are consistent between the two models, with the estimates for the dependence model being consistently 0.02 larger than the estimates for the independence model, and both indicating that there is about a 25\% increase in counts between the least and most thoroughly sequenced samples. 
+The MAP estimates for the hierarchical means, $\eta$, and standard deviations, $\sigma$, are consistent between the independence and dependence models with, perhaps, a slightly larger mean and smaller standard deviation for the logarithm of the overdispersion parameter, $\psi_g$, in the dependence model relative to the independence model. In the dependence model, there appears to be high correlation amongst $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$, and negative correlation between $\psi_g$ and each of $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$. The normalization factors, and their variance, are consistent between the two models, with the estimates for the dependence model being consistently 0.02 larger than the estimates for the independence model, and both indicating that there is about a 25\% increase in counts between the least and most thoroughly sequenced samples. 
 
 
 Independently for each gene, we ran four Markov chains conditional on the estimated hyperparameters to obtain approximate posterior distributions for all gene-specific parameters. Each Markov chain used initial values randomly drawn by {\tt Stan} and was run for a total of 2000 iterations, with 1000 iterations of burn-in and the remaining 1000 draws thinned by a factor of 4 for storage reasons. 
@@ -223,7 +221,7 @@ Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the p
 
 With almost 30,000 genes in our data set, we can evaluate the normality assumption for the gene-specific parameters. Figure \ref{f:normality} provides histograms of components of $\theta$ from a single MCMC iteration.
 % From Dan, "Why use draws from a single Markov chain iteration?  Ideally, we want to see if the true underlying components of theta follow the distributions we have specified.  Wouldn't posterior means tend to be closer to the truth than single draws?"
-If the prior assumption of normality is correct, we would expect these histograms to show approximate normality. The marginal histograms show a bimodal distribution for $\mu$ with a secondary peak around relatively small values. The bivariate histograms amongst the components of $\mu$ show a high correlation but with a heavy-tail toward small values of both components of $\mu$. With stricter gene-inclusion criterion, it is possible both the secondary peak and the heavy-tailedness could be eliminated. The histogram for $\log(\psi)$ displays a heavy-tail to the right and the bivariate histograms show a pattern of near independence between $\log(\psi)$ and $\mu_g$ until $\mu_g$ passes a threshold at which point $\log(\psi)$ appears to decrease. Both of these phenomenon are consistent with observations in the literature that the negative-binomial overdispersion parameter decreases as the mean increases, but the bivariate histograms appear to indicate a nonlinear relationship between the means and the log of the overdispersion parameter.
+If the prior assumption of normality is correct, we would expect these histograms to show approximate normality. The marginal histograms show a bimodal distribution for $\mu$ with a secondary peak around relatively small values. The bivariate histograms amongst the components of $\mu$ show a high correlation but with a heavy-tail toward small values of both components of $\mu$. With stricter gene-inclusion criterion, it is possible both the secondary peak and the heavy-tailedness could be eliminated. The histogram for $\psi$ displays a heavy-tail to the right and the bivariate histograms show a pattern of near independence between $\psi$ and $\mu_g$ until $\mu_g$ passes a threshold at which point $\psi$ appears to decrease. Both of these phenomenon are consistent with observations in the literature that the negative-binomial overdispersion parameter decreases as the mean increases, but the bivariate histograms appear to indicate a nonlinear relationship between the means and the log of the overdispersion parameter.
 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{normality}}
@@ -231,7 +229,7 @@ If the prior assumption of normality is correct, we would expect these histogram
 \label{f:normality}
 \end{figure}
 
-Marginal and bivariate histograms for the model with an estimated covariance look similar although the estimated distribution $N(\hat{\eta},\hat{\Sigma})$ has increased variance for $\mu$ and decreased variance for $\log(\psi)$ as was previously seen in Table \ref{t:map} (results not shown). 
+Marginal and bivariate histograms for the model with an estimated covariance look similar although the estimated distribution $N(\hat{\eta},\hat{\Sigma})$ has increased variance for $\mu$ and decreased variance for $\psi$ as was previously seen in Table \ref{t:map} (results not shown). 
 
 \section{Discussion}
 \label{s:discussion}
