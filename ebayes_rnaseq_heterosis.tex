@@ -96,37 +96,53 @@ We assume improper uniform priors for $\eta_\phi$, $\eta_\alpha$, and $\eta_\del
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta)$, and $\sigma=(\sigma_\gamma,\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
-\begin{align}
+We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta)$, and $\sigma=(\sigma_\gamma,\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_\psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
+\begin{equation}
+\begin{split}
 p\left(\theta\left|y,\hat{\pi}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
-&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] N\left(\left.\left[\mu_g, \psi_g \right]^\top\right|\hat{\eta}, \hat{\Sigma} \right). 
+%&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] p(\theta_g|\hat{\eta},\hat{\sigma}) \\
+\propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
+&\times 
+\left. \vphantom{\prod_{v=1}^V}
+N(\phi_g;\hat{\eta}_\phi, \hat{\sigma}_\phi^2)
+La(\alpha_g;\hat{\eta}_\alpha, \hat{\sigma}_\alpha)
+La(\delta_g;\hat{\eta}_\delta, \hat{\sigma}_\delta)
+N(\psi_g;\hat{\eta}_\psi, \hat{\sigma}_\psi^2) 
+\right]
 \label{e:condind}
-\end{align}
+\end{split}
+\end{equation}
 Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
 
 To perform the optimization required for the MAP estimate $\hat{\pi}$, we use the statistical software, {\tt Stan} \citep{stan-software:2014}, executed through the RStan interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows the construction of general Bayesian models with the primary restriction that all unknown parameters are continuous. With a fully constructed model, the software can obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in RStan. Presumably due to the large dimension of the optimization, it was necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} and reasonable starting values obtained via {\tt edgeR} \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor}. The {\tt Stan} software also includes the RStan function, {\tt sampling}, an implementation of a Markov chain Monte Carlo (MCMC) algorithm for obtaining samples from the posterior. By default, Stan uses a no-U-turn sampler \citep{hoffman2013no}, a variant of Hamiltonion Monte Carlo \citep{neal2011mcmc}.
 
-As we have not integrated out the gene-specific parameters when obtaining the MAP estimate, we actually receive a joint MAP estimate of $\theta$ and $\pi$. We explicitly use the MAP estimate of $\pi$ when obtaining empirical Bayes posterior samples for the gene-specific parameters as in equation \eqref{e:condind}. The MAP estimate of $\theta$ can also be used in this step as initial values for the MCMC. 
+As we have not integrated out the gene-specific parameters when obtaining the MAP estimate, we actually receive a joint MAP estimate of $\theta$ and $\pi$. We explicitly use the MAP estimate of $\pi$ when obtaining empirical Bayes posterior samples for the gene-specific parameters as in equation \eqref{e:condind}. The MAP estimate of $\theta$ could be used as initial values in the MCMC, although we did not find this necessary.
 
 \subsection{Gene expression heterosis}
 \label{s:gene_heterosis}
 
-To identify gene expression heterosis, we consider $V=3$ varieties, where  $v=1,2$ signify the two parental varieties and $v=3$ represents the hybrid. For a specific gene $g$, low-parent  heteorisis (LPH) of gene expression occurs when $\mu_{g3}< \min(\mu_{g1},\mu_{g2})$ 
-%, mid-parent gene expression heterosis occurs when $\mu_{g1}\le \mu_{g3}\le \mu_{g2}$ if $\mu_{g1}\le \mu_{g2}$ (or $\mu_{g1}\ge \mu_{g3}\ge \mu_{g2}$ if $\mu_{g1}\ge \mu_{g2}$), 
-and high-parent  heterosis (HPH) of gene expression occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{ heterosis} of gene expression to be the event of LPH or HPH. The most important hypotheses are
-\begin{align}
-H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
-H_{g1}:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3},
-\label{e:hypotheses}
-\end{align}
-where $H_{g0}$ indicates no heterosis for gene $g$ and $H_{g1}$ indicates  heterosis for gene $g$. 
-We evaluate these hypotheses based on empirical Bayes estimates of their posterior probabilities, e.g., 
-\begin{align}
-P\left(H_{g1}|y, \hat{\pi}_{MAP}\right) &= P\left(\left.\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}\right| y, \hat{\pi}_{MAP}\right) \nonumber \\
-&\approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\mu_{g3}^{(m)}< \min\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) \mbox{ or } \max\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) < \mu_{g3}^{(m)}\right), \label{e:probs}
-\end{align}
-where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. The set of probabilities $P\left(H_{g1}|y, \hat{\pi}_{MAP}\right)$ for $g=1,\ldots,G$ can be used to provide a list of genes sorted by the relative strength of evidence of  heterosis. Geneticists can use this list to prioritize future experiments to understand the molecular genetic mechanisms for heterosis.  
+For a specific gene $g$, low-parent heteorisis (LPH) of gene expression occurs when average expression in the hybrid is less than the average expression of either parent, i.e. $\delta_g < -|\alpha_g|$, and high-parent heterosis (HPH) occurs when average expression in the hybrid is greater than the average expression of either parent, i.e. $\delta_g > |\alpha_g|$. 
+% and high-parent  heterosis (HPH) of gene expression occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{heterosis} of gene expression to be the event of LPH or HPH. The most important hypotheses are
+% \begin{align}
+% H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
+% H_{g1}:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3},
+% \label{e:hypotheses}
+% \end{align}
+% where $H_{g0}$ indicates no heterosis for gene $g$ and $H_{g1}$ indicates  heterosis for gene $g$. 
+% We evaluate these hypotheses based on empirical Bayes estimates of their posterior probabilities, e.g., 
+% \begin{align}
+% P\left(H_{g1}|y, \hat{\pi}_{MAP}\right) &= P\left(\left.\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}\right| y, \hat{\pi}_{MAP}\right) \nonumber \\
+% &\approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\mu_{g3}^{(m)}< \min\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) \mbox{ or } \max\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) < \mu_{g3}^{(m)}\right), \label{e:probs}
+% \end{align}
+% where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. 
+We evaluate these probabilities based on empirical Bayes estimates of their posterior probabilities, e.g., 
+\begin{equation}
+%P(LPH_g|y) \approx 
+P(LPH_g|y,\hat{\pi}_{MAP}) = P\left(\left.\delta_g < -|\alpha_g|\right|y, \hat{\pi}_{MAP}\right) = \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\delta_g^{(m)} < -\left|\alpha_g^{(m)}\right|\right), 
+\label{e:probs}
+\end{equation}
+where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. We construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities. Geneticists can use this list to prioritize future experiments to understand the molecular genetic mechanisms for heterosis.  
  
 
 \section{Simulation study based on a maize experiment}
