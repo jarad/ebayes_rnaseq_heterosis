@@ -58,9 +58,7 @@ The remainder of the paper proceeds as follows. Section \ref{s:method} presents 
 \section{Empirical Bayes identification of gene expression heterosis from RNA-seq read counts}
 \label{s:method}
 
-An RNA sequencing (RNA-seq) experiment to identify genes demonstrating expression heterosis consists of three genetic varieties: two parental varieties (P1 and P2) and a cross between these two varieties called the hybrid (H). For each variety, replicate RNA samples are isolated and assessed for quality. Complementary DNA (cDNA) libraries, consisting of short cDNA fragments derived from RNA, are constructed. Then, next generation sequencing technology is used to determine the \emph{reads}, or nucleotide sequences, in the cDNA libraries. These reads are processed using bioinformatic algorithms to match the reads to genes, or specific gene transcripts, exons, microRNAs, etc. The results of read processing are summarized by a gene $\times$ sample matrix of counts. See \cite{nettleton2014design} 
-% JBN: cite the book 
-for more details on RNA-seq experiments and data from a statistical perspective, and see \cite{paschold2012complementation} for the biological background behind the use of RNA-seq to study gene expression heterosis.
+An RNA sequencing (RNA-seq) experiment to identify genes demonstrating expression heterosis consists of three genetic varieties: two parental varieties (P1 and P2) and a cross between these two varieties called the hybrid (H). For each variety, replicate RNA samples are isolated and assessed for quality. Complementary DNA (cDNA) libraries, consisting of short cDNA fragments derived from RNA, are constructed. Then, next generation sequencing technology is used to determine the \emph{reads}, or nucleotide sequences, in the cDNA libraries. These reads are processed using bioinformatic algorithms to match the reads to genes, or specific gene transcripts, exons, microRNAs, etc. The results of read processing are summarized by a gene $\times$ sample matrix of counts. See \cite{datta2014statistical} for more details on RNA-seq experiments and data from a statistical perspective, and see \cite{paschold2012complementation} for the biological background behind the use of RNA-seq to study gene expression heterosis.
 
 To use RNA-seq counts to identify genes displaying expression heterosis, we build a hierarchical model to borrow information across gene-variety means and across gene-specific overdispersion parameters, estimate the parameters using an empirical Bayes procedure implemented in the statistical software {\tt Stan}, and calculate empirical Bayes posterior probabilities for heterosis. 
 
@@ -73,23 +71,30 @@ Let $Y_{gvi}$ be the count for gene $g=1,\ldots,G$, variety $v=1,\ldots,V$, and 
 Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right), 
 \label{e:data}
 \end{equation}
-where $NB(\eta,e^\psi)$ indicates a negative binomial distribution with expectation $\eta$ and variance $\eta+e^\psi\eta^2$, and $ind$ indicates the observations are conditionally independent.  As shown in equation \eqref{e:data}, our data model involves gene-specific overdispersion $\psi_g$ and a mean that depends on the gene-variety combination through $\mu_{gv}$ and on the sample though  $\gamma_{vi}$.  The $\mu_{gv}$ terms are of primary scientific interest; the $\gamma_{vi}$ terms are normalization factors that account for differences in the thoroughness of sequencing from sample to sample.  Practitioners typically compute normalization factors for each sample and then treat them as known constants in further analysis.  In contrast, we include normalization factors in our model as unknowns that we estimate along with other parameters.     
+where $NB(\xi,e^\psi)$ indicates a negative binomial distribution with expectation $\xi$ and variance $\xi+e^\psi\xi^2$, and $ind$ indicates the observations are conditionally independent.  As shown in equation \eqref{e:data}, our data model involves gene-specific overdispersion $\psi_g$ and a mean that depends on the gene-variety combination through $\mu_{gv}$ and on the sample though  $\gamma_{vi}$.  The $\mu_{gv}$ terms are of primary scientific interest; the $\gamma_{vi}$ terms are normalization factors that account for differences in the thoroughness of sequencing from sample to sample. 
 
+Following \cite{ji2014estimation}, we reparameterize the gene-variety mean structure into the gene-specific parental average ($\phi_g$), half-parental difference ($\alpha_g$), and hybrid difference ($\delta_g$). Specifically, if $V=3$ with $v=1,2$ indicate the two parental varieties and $v=3$ indicates the hybrid, then
+\[ \phi_g = \frac{\mu_{g1}+\mu_{g2}}{2} \qquad \alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2} \qquad \delta_g = \phi_g-\mu_{g3}. \]
 
-We present a hierarchical model for the normalization factors, overdispersions, and gene-variety parameters. The sample-specific sequencing depth terms are assumed to follow a normal distribution, i.e. $\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau^2)$. (These terms are the normalization factors that practitioners typically estimate for each sample and then treat as constant in further analysis.) The logarithm of the gene-specific overdispersion parameters and the gene-specific variety effects are assumed to have a joint normal distribution, i.e. 
-$\theta_g = [\mu_g, \psi_g]^\top \stackrel{ind}{\sim} N\left(\eta, \Sigma\right)$
-where $\mu_g = (\mu_{g1},\ldots,\mu_{gV})'$. We consider an \emph{independence} model in which $\Sigma$ is diagonal with elements $\sigma_1^2,\ldots,\sigma_{V+1}^2$ and a \emph{dependence} model in which $\Sigma$ is a general positive definite matrix.
-% JBN: Switch mu and eta throughout
+We present a hierarchical model for the normalization factors, overdispersions, and gene-specific mean parameters. These normalization factors, parental averages, and overdispersion parameters are assumed to follow a normal distribution. 
+\[ 
+\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2) \qquad 
+\phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2) \qquad 
+\psi_g \stackrel{ind}{\sim} N(0,\sigma_\psi^2) \qquad 
+\]
+To allow for more shrinkage with the half-parental difference and hybrid difference, we use a Laplace (or double exponential prior) and thus implement a Bayesian LASSO \citep{park2008bayesian}. Thus
+\[ 
+\alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad
+\delta_g \stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) 
+\]
+where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $p(\alpha|\eta,\sigma) = exp(-|\alpha-\eta|/\sigma)/2\sigma$, expectation $\eta$ and variance $2\sigma^2$. We assume independence amongst the normalization factors, parental averages, half parental differences, hybrid differences, and overdispersion parameters.
 
-We assume improper uniform priors for $\eta$ and take $\tau\stackrel{ind}{\sim} Ca^+(0,1)$, where 0 and 1 are the location and scale parameters, respectively, of the untruncated half-Cauchy distribution. In the independence model, we also assign the $Ca^+(0,3)$ prior to the
-diagonal elements of $\Sigma$. In the dependence model, we assume a conjugate, proper inverse Wishart distribution with degrees of freedom $V+2$ and an identity scale matrix, resulting in marginally uniform correlations. 
-
-
+We assume improper uniform priors for $\eta_\phi$, $\eta_alpha$, and $\eta_\delta$ and independent half-cauchy priors for all standard deviations. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ and hyperparameters $\pi = (\gamma,\eta, \Sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on $\hat{\pi}$. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
+We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_alpha,\eta_delta)$, and $\sigma=(\sigma_gamma,\sigma_\phi,\sigma_\alpha,\sigma_delta,\sigma_psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
 \begin{align}
 p\left(\theta\left|y,\hat{\pi}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
@@ -97,8 +102,6 @@ p\left(\theta\left|y,\hat{\pi}\right.\right)
 \label{e:condind}
 \end{align}
 Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
-
-
 
 To perform the optimization required for the MAP estimate $\hat{\pi}$, we use the statistical software, {\tt Stan} \citep{stan-software:2014}, executed through the RStan interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows the construction of general Bayesian models with the primary restriction that all unknown parameters are continuous. With a fully constructed model, the software can obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in RStan. Presumably due to the large dimension of the optimization, it was necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} and reasonable starting values obtained via {\tt edgeR} \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor}. The {\tt Stan} software also includes the RStan function, {\tt sampling}, an implementation of a Markov chain Monte Carlo (MCMC) algorithm for obtaining samples from the posterior. By default, Stan uses a no-U-turn sampler \citep{hoffman2013no}, a variant of Hamiltonion Monte Carlo \citep{neal2011mcmc}.
 
