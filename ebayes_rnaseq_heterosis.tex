@@ -189,8 +189,9 @@ To assess the efficacy of our method to identify genes demonstrating heterosis, 
 \subsection{Constructing simulated data}
 \label{s:sim_data}
 
-We applied the \edgeR{} package \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor} to the maize data on 27,888 genes with average count at least one and at most two zero read counts for each variety across four replications.  This analysis produced  sample-specific normalization factors () % JBN: state the normalization factors, "I suppose you used the edgeR default, which is TMM, but I think this should be stated explicitly."
-, gene-specific dispersion estimates, and gene-variety-specific location parameter estimates. We treated these estimates as the true parameter values for the simulation study so that our simulated datasets mimicked the existing covariance structure among the gene-variety means of the original maize data.
+We applied the \edgeR{} package \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor} to the maize data on 27,888 genes with average count at least one and at most two zero read counts for each variety across four replications.  This analysis produced sample-specific normalization factors using the TMM method \citep{robinson2010scaling},
+%(0.080, -0.041, -0.054, 0.000, -0.036, -0.147, 0.093, 0.059, -0.004, -0.057, 0.067,  0.041) 
+gene-specific dispersion estimates, and gene-variety-specific location parameter estimates \citep{mccarthy2012differential}. We treated these estimates as the true parameter values for the simulation study so that our simulated datasets mimicked the existing covariance structure among the gene-variety means of the original maize data.
 
 Using these parameters and normalization factors, we simulated data according to the negative-binomial model in \eqref{e:data} independently for each gene. For each simulation, we analyzed a subset of 25,000 genes selected randomly from genes with simulated counts at least one on average and with at most two zeros for each variety across replications.  We repeated this simulation process 10 times for each of 4, 8, and 16 replicates per variety, reusing normalization factors when necessary.  
 % From Dan "Did we consider changing the number of zeros allowed when the number of reps is higher?  I like the idea of simplifying all this by just picking an average count threshold that his high enough to avoid problems.  I think that may be what others have done in the past."
@@ -245,38 +246,42 @@ Independently for each gene, we ran four Markov chains conditional on the estima
 % From Dan "Do we need to be more specific about what method was used to generate the chains?"
 The potential scale reduction factor, $\hat{R}$, was computed for each parameter \citep{Gelm:Rubi:infe:1992, Broo:Gelm:gene:1997}. If the maximum $\hat{R}$ was larger than 1.1 for any parameter, the total number of iterations was increased by 500, with the burn-in increased proportionally, and the chain was rerun. This process was repeated until the maximum $\hat{R}$ was less than 1.1 for all parameters.
 
-With posteriors for all parameters, we can calculate empirical Bayes posterior probabilities for LPH and HPH. For each gene, the quantity of interest is likely to be the maximum of these two probabilities. For each gene with a high probability of either HPH or LPH, the magnitude of the effect is of interest. Thus, we calculate 
+With posteriors for all parameters, we can calculate empirical Bayes posterior probabilities for LPH and HPH. For each gene, the quantity of interest is likely to be the maximum of these two probabilities. For each gene with a high probability of either HPH or LPH, the magnitude of the effect is of interest. We calculate 
 \begin{equation}
-\mbox{estimated effect size}_g = \left\{ 
+% \mbox{estimated effect size}_g = \left\{ 
+% \begin{array}{ll}
+% \hat{\mu}_{g3} - \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} < \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
+% \hat{\mu}_{g3} - \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} > \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
+% 0 & \mbox{otherwise},
+% \end{array} 
+% \right. 
+\mbox{estimated effect size}_g \equiv \left\{ 
 \begin{array}{ll}
-\hat{\mu}_{g3} - \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} < \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
-\hat{\mu}_{g3} - \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} > \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
+\hat{\delta}_g - |\hat{\alpha}_g| & \mbox{if } \hat{\delta}_g > \phantom{-}|\alpha_g| \\
+\hat{\delta}_g + |\hat{\alpha}_g| & \mbox{if } \hat{\delta}_g < -|\alpha_g| \\
 0 & \mbox{otherwise},
 \end{array} 
 \right. 
 \label{e:effect_size}
 \end{equation}
-where $\hat{\mu}_{gi}$ is the estimated posterior mean of $\mu_{gi}$ for $i=1,2,3$.
+where $\hat{\mu}_{gi}$ is the estimated posterior mean of $\mu_{gv}$ for $v=1,2,3$. Thus, the estimated effect size is the difference between hybrid mean and the nearest parent with negative values indicating LPH and positive values indicating HPH. If the hybrid mean is estimated to be between the parents, this effect is defined to be zero. 
 
 
-Figure \ref{f:volcano} provides a volcano plot to visualize the maximum of the probabilities of LPH and HPH versus estimated effect size. The figure shows a line at zero for probabilities less than 0.5 because the effect size is set to 0 for the vast majority of genes. Above a probability of 0.5, we see a prototypical volcano pattern, with increased  heterosis probability corresponding to larger estimated effect sizes and no estimated effect sizes near zero for genes with high heterosis probability. We also see asymmetry, with larger negative effect sizes than positive effect sizes, because many genes have hybrid counts near zero and relatively high parental counts. Genes with high estimated posterior probabilities of heterosis and large estimated effect sizes are candidates for further investigation.
-
-% Compare independence and volcano plots
+Figure \ref{f:volcano} provides a volcano plot, in this case a bivariate histogram, to visualize the maximum of the probabilities of LPH and HPH versus estimated effect size. The figure shows a peak at zero for probabilities below 0.5 with estimated effect sizes of zero. Above a probability of 0.5, we see a prototypical volcano pattern, with increased heterosis probability corresponding to larger estimated effect sizes and no estimated effect sizes near zero for genes with high heterosis probability. We also see asymmetry, with larger negative effect sizes than positive effect sizes due to genes with hybrid counts near zero and relatively high parental counts. Genes with high estimated posterior probabilities of heterosis and large estimated effect sizes are candidates for further investigation.
 
 \begin{figure}
-\centerline{\includegraphics[width=\textwidth]{volcano}}
-\caption{A two-dimensional histogram of the maximum of the LPH and HPH probabilities versus estimated effect size defined in equation \ref{e:effect_size} for the B73 $\times$ Mo17 maize experiment using the independence model.}
+\centerline{\includegraphics[width=\textwidth]{maize_volcano_dexp}}
+\caption{A bivariaet histogram of the maximum of the LPH and HPH probabilities versus estimated effect size defined in equation \ref{e:effect_size} for the B73 $\times$ Mo17 maize experiment.}
 \label{f:volcano}
 \end{figure}
 
-With almost 30,000 genes in our data set, we can evaluate the normality assumption for the gene-specific parameters. Figure \ref{f:normality} provides histograms of components of $\theta$ from a single MCMC iteration.
-% From Dan, "Why use draws from a single Markov chain iteration?  Ideally, we want to see if the true underlying components of theta follow the distributions we have specified.  Wouldn't posterior means tend to be closer to the truth than single draws?"
-If the prior assumption of normality is correct, we would expect these histograms to show approximate normality. The marginal histograms show a bimodal distribution for $\mu$ with a secondary peak around relatively small values. The bivariate histograms amongst the components of $\mu$ show a high correlation but with a heavy-tail toward small values of both components of $\mu$. With stricter gene-inclusion criterion, it is possible both the secondary peak and the heavy-tailedness could be eliminated. The histogram for $\psi$ displays a heavy-tail to the right and the bivariate histograms show a pattern of near independence between $\psi$ and $\mu_g$ until $\mu_g$ passes a threshold at which point $\psi$ appears to decrease. Both of these phenomenon are consistent with observations in the literature that the negative-binomial overdispersion parameter decreases as the mean increases, but the bivariate histograms appear to indicate a nonlinear relationship between the means and the log of the overdispersion parameter.
+With almost 30,000 genes in our data set, we can evaluate the distribution assumptions for the gene-specific parameters. Figure \ref{f:scatterplot} provides marginal and bivariate histograms for the gene-specific parameters.
+
 
 \begin{figure}
-\centerline{\includegraphics[width=\textwidth]{normality}}
-\caption{Marginal and bivariate histograms for gene-specific parameters from a single MCMC sample, $\theta_g^{(m)}$,  for the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions from $N(\hat{\eta},\hat{\Sigma})$.}
-\label{f:normality}
+\centerline{\includegraphics[width=\textwidth]{scatterplot_dexp}}
+\caption{Marginal and bivariate histograms for gene-specific parameter posterior meansfor the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions in the hierarchical model with the MAP estimates.}
+\label{f:scatterplot}
 \end{figure}
 
 Marginal and bivariate histograms for the model with an estimated covariance look similar although the estimated distribution $N(\hat{\eta},\hat{\Sigma})$ has increased variance for $\mu$ and decreased variance for $\psi$ as was previously seen in Table \ref{t:map} (results not shown). 
@@ -284,7 +289,7 @@ Marginal and bivariate histograms for the model with an estimated covariance loo
 \section{Discussion}
 \label{s:discussion}
 
-Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic heterosis of traits, such as plant height or grain yield. Because of the unwieldy composite null hypothesis in \eqref{e:hypotheses}, existing methods for identifying gene expression heterosis based on \RNAseq{} data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach, modified to allow for \RNAseq{} read counts as measures of transcript abundance. We developed an empirical Bayes approach based on obtaining MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters. This methodology can be conveniently implemented in the statistical software, {\tt Stan}. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis.  
+Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic heterosis of traits, such as plant height or grain yield. Existing methods for identifying differential gene expression based on \RNAseq{} data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach, modified to allow for \RNAseq{} read counts as measures of transcript abundance. We developed an empirical Bayes approach based on obtaining MAP estimates for hyperparameters followed by MCMC to estimate gene-specific parameters. This methodology can be conveniently implemented in the statistical software, {\tt Stan}. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis.  
 
 Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably well with an implementation of our model in \ShrinkBayes{}, which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment in which phenotypic heterosis is well known. 
 % Estimates of heterosis to compare with Ji et. al.
