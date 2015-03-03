@@ -73,28 +73,30 @@ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right),
 \end{equation}
 where $NB(\xi,e^\psi)$ indicates a negative binomial distribution with expectation $\xi$ and variance $\xi+e^\psi\xi^2$, and $ind$ indicates the observations are conditionally independent.  As shown in equation \eqref{e:data}, our data model involves gene-specific overdispersion $\psi_g$ and a mean that depends on the gene-variety combination through $\mu_{gv}$ and on the sample though  $\gamma_{vi}$.  The $\mu_{gv}$ terms are of primary scientific interest; the $\gamma_{vi}$ terms are normalization factors that account for differences in the thoroughness of sequencing from sample to sample. 
 
-Following \cite{ji2014estimation}, we reparameterize the gene-variety mean structure into the gene-specific parental average ($\phi_g$), half-parental difference ($\alpha_g$), and hybrid difference ($\delta_g$). Specifically, if $V=3$ with $v=1,2$ indicate the two parental varieties and $v=3$ indicates the hybrid, then
-\[ \phi_g = \frac{\mu_{g1}+\mu_{g2}}{2} \qquad \alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2} \qquad \delta_g = \phi_g-\mu_{g3}. \]
+Following \cite{ji2014estimation}, we reparameterize the gene-variety mean structure into the gene-specific parental average ($\phi_g$), half-parental difference ($\alpha_g$), and hybrid difference ($\delta_g$). Specifically, for heterosis $V=3$ and let $v=1,2$ indicate the two parental varieties and $v=3$ indicate the hybrid, then
+\[ \phi_g = \frac{\mu_{g1}+\mu_{g2}}{2}, \quad 
+\alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2}, \quad \mbox{and} \quad
+\delta_g = \phi_g-\mu_{g3}. \]
 
-We present a hierarchical model for the normalization factors, overdispersions, and gene-specific mean parameters. These normalization factors, parental averages, and overdispersion parameters are assumed to follow a normal distribution. 
+We present a hierarchical model for the normalization factors, overdispersions, and gene-specific mean parameters. The normalization factors, parental averages, and overdispersion parameters are assumed to follow a normal distribution, i.e.
 \[ 
-\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2) \qquad 
-\phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2) \qquad 
-\psi_g \stackrel{ind}{\sim} N(0,\sigma_\psi^2) \qquad 
+\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
+\phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), \quad \mbox{and}\quad 
+\psi_g \stackrel{ind}{\sim} N(0,\sigma_\psi^2). 
 \]
-To allow for more shrinkage with the half-parental difference and hybrid difference, we use a Laplace (or double exponential prior) and thus implement a Bayesian LASSO \citep{park2008bayesian}. Thus
+To allow for more shrinkage with the half-parental and hybrid differences, we use a Laplace (or double exponential prior) and thus implement a Bayesian LASSO \citep{park2008bayesian}, i.e. 
 \[ 
-\alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad
+\alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad \mbox{and} \qquad
 \delta_g \stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) 
 \]
-where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $p(\alpha|\eta,\sigma) = exp(-|\alpha-\eta|/\sigma)/2\sigma$, expectation $\eta$ and variance $2\sigma^2$. We assume independence amongst the normalization factors, parental averages, half parental differences, hybrid differences, and overdispersion parameters.
+where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $p(\alpha|\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$, expectation $\eta$, and variance $2\sigma^2$. We assume independence amongst the normalization factors, parental averages, half parental differences, hybrid differences, and overdispersion parameters.
 
-We assume improper uniform priors for $\eta_\phi$, $\eta_alpha$, and $\eta_\delta$ and independent half-cauchy priors for all standard deviations. 
+We assume improper uniform priors for $\eta_\phi$, $\eta_\alpha$, and $\eta_\delta$ and independent half-cauchy priors for all standard deviations \citep{gelman2006prior}.
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_alpha,\eta_delta)$, and $\sigma=(\sigma_gamma,\sigma_\phi,\sigma_\alpha,\sigma_delta,\sigma_psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
+We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta)$, and $\sigma=(\sigma_\gamma,\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
 \begin{align}
 p\left(\theta\left|y,\hat{\pi}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
