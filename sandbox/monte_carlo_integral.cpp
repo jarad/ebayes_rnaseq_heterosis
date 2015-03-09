@@ -67,7 +67,7 @@ double monte_carlo_integral(IntegerMatrix count,
     mu[3];             // array to contain values for mu derived from padp
   
   for (int g=0; g<G; g++) {
-    Rprintf("%i: ", g); 
+    //Rprintf("%i: ", g); 
     
     for (int s=0; s<n_sims; s++) {
       rpadp(padp, mean, scale);        // random draws for phi, alpha, delta, and psi
@@ -83,8 +83,8 @@ double monte_carlo_integral(IntegerMatrix count,
     }
     
     integral += logsumexp(log_mass, n_sims) - log_n_sims;
-    Rprintf(", total=%f", logsumexp(log_mass, n_sims) - log_n_sims);
-    Rprintf("\n");
+    //Rprintf(", total=%f", logsumexp(log_mass, n_sims) - log_n_sims);
+    //Rprintf("\n");
   }     
          
   return integral;
