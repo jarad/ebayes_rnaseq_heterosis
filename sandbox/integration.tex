@@ -1,0 +1,52 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\newcommand{\argmax}{\mbox{argmax}}
+
+\begin{document}
+
+\section{MAP estimate}
+
+Let $\theta_g$ be the gene-specific parameters and $\pi$ be the hyperparameters. The MAP estimate for $\pi$ is 
+\begin{align*}
+\argmax_{\pi} \log p(\pi|y) 
+&= \argmax_{\pi} \log\left( \int \prod_{g=1}^G \left[ \, \prod_{v=1}^V \prod_{i=1}^{n_v} NB(y_{gvi}|f(\theta_g)) p(\theta_g|\pi) \right] p(\pi) d\theta \right) \\
+&= \argmax_{\pi}\sum_{g=1}^G \log \left[ \, \int \prod_{v=1}^V \prod_{i=1}^{n_v} NB(y_{gvi}| f(\theta_g)) p(\theta_g|\pi) d\theta_g  \right] + \log(p(\pi)) \\
+&= \argmax_{\pi}\sum_{g=1}^G \log(I_g) + \log(p(\pi)) 
+\end{align*}
+where 
+ \[
+ I_g = \int \prod_{v=1}^V \prod_{i=1}^{n_v} NB(y_{gvi}| f(\theta_g)) p(\theta_g|\pi) d\theta_g
+ \]
+
+\subsection{Quadrature}
+
+Using quadrature, we would have a set of points $\theta_g^{(k)}$ that would depend on $\pi$ and associated weight $w_k$. We would approximate the integral via 
+\[
+I_g \approx \sum_{k=1}^K w_k NB(y_{gvi}| f(\theta_g^{(k)})).
+\]
+
+\subsection{Monte Carlo integration}
+
+Alternatively, we can use Monte Carlo integration which would sample $\theta_g^{(k)} \sim p(\theta_g|\pi)$ and approximate the integral via 
+\[
+I_g \approx \frac{1}{K} \sum_{k=1}^K NB(y_{gvi}| f(\theta_g^{(k)})).
+\]
+
+
+\subsection{Importance sampling}
+
+Importance sampling uses an alternative sampling distribution $q(\theta_g|\pi)$. Then we sample $\theta_g^{(k)} \sim q(\theta_g|\pi)$ and approximate the integral via 
+\[
+I_g \approx \sum_{k=1}^K w_k NB(y_{gvi}| f(\theta_g^{(k)})).
+\]
+where $w_k = p(\theta^{(k)}|\pi)/p(\theta^{(k)}|\pi)$. 
+
+If we make the proposal gene specific, i.e. $q_g(\theta_g|\pi)$, then we can sample using a proposal that is tuned to the data. For example, one component of $\theta_g$ is $\phi_g$, the mean parental response, i.e. $E[y_{g1i}+y_{g2i}]/2$. This parameter is extremely variable across $g$. It certainly makes sense to choose $\phi_g$ in a range near the empirical parental average, i.e. 
+
+\[ \hat{\phi}_g = \frac{1}{2}\left[ \frac{1}{n_1} \sum_{i=1}^{n_1} y_{g1i} + \frac{1}{n_2} \sum_{i=1}^{n_2} y_{g2i} \right] \]
+
+
+
+\end{document}
