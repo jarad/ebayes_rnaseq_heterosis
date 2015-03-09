@@ -7,6 +7,26 @@ using namespace Rcpp;
 
 // For more on using Rcpp click the Help button on the editor toolbar
 
+void rpadp(double *padp, NumericVector mean, NumericVector scale) {
+  for (int i=0; i<4; i++) 
+    padp[i] = rnorm(1, mean[i], scale[i])[0];
+}
+
+double dpadp(double *padp, NumericVector mean, NumericVector scale) {
+  double sum=0;
+  
+  for (int i=0; i<4; i++)
+    sum += R::dnorm(padp[i], mean[i], scale[i], 1);
+
+  return sum;
+}
+
+void calculate_mu(double mu[], double padp[], IntegerVector variety) {
+  mu[0] = padp[0]+padp[1]; // make sure these agree with definition
+  mu[1] = padp[0]-padp[1];
+  mu[2] = padp[0]+padp[2];
+}
+
 double logsumexp(double x[], int n) {
   double max_val = x[0], sum = 0.0;
   int i;
@@ -24,58 +44,47 @@ double logsumexp(double x[], int n) {
 // [[Rcpp::export]]
 double monte_carlo_integral(IntegerMatrix count, 
                             IntegerVector variety, 
-                            NumericVector hyperparameters,
+                            NumericVector mean,
+                            NumericVector scale,
                             int n_sims) {
   // count is the observed count (gene x sample)
   // variety is the variety identifier for the columns
-  // hyperparameters are the values for the hyperparameters
-  // sims number of Monte Carlo simulations to use
-  int G = count.nrow();
-  int n = count.ncol();
+  // mean and scale contain the hyperparameters for the phi-alpha-delta-psi distributions
+  // n_sims number of Monte Carlo simulations to use
+  int G = count.nrow(); // number of genes
+  int n = count.ncol(); // number of samples
+  double log_n_sims = log( (double) n_sims);
   
   // argument error handling
   if (variety.size() != n) throw std::range_error("Length of variety and number of columns of count do not agree.");
-  if (hyperparameters.size() != 8) throw std::range_error("Hyperparameters must have length 8.");
-  
-  // set up hyperparameters
-  double phi_location   = hyperparameters[0],
-         alpha_location = hyperparameters[1],
-         delta_location = hyperparameters[2],
-         psi_location   = hyperparameters[3],
-         phi_scale      = hyperparameters[4],
-         alpha_scale    = hyperparameters[5], 
-         delta_scale    = hyperparameters[6],
-         psi_scale      = hyperparameters[7];
+//  if (variety.max()   > 3) throw std::range_error("Values in variety must not be greater than 3.")
+  if (mean.size()   != 4) throw std::range_error("mean  must have length 4.");  
+  if (scale.size()  != 4) throw std::range_error("scale must have length 4.");
          
-  double integral = 0, partial_integral, log_mass[n_sims], phi, alpha, delta, psi, mu[3], gene_avg;
+  double integral = 0, // value of the integral (updated for each gene)
+    log_mass[n_sims],  // log_mass for each simulated set of parameters (reused for each gene)
+    padp[4],           // array contain values for phi, alpha, delta, and psi
+    mu[3];             // array to contain values for mu derived from padp
   
   for (int g=0; g<G; g++) {
-    partial_integral = 0;
-    
-    gene_avg = 0;
-    for (int ii=0; ii<n; ii++) gene_avg += count(g,ii);
-    gene_avg /= n;
+    Rprintf("%i: ", g); 
     
     for (int s=0; s<n_sims; s++) {
-      phi   = rnorm(1, phi_location,   phi_scale)[0]; 
-      //phi   = rnorm(1, log(gene_avg),   .1)[0]; 
-      alpha = rnorm(1, alpha_location, alpha_scale)[0]; // change to laplace
-      delta = rnorm(1, delta_location, delta_scale)[0]; // change to laplace
-      psi   = rnorm(1, psi_location,   psi_scale)[0];
+      rpadp(padp, mean, scale);        // random draws for phi, alpha, delta, and psi
+      calculate_mu(mu, padp, variety); // calculate mu from phi, alpha, delta
       
-      mu[0] = phi+alpha; // make sure these agree with definition
-      mu[1] = phi-alpha;
-      mu[2] = phi+delta;
-      
-      log_mass[s] = 0;
+      log_mass[s] = dpadp(padp, mean, scale) - // target 
+                    dpadp(padp, mean, scale);  // proposal
+     
       for (int i=0; i<n; i++) {
-        log_mass[s] += dnbinom_mu(count(g,i), 1/exp(psi), exp(mu[variety[i]]), 1);
-        //Rprintf("%i %i %i\n %f %f %f %f\n %f %f %f\n %i %f\n", 
-        //        g, s, i, phi, alpha, delta, psi, mu[0], mu[1], mu[2], count(g,i),dnbinom_mu(count(g,i), 1/exp(psi), exp(mu[variety[i]]), 1));
-        //Rprintf("  %i %i %i %f\n", g, s, i, log_mass);
-      }
+        log_mass[s] += dnbinom_mu(count(g,i), 1/exp(padp[3]), exp(mu[variety[i]]), 1);
+      } 
+      //Rprintf("%e ", log_mass[s]);
     }
-    integral += logsumexp(log_mass, n_sims);
+    
+    integral += logsumexp(log_mass, n_sims) - log_n_sims;
+    Rprintf(", total=%f", logsumexp(log_mass, n_sims) - log_n_sims);
+    Rprintf("\n");
   }     
          
   return integral;
