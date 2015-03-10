@@ -31,6 +31,8 @@ void calculate_exp_mu(NumericVector exp_mu, double padp[], IntegerVector variety
     exp_mu[i] = exp(tmp_mu[variety[i]]);
 }
 
+
+
 double logsumexp(double x[], int n) {
   double max_val = x[0], sum = 0.0;
   int i;
