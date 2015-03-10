@@ -17,7 +17,7 @@ hyperparameters = melt(all$hyperparameters)
 sourceCpp("monte_carlo_integral.cpp")
 
 log_like = function(pi) {
-  -monte_carlo_integral(as.matrix(count[,-1]), variety-1, pi[1:4], exp(pi[5:8]), 1000)
+  -monte_carlo_integral(t(as.matrix(count[,-1])), variety-1, pi[1:4], exp(pi[5:8]), 1000)
 }
 
 o = optim(rep(0,8), log_like)

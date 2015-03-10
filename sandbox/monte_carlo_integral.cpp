@@ -21,10 +21,14 @@ double dpadp(double *padp, NumericVector mean, NumericVector scale) {
   return sum;
 }
 
-void calculate_mu(double mu[], double padp[], IntegerVector variety) {
-  mu[0] = padp[0]+padp[1]; // make sure these agree with definition
-  mu[1] = padp[0]-padp[1];
-  mu[2] = padp[0]+padp[2];
+void calculate_mu(NumericVector mu, double padp[], IntegerVector variety) {
+  double tmp_mu[3];
+  tmp_mu[0] = padp[0]+padp[1]; // make sure these agree with definition
+  tmp_mu[1] = padp[0]-padp[1];
+  tmp_mu[2] = padp[0]+padp[2];
+  
+  for (int i=0; i<mu.length(); i++)
+    mu[i] = tmp_mu[variety[i]];
 }
 
 double logsumexp(double x[], int n) {
@@ -41,18 +45,30 @@ double logsumexp(double x[], int n) {
   return log(sum) + max_val;
 }
 
+
+// [[Rcpp::export]]
+NumericVector dnbinom_mu(NumericMatrix::Column x, double size, NumericVector mu, int lg) {
+  // Vectorized for mu (mean)
+  NumericVector result(mu.length());
+  for (int i=0; i<mu.length(); i++) 
+    result[i] = dnbinom_mu(x[i], size, mu[i], lg);
+  return result;
+}
+
+
+
 // [[Rcpp::export]]
 double monte_carlo_integral(IntegerMatrix count, 
                             IntegerVector variety, 
                             NumericVector mean,
                             NumericVector scale,
                             int n_sims) {
-  // count is the observed count (gene x sample)
+  // count is the observed count (sample x gene, column major for quick access)
   // variety is the variety identifier for the columns
   // mean and scale contain the hyperparameters for the phi-alpha-delta-psi distributions
   // n_sims number of Monte Carlo simulations to use
-  int G = count.nrow(); // number of genes
-  int n = count.ncol(); // number of samples
+  int G = count.ncol(); // number of genes
+  int n = count.nrow(); // number of samples
   double log_n_sims = log( (double) n_sims);
   
   // argument error handling
@@ -63,8 +79,9 @@ double monte_carlo_integral(IntegerMatrix count,
          
   double integral = 0, // value of the integral (updated for each gene)
     log_mass[n_sims],  // log_mass for each simulated set of parameters (reused for each gene)
-    padp[4],           // array contain values for phi, alpha, delta, and psi
-    mu[3];             // array to contain values for mu derived from padp
+    padp[4];           // array containing values for phi, alpha, delta, and psi           
+  
+  NumericVector mu(n); // array to contain values for mu derived from padp
   
   for (int g=0; g<G; g++) {
     //Rprintf("%i: ", g); 
@@ -74,11 +91,12 @@ double monte_carlo_integral(IntegerMatrix count,
       calculate_mu(mu, padp, variety); // calculate mu from phi, alpha, delta
       
       log_mass[s] = dpadp(padp, mean, scale) - // target 
-                    dpadp(padp, mean, scale);  // proposal
+                    dpadp(padp, mean, scale) + // proposal
+                    dnbinom_mu(count(_,g), 1/exp(padp[3]), exp(mu), 1);  
      
-      for (int i=0; i<n; i++) {
-        log_mass[s] += dnbinom_mu(count(g,i), 1/exp(padp[3]), exp(mu[variety[i]]), 1);
-      } 
+//     for (int i=0; i<n; i++) {
+//        log_mass[s] += dnbinom_mu(count(g,i), 1/exp(padp[3]), exp(mu[variety[i]]), 1);
+//      } 
       //Rprintf("%e ", log_mass[s]);
     }
     
