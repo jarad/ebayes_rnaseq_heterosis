@@ -39,7 +39,7 @@ I_g \approx \frac{1}{K} \sum_{k=1}^K \prod_{v=1}^V \prod_{i=1}^{n_v}  NB(y_{gvi}
 
 Importance sampling uses an alternative sampling distribution $q(\theta_g|\pi)$. Then we sample $\theta_g^{(k)} \sim q(\theta_g|\pi)$ and approximate the integral via 
 \[
-I_g \approx \sum_{k=1}^K w_k \prod_{v=1}^V \prod_{i=1}^{n_v} NB(y_{gvi}| f(\theta_g^{(k)})).
+I_g \approx \frac{1}{K} \sum_{k=1}^K w_k \prod_{v=1}^V \prod_{i=1}^{n_v} NB(y_{gvi}| f(\theta_g^{(k)})).
 \]
 where $w_k = p(\theta^{(k)}|\pi)/q(\theta^{(k)}|\pi)$. 
 
