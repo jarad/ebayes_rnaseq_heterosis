@@ -102,5 +102,5 @@ double monte_carlo_integral(IntegerMatrix count,
     //Rprintf("\n");
   }     
          
-  return integral - G*log( (double) n_sims);
+  return integral - G*log(n_sims);
 }
