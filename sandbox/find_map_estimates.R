@@ -66,15 +66,15 @@ ggplot(r, aes(x=n_sims,y=integral, color=factor(n_genes))) +
 
 
 
-log_like = function(pi) {
-  monte_carlo_integral(t(as.matrix(count[,-1])), variety-1, pi[1:4], exp(pi[5:8]), 
+log_like = function(x) {
+  monte_carlo_integral(t(as.matrix(count[,-1])), variety-1, c(x[1:2],pi[3:4]), exp(pi[5:8]), 
                        with(data_summary, estimate[parameter=='phi']),
                        with(data_summary,       sd[parameter=='phi']),
                        10000)
 }
 
 truth = melt(all$hyperparameters, value.var="truth")$value
-o = optim(truth, log_like, control = list(fnscale=-1))
+o = optim(truth[1:2], log_like, control = list(trace=1, fnscale=-1, reltol=1e-4))
 cbind(melt(all$hyperparameters, value.var="truth"), estimate = c(o$par[1:4], exp(o$par[5:8])))
 
 
