@@ -34,7 +34,7 @@ dlaplace = function(x, mean = 0, scale = 1, rate = 1/scale, log = FALSE) {
 rlaplace = function(n, mean = 0, scale = 1, rate = 1/scale) {
   # sample(c(-1,1), n, replace=TRUE) * rexp(n, rate=rate) + mean
   u = runif(n=n)-.5
-  mean - scale * sign(x=u)*log(1-2*abs(x=u))
+  mean - sign(x=u)*log(1-2*abs(x=u)) / rate
 }
 
 plaplace = function(q, mean = 0, scale = 1, rate = 1/scale, lower.tail = TRUE, log.p = FALSE) {
@@ -46,5 +46,5 @@ plaplace = function(q, mean = 0, scale = 1, rate = 1/scale, lower.tail = TRUE, l
 }
 
 qlaplace = function(p, mean = 0, scale = 1, rate = 1/scale, lower.tail = TRUE, log.p = FALSE) {
-  mean - scale * sign(p-0.5) * log(1-2*abs(p-0.5))
+  mean - sign(p-0.5) * log(1-2*abs(p-0.5)) / rate
 }
