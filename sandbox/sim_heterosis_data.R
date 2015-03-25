@@ -32,12 +32,12 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, distributions=NULL) {
     }, .id="gene")
   
   data = ddply(data.frame(gene=1:G), .(gene), function(x) {
-    g = x$gene
+    g = as.numeric(x$gene)
     mutate(data.frame(parent = rep(1:3, times = nv)),
            sample = 1:sum(nv),
-           eta = with(parameters, c(phi[g]+alpha[g], phi[g]-alpha[g], phi[g]+delta[g])),
+           eta = with(parameters, c(phi[g]+alpha[g], phi[g]-alpha[g], phi[g]+delta[g]))[parent],
            y = rnbinom(length(eta), size = 1/exp(parameters$psi[g]), mu = exp(eta)))
-  })
+  }, .inform=T)
   
   return(list(data            = data, 
               parameters      = parameters,

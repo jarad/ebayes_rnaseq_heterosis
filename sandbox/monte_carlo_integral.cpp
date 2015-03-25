@@ -21,15 +21,17 @@ double dpadp(double *padp, NumericVector mean, NumericVector scale) {
   return sum;
 }
 
-void calculate_mu(NumericVector mu, double padp[], IntegerVector variety) {
+void calculate_exp_mu(NumericVector exp_mu, double padp[], IntegerVector variety) {
   double tmp_mu[3];
   tmp_mu[0] = padp[0]+padp[1]; // make sure these agree with definition
   tmp_mu[1] = padp[0]-padp[1];
   tmp_mu[2] = padp[0]+padp[2];
   
-  for (int i=0; i<mu.length(); i++)
-    mu[i] = tmp_mu[variety[i]];
+  for (int i=0; i < exp_mu.length(); i++)
+    exp_mu[i] = exp(tmp_mu[variety[i]]);
 }
+
+
 
 double logsumexp(double x[], int n) {
   double max_val = x[0], sum = 0.0;
@@ -45,23 +47,13 @@ double logsumexp(double x[], int n) {
   return log(sum) + max_val;
 }
 
-
-// [[Rcpp::export]]
-NumericVector dnbinom_mu(NumericMatrix::Column x, double size, NumericVector mu, int lg) {
-  // Vectorized for mu (mean)
-  NumericVector result(mu.length());
-  for (int i=0; i<mu.length(); i++) 
-    result[i] = dnbinom_mu(x[i], size, mu[i], lg);
-  return result;
-}
-
-
-
 // [[Rcpp::export]]
 double monte_carlo_integral(IntegerMatrix count, 
                             IntegerVector variety, 
                             NumericVector mean,
                             NumericVector scale,
+                            NumericVector data_phi_mean,
+                            NumericVector data_phi_scale,
                             int n_sims) {
   // count is the observed count (sample x gene, column major for quick access)
   // variety is the variety identifier for the columns
@@ -69,7 +61,6 @@ double monte_carlo_integral(IntegerMatrix count,
   // n_sims number of Monte Carlo simulations to use
   int G = count.ncol(); // number of genes
   int n = count.nrow(); // number of samples
-  double log_n_sims = log( (double) n_sims);
   
   // argument error handling
   if (variety.size() != n) throw std::range_error("Length of variety and number of columns of count do not agree.");
@@ -79,31 +70,37 @@ double monte_carlo_integral(IntegerMatrix count,
          
   double integral = 0, // value of the integral (updated for each gene)
     log_mass[n_sims],  // log_mass for each simulated set of parameters (reused for each gene)
+    r,                // negative binomial 'size' = 1/e^psi
     padp[4];           // array containing values for phi, alpha, delta, and psi           
   
-  NumericVector mu(n); // array to contain values for mu derived from padp
+  NumericVector proposal_mean = mean,
+    proposal_scale = scale,
+    exp_mu(n); // array to contain values for mu derived from padp
   
   for (int g=0; g<G; g++) {
     //Rprintf("%i: ", g); 
+    // Use data mean and scale for phi 
+    proposal_mean[0]  = data_phi_mean[g];
+    proposal_scale[0] = data_phi_scale[g];
     
     for (int s=0; s<n_sims; s++) {
-      rpadp(padp, mean, scale);        // random draws for phi, alpha, delta, and psi
-      calculate_mu(mu, padp, variety); // calculate mu from phi, alpha, delta
+      rpadp(padp, proposal_mean, proposal_scale);  // random draws for phi, alpha, delta, and psi
+      calculate_exp_mu(exp_mu, padp, variety);     // calculate mu from phi, alpha, delta
       
-      log_mass[s] = dpadp(padp, mean, scale) - // target 
-                    dpadp(padp, mean, scale) + // proposal
-                    dnbinom_mu(count(_,g), 1/exp(padp[3]), exp(mu), 1);  
+      log_mass[s] = dpadp(padp, mean, scale) -                   // target 
+                    dpadp(padp, proposal_mean, proposal_scale);  // proposal
      
-//     for (int i=0; i<n; i++) {
-//        log_mass[s] += dnbinom_mu(count(g,i), 1/exp(padp[3]), exp(mu[variety[i]]), 1);
-//      } 
+     r = 1/exp(padp[3]);
+     for (int i=0; i<n; i++) {
+        log_mass[s] += dnbinom_mu(count(i,g), r, exp_mu[variety[i]], 1);
+      } 
       //Rprintf("%e ", log_mass[s]);
     }
     
-    integral += logsumexp(log_mass, n_sims) - log_n_sims;
+    integral += logsumexp(log_mass, n_sims);
     //Rprintf(", total=%f", logsumexp(log_mass, n_sims) - log_n_sims);
     //Rprintf("\n");
   }     
          
-  return integral;
+  return integral - G*log(n_sims);
 }
