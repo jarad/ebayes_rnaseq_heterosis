@@ -48,5 +48,103 @@ If we make the proposal gene specific, i.e. $q_g(\theta_g|\pi)$, then we can sam
 \[ \hat{\phi}_g = \frac{1}{2}\left[ \frac{1}{n_1} \sum_{i=1}^{n_1} y_{g1i} + \frac{1}{n_2} \sum_{i=1}^{n_2} y_{g2i} \right] \]
 
 
+\section{Expectation-Maximization}
+
+An EM algorithm to obtain MAP estimates for $\pi$ is 
+\begin{enumerate}
+\item Expectation
+\[ Q(\pi|\pi^{(t)}) = E_{\theta|y,\pi^{(t)}}[\log p(\theta|y)] \]
+\item Maximization
+\[ \pi^{(t+1)} = \argmax_{\pi} Q(\pi|\pi^{(t)})  \]
+\end{enumerate}
+
+Below, the expectation is always with respect to $p(\theta|y,\pi^{(t)})$. 
+
+The expectation can be broken up into its constitutive components, i.e. 
+
+\[
+E[\log p(\theta|y)]= E[C] + E[\log p(y|\theta)] + E[\log p(\theta|\pi)] + E[\log p(\pi)] 
+\]
+
+In the maximization step, we are maximizing with respect to $\pi$ and just $C + \log p(y|\theta)$ is irrelevant
+if we are obtaining MLEs (instead of MAPs) then just ignore $\log p(\pi)$ as well. 
+
+\subsection{MLEs} 
+
+First consider just $E[\log p(\theta|\pi)]$ where 
+\begin{equation}
+p(\theta|\pi) = \prod_{g=1}^G p(\theta_g|\pi) = \prod_{g=1}^G p(\phi_g|\mu_\phi, \sigma_\phi) p(\alpha_g|\mu_\alpha, \sigma_\alpha) p(\delta_g|\mu_\delta, \sigma_\delta) p(\psi_g|\mu_\psi, \sigma_\psi) \label{e:theta}
+\end{equation}
+
+Thus, the expectation is 
+
+\begin{align*}
+E[\log p(\theta|\pi)]
+=& E_{\theta|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\phi_g|\mu_\phi, \sigma_\phi) +\log p(\alpha_g|\mu_\alpha, \sigma_\alpha) +\log p(\delta_g|\mu_\delta, \sigma_\delta) +\log p(\psi_g|\mu_\psi, \sigma_\psi) \right] \\
+=& E_{\phi|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\phi_g|\mu_\phi, \sigma_\phi) \right] +  E_{\alpha|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\alpha_g|\mu_\alpha, \sigma_\alpha) \right] \\
+&+  E_{\delta|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\delta_g|\mu_\delta, \sigma_\delta) \right] +  E_{\psi|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\psi_g|\mu_\psi, \sigma_\psi) \right]
+\end{align*}
+
+\subsubsection{Normal model}
+
+For simplicity, define the following 
+\[
+\hat{\mu}_{\phi,g}^{(t)} = E[\phi_g|y,\pi^{(t)}] \qquad \mbox{and} \qquad
+\hat{\sigma}_{\phi,g}^{2(t)} = V[\phi_g|y,\pi^{(t)}] 
+\]
+
+For a normal model, e.g. $\phi_g|\pi \stackrel{ind}{\sim} N(\mu_\phi,\sigma_\phi^2)$, we have 
+\[ 
+\begin{array}{rl}
+\multicolumn{2}{l}{
+E_{\phi|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\phi_g|\mu_\phi, \sigma_\phi) \right] = 
+E_{\phi|y,\pi^{(t)}} \left[ -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G (\phi_g-\mu_\phi)^2 \right]} \\
+&= -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G E\left[\left.\left(\phi_g-\mu_\phi\right)^2\right|y,\pi^{(t)}\right]\\
+&= -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G E\left[\left.\left(\phi_g-\hat{\mu}_{\phi,g}^{(t)}+\hat{\mu}_{\phi,g}^{(t)}-\mu_\phi\right)^2\right|y,\pi^{(t)}\right]\\
+&= -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G 
+E\left[\left.\left(\phi_g-\hat{\mu}_{\phi,g}^{(t)}\right)^2+2\left(\phi_g-\hat{\mu}_{\phi,g}^{(t)}\right)\left(\hat{\mu}_{\phi,g}^{(t)}-\mu_\phi\right)+\left(\hat{\mu}_{\phi,g}^{(t)}-\mu_\phi\right)^2\right|y,\pi^{(t)}\right]\\
+&= -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G \left[ \hat{\sigma}_{\phi,g}^{2(t)} + \left(\hat{\mu}_{\phi,g}^{(t)}-\mu_\phi\right)^2 \right]\\
+&= -\frac{G}{2}\log(2\pi \sigma_\phi^2) - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G \hat{\sigma}_{\phi,g}^{2(t)} - \frac{1}{2\sigma_\phi^2} \sum_{g=1}^G \left(\hat{\mu}_{\phi,g}^{(t)}-\mu_\phi\right)^2 
+\end{array}
+\]
+
+
+This is maximized when 
+\[ \mu_\phi^{(t+1)} = \frac{1}{G} \sum_{g=1}^G \hat{\mu}_{\phi,g}^{(t)} \qquad \mbox{and} \qquad 
+\sigma_\phi^{2(t+1)} = \frac{1}{G} \sum_{g=1}^G \left[ \hat{\sigma}_{\phi,g}^{2(t)} + \left(\hat{\mu}_{\phi,g}^{(t)}-\mu^{(t+1)}_\phi\right)^2 \right].
+\] 
+
+
+
+\subsubsection{Laplace model}
+
+For simplicity, define the following 
+\[
+\hat{\mu}_{\alpha,g}^{(t)} = E[\alpha_g|y,\pi^{(t)}] \qquad \mbox{and} \qquad
+\hat{\sigma}_{\alpha,g}^{2(t)} = V[\alpha_g|y,\pi^{(t)}] 
+\]
+
+For a Laplace model, e.g. $\alpha_g|\pi \stackrel{ind}{\sim} La(\mu_\alpha,\sigma_\alpha)$, we have 
+\[ 
+\begin{array}{rl}
+\multicolumn{2}{l}{
+E_{\alpha|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\alpha_g|\mu_\alpha, \sigma_\alpha) \right] = 
+E_{\alpha|y,\pi^{(t)}} \left[ -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G |\alpha_g-\mu_\alpha| \right]} \\
+&= -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G E_{\alpha|y,\pi^{(t)}} \left[|\alpha_g-\mu_\alpha| \right] \\
+\end{array}
+\]
+Since the median minimizes absolute deviation and thus it is likely that 
+\[ 
+\mu_\alpha^{(t+1)} = \mbox{median}_g\, \hat{\mu}_{\alpha,g}^{(t)}
+\]
+This doesn't make complete sense since there i no reason that the posterior mean need to be used here, perhaps the posterior median? 
+or perhaps, by analogy,
+\[
+\mu_\alpha^{(t+1)} = \frac{1}{G} \sum_{g=1}^G \hat{\mu}_{\alpha,g}^{(t)} \qquad \mbox{and} \qquad
+\sigma_\alpha^{2(t+1)} = \frac{1}{G} \sum_{g=1}^G E\left[\left|\alpha_g-\hat{\mu}_{\alpha,g}^{(t)}\right|\right] + \left|\hat{\mu}_{\alpha,g}^{(t)}-\mu^{(t+1)}_\alpha\right| .
+\] 
+why the average?
+
+
 
 \end{document}
