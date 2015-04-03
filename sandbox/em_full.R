@@ -12,7 +12,8 @@ registerDoMC(cores=8)
 
 m = stan_model("sg_model_pad_dexp.txt")
 
-d = sim_heterosis_data(G=1000)
+G = 1000
+d = sim_heterosis_data(G=G)
 
 
 # Set initial values for hyperparameters
@@ -28,9 +29,10 @@ truth = data.frame(variable=names(hyper), value=with(d$hyperparameter, c(locatio
 n_iter = 100
 hyper_keep = matrix(NA, nrow=n_iter, ncol=n_hyper)
 
+cat("MCEM with", G, "genes.\n", file="em_full.Ro")
 # Run EM
 for (i in 1:n_iter) {
-  cat(i, unlist(hyper), "\n")
+  start_time = proc.time()
   
   # MCMC for gene specific parameters
   mcmc = dlply(d$data, .(gene), function(x) {
@@ -74,7 +76,10 @@ for (i in 1:n_iter) {
   # Save hyperparameters
   for (j in 1:n_hyper) hyper_keep[i,j] = hyper[[j]]
   
-  save(hyper, "em_full.RData")
+  save(hyper, file="em_full.RData")
+  
+  cat(i, unlist(hyper), "time=", proc.time()-start_time, "\n",
+      file="em_full.Ro", append=TRUE)
 }
 
 # Plot hyperparameters
