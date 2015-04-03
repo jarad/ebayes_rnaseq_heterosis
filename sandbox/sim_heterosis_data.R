@@ -19,7 +19,7 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, distributions=NULL) {
   if (is.null(parameters)) 
     hyperparameters = data.frame(parameter      = c("phi","alpha","delta","psi"),
                                  location = c(4.6,0,0,-2),
-                                 scale    = c(1.8,.1,.01,.1))
+                                 scale    = c(1.8,.1,.1,.1))
   
   # Simulate gene-specific parameters
   if (is.null(distributions)) 

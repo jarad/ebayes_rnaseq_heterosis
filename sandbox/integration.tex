@@ -133,24 +133,20 @@ For a Laplace model, e.g. $\alpha_g|\pi \stackrel{ind}{\sim} La(\mu_\alpha,\sigm
 E_{\alpha|y,\pi^{(t)}} \left[ \sum_{g=1}^G \log p(\alpha_g|\mu_\alpha, \sigma_\alpha) \right] = 
 E_{\alpha|y,\pi^{(t)}} \left[ -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G |\alpha_g-\mu_\alpha| \right]} \\
 &= -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G E \left[|\alpha_g-\mu_\alpha| \right] \\
-&\ge -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G E\left[\left|\alpha_g-\hat{\alpha}_{g}^{(t)}\right|\right] + \left|\hat{\alpha}_{g}^{(t)}-\mu_\alpha\right] \\
+&\ge -G\log(2\sigma_\alpha) - \frac{1}{\sigma_\alpha} \sum_{g=1}^G E\left[\left|\alpha_g-\hat{\alpha}_{g}^{(t)}\right|\right] + \left|\hat{\alpha}_{g}^{(t)}-\mu_\alpha\right| \\
 \end{array}
 \]
-Since the median minimizes absolute deviation and thus it is likely that 
+To maximize this final quantity, we take $\hat{\alpha}_{g}^{(t)}$ to be the posterior median and 
 \[ 
-\mu_\alpha^{(t+1)} = \mbox{median}_g\, \hat{\alpha}_{g}^{(t)}
+\mu_\alpha^{(t+1)} = \mbox{median}_g\, \hat{\alpha}_{g}^{(t)}.
 \]
-Now the choice for what to use for $\hat{\alpha}_{g}^{(t)}$ appears pretty arbitrary. Perhaps we should use the posterior median since it will minimize $E\left[\left|\alpha_g-\hat{\alpha}_{g}^{(t)}\right|\right]$.
-
-\[
-\mu_\alpha^{(t+1)} = \frac{1}{G} \sum_{g=1}^G \hat{\alpha}_{g}^{(t)} \]
-and 
+This maximization provides a lower bound on the quantity that we actually want to maximize. For whatever value of $\mu_\alpha^{(t+1)}$ is chosen (ideally we choose the one that provides the maximum), then 
 \[
 \sigma_\alpha^{2(t+1)} 
 = \frac{1}{G} \sum_{g=1}^G E_{\alpha|y,\pi^{(t)}}\left[\left.\left|\alpha_g-\mu_\alpha^{(t+1)}\right|\right|y,\pi^{(t)}\right] 
-\le  \frac{1}{G} \sum_{g=1}^G E_{\alpha|y,\pi^{(t)}}\left[\left|\alpha_g-\hat{\alpha}_{g}^{(t)}\right|\right] + \left|\hat{\alpha}_{g}^{(t)}-\mu^{(t+1)}_\alpha\right| .
+%\le  \frac{1}{G} \sum_{g=1}^G E_{\alpha|y,\pi^{(t)}}\left[\left|\alpha_g-\hat{\alpha}_{g}^{(t)}\right|\right] + \left|\hat{\alpha}_{g}^{(t)}-\mu^{(t+1)}_\alpha\right| .
 \] 
-We will probably just need to use a Monte Carlo approximation to this expectation. 
+We will probably just need to use a Monte Carlo (MCMC) approximation to this expectation. 
 
 
 
