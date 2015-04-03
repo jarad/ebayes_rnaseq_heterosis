@@ -11,7 +11,7 @@ registerDoMC()
 
 m = stan_model("sg_model_pad_dexp.txt")
 
-d = sim_heterosis_data(G=100)
+d = sim_heterosis_data(G=1000)
 
 
 # Set initial values for hyperparameters
@@ -24,7 +24,7 @@ n_hyper = 8
 truth = data.frame(variable=names(hyper), value=with(d$hyperparameter, c(location,scale)))
 
 # 
-n_iter = 50
+n_iter = 100
 hyper_keep = matrix(NA, nrow=n_iter, ncol=n_hyper)
 
 # Run EM
@@ -72,6 +72,8 @@ for (i in 1:n_iter) {
   
   # Save hyperparameters
   for (j in 1:n_hyper) hyper_keep[i,j] = hyper[[j]]
+  
+  save(hyper, "em_full.RData")
 }
 
 # Plot hyperparameters
