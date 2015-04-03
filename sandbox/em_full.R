@@ -1,13 +1,14 @@
 library(rstan)
 library(reshape2)
 library(doMC)
-library(dplyr)
+#library(dplyr)
 library(ggplot2)
+library(plyr)
 
 source("Laplace.R")
 source("sim_heterosis_data.R")
 
-registerDoMC()
+registerDoMC(cores=8)
 
 m = stan_model("sg_model_pad_dexp.txt")
 
