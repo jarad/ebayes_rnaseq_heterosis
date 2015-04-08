@@ -30,6 +30,7 @@ n_iter = 100
 hyper_keep = matrix(NA, nrow=n_iter, ncol=n_hyper)
 
 cat("MCEM with", G, "genes.\n", file="em_full.Ro")
+cat("iteration", names(hyper), "iteration_time\n", sep="")
 # Run EM
 for (i in 1:n_iter) {
   start_time = proc.time()
@@ -76,9 +77,9 @@ for (i in 1:n_iter) {
   # Save hyperparameters
   for (j in 1:n_hyper) hyper_keep[i,j] = hyper[[j]]
   
-  save(hyper, file="em_full.RData")
+  save(hyper_keep, file="em_full.RData")
   
-  cat(i, unlist(hyper), "time=", proc.time()-start_time, "\n",
+  cat(i, unlist(hyper), proc.time()[3]-start_time[3], "\n",
       file="em_full.Ro", append=TRUE)
 }
 
