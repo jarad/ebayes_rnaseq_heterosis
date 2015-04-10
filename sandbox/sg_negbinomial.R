@@ -6,15 +6,32 @@ library(ggplot2)
 library(plyr)
 
 source("Laplace.R")
-source("sim_heterosis_data.R")
 
 registerDoMC(cores=8)
 
-m = stan_model("sg_model_pad_dexp.txt")
+m = stan_model("sg_negbinomial.stan")
 
-set.seed(20150408)
+# Simulate data
+set.seed(20150409)
 G = 100
-d = sim_heterosis_data(G=G)
+
+d = list()
+d$hyperparameters = data.frame(parameter = c("phi","alpha","delta"),
+                               location  = c(4.6,0,0),
+                               scale     = c(1.8,.1,.1))
+d$parameters = with(d$hyperparameters, 
+                    data.frame(gene = 1:G, 
+                               phi   = rnorm(   G, location[parameter=='phi'  ], scale[parameter=='phi'  ]),
+                               alpha = rlaplace(G, location[parameter=='alpha'], scale[parameter=='alpha']),
+                               delta = rlaplace(G, location[parameter=='delta'], scale[parameter=='delta'])))
+d$data = ddply(d$parameters, .(gene), function(x) {
+  mu = with(x, phi + c(alpha,-alpha,delta))
+  mutate(data.frame(variety = rep(1:3, each=4)),
+         sample  = 1:length(variety),
+         count   = rpois(length(variety), exp(mu[variety])))
+})
+
+
 
 # Construct design
 X = cbind(1, rep(c(-1,1,0), each=4), rep(c(0,0,1), each=4))
@@ -22,7 +39,7 @@ X = cbind(1, rep(c(-1,1,0), each=4), rep(c(0,0,1), each=4))
 
 # Use edgeR
 source("edgeR_est.R")
-d_w = dcast(d$data[,c("gene","parent","sample","y")], gene~parent+sample, value.var='y')
+d_w = dcast(d$data[,c("gene","variety","sample","count")], gene~variety+sample, value.var='count')
 edgeR = edgeR_est(d_w[,-1], substr(names(d_w)[-1],1,1), rownames(d_w))
 
 # Set initial values for hyperparameters
@@ -40,6 +57,7 @@ truth = data.frame(variable=names(hyper), value=with(d$hyperparameter, c(locatio
 # 
 n_iter = 10
 hyper_keep = matrix(NA, nrow=n_iter, ncol=n_hyper)
+hyper_keep[1,] = unlist(hyper)
 
 if (!interactive()) {
   cat("MCEM with", G, "genes.\n", file="em_full.Ro")
@@ -49,14 +67,14 @@ if (!interactive()) {
 
 
 # Run EM
-for (i in 1:n_iter) {
+for (i in 2:n_iter) {
   start_time = proc.time()
   
   # MCMC for gene specific parameters
   mcmc = dlply(d$data, .(gene), function(x) {
     sampling(m, c(list(S=nrow(x), 
                        X = X, 
-                       count=x$y, 
+                       count=x$count, 
                        c=rep(0, nrow(x))), 
                   hyper), 
              c(gene_names), 
@@ -123,13 +141,14 @@ for (i in 1:n_iter) {
 }
 
 # Plot hyperparameters
-em = data.frame(iteration=1:n_iter, hyper_keep)
-names(em)[-1] = names(hyper)
+#hyper_keep2 = hyper_keep
+em  = data.frame(iteration=1:n_iter, hyper_keep , stan="sg_poisson")
+em2 = data.frame(iteration=1:n_iter, hyper_keep2, stan="sg_model_pad_dexp.txt")
+names(em)[2:7] = names(em2)[2:7] = names(hyper)
 
-ggplot(melt(em, id.var='iteration'), aes(x=iteration, y=value)) + 
+ggplot(melt(rbind(em,em2), id.var=c('iteration','stan')), aes(x=iteration, y=value, color=stan)) + 
   geom_point() +
-  facet_wrap(~variable, scale='free', nrow=2) 
-+
+  facet_wrap(~variable, scale='free', nrow=2) +
   geom_hline(data=truth[1:n_hyper,], aes(yintercept=value), col='red')
 
 
