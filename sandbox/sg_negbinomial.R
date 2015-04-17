@@ -6,31 +6,16 @@ library(ggplot2)
 library(plyr)
 
 source("Laplace.R")
+source("sim_heterosis_data.R")
 
-registerDoMC(cores=8)
+registerDoMC(cores=6)
 
 m = stan_model("sg_negbinomial.stan")
 
 # Simulate data
 set.seed(20150409)
 G = 100
-
-d = list()
-d$hyperparameters = data.frame(parameter = c("phi","alpha","delta"),
-                               location  = c(4.6,0,0),
-                               scale     = c(1.8,.1,.1))
-d$parameters = with(d$hyperparameters, 
-                    data.frame(gene = 1:G, 
-                               phi   = rnorm(   G, location[parameter=='phi'  ], scale[parameter=='phi'  ]),
-                               alpha = rlaplace(G, location[parameter=='alpha'], scale[parameter=='alpha']),
-                               delta = rlaplace(G, location[parameter=='delta'], scale[parameter=='delta'])))
-d$data = ddply(d$parameters, .(gene), function(x) {
-  mu = with(x, phi + c(alpha,-alpha,delta))
-  mutate(data.frame(variety = rep(1:3, each=4)),
-         sample  = 1:length(variety),
-         count   = rpois(length(variety), exp(mu[variety])))
-})
-
+d = sim_heterosis_data(G=G)
 
 
 # Construct design
@@ -44,8 +29,8 @@ edgeR = edgeR_est(d_w[,-1], substr(names(d_w)[-1],1,1), rownames(d_w))
 
 # Set initial values for hyperparameters
 #gene_names = c("phi","alpha","delta","psi")
-gene_names = c("phi","alpha","delta")
-hyper = with(edgeR$hyperparameters[1:3,], as.list(c(location, scale)))
+gene_names = c("phi","alpha","delta","psi")
+hyper = with(edgeR$hyperparameters, as.list(c(location, scale)))
 names(hyper) = c(paste("eta_",   gene_names, sep=''),
                  paste("sigma_", gene_names, sep=''))
 hyper$eta_alpha = 0 
@@ -55,7 +40,7 @@ n_hyper = length(hyper)
 truth = data.frame(variable=names(hyper), value=with(d$hyperparameter, c(location,scale)))
 
 # 
-n_iter = 10
+n_iter = 20
 hyper_keep = matrix(NA, nrow=n_iter, ncol=n_hyper)
 hyper_keep[1,] = unlist(hyper)
 
@@ -64,7 +49,10 @@ if (!interactive()) {
   cat("iteration", names(hyper), "iteration_time\n", sep=", ", file="em_full.Ro", add=TRUE)
 }
 
-
+# Initial inits
+inits = alply(edgeR$parameters, 1, function(x) {
+  list(as.list(x), as.list(x), as.list(x), as.list(x))
+})
 
 # Run EM
 for (i in 2:n_iter) {
@@ -79,12 +67,22 @@ for (i in 2:n_iter) {
                   hyper), 
              c(gene_names), 
              iter=10^2+(i+2)^2, 
+             init = inits[[x$gene[1]]], 
              chains=4)
   }, .parallel=TRUE)
   for(j in 1:length(mcmc)) attr(mcmc[[j]],"name") <- names(mcmc)[j]
 
   # Get initial values (for next iteration)
-  
+  inits = llply(mcmc, function(x) {
+    e = extract(x, permuted=FALSE)
+    inits = list()
+    n_iter = dim(e)[1]
+    for (j in 1:dim(e)[2]) inits[[j]] = list(phi=e[n_iter,j,1],
+                                             alpha = e[n_iter,j,2],
+                                             delta = e[n_iter,j,3],
+                                             psi   = e[n_iter,j,4])
+    inits
+  })
   
   # Extract samples to calculate M step
   samps = ldply(mcmc, function(x) {
@@ -142,13 +140,12 @@ for (i in 2:n_iter) {
 
 # Plot hyperparameters
 #hyper_keep2 = hyper_keep
-em  = data.frame(iteration=1:n_iter, hyper_keep , stan="sg_poisson")
-em2 = data.frame(iteration=1:n_iter, hyper_keep2, stan="sg_model_pad_dexp.txt")
-names(em)[2:7] = names(em2)[2:7] = names(hyper)
+em  = data.frame(iteration=1:n_iter, hyper_keep)
+names(em)[-1] = names(hyper)
 
-ggplot(melt(rbind(em,em2), id.var=c('iteration','stan')), aes(x=iteration, y=value, color=stan)) + 
+ggplot(melt(em, id.var='iteration'), aes(x=iteration, y=value)) + 
   geom_point() +
   facet_wrap(~variable, scale='free', nrow=2) +
-  geom_hline(data=truth[1:n_hyper,], aes(yintercept=value), col='red')
+  geom_hline(data=truth, aes(yintercept=value), col='red')
 
 
