@@ -5,9 +5,11 @@ data {
   real eta_phi;
   real eta_alpha;
   real eta_delta;
+  real eta_psi;
   real sigma_phi;
   real sigma_alpha;
   real sigma_delta;
+  real sigma_psi;
   vector[S] c;                     // lane sequencing depth
 }
 transformed data {
@@ -21,7 +23,8 @@ transformed data {
 parameters {
   real phi;
   real alpha;
-  real delta;        
+  real delta;
+  real psi;          
 }
 transformed parameters {
   vector[3] pad;
@@ -34,6 +37,7 @@ model {
   phi   ~ normal(            eta_phi,   sigma_phi);
   alpha ~ double_exponential(eta_alpha, sigma_alpha); // Laplace
   delta ~ double_exponential(eta_delta, sigma_delta); // Laplace
+  psi   ~ normal(            eta_psi,   sigma_psi);
 
-  count ~ poisson_log(X*pad + c);
+  count ~ neg_binomial_2_log(X*pad+c, 1/exp(psi));
 }
