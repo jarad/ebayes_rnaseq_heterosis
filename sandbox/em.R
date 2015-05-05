@@ -11,20 +11,24 @@ models$het_negbin  = stan_model('stan_models/het_negbin.stan')
 
 # calculates hyper parameters for normal distribution
 normal_hyper = function(samples, learn_mean) {
-  eta = ifelse(learn_mean, mean(samples, 0))
+  eta = ifelse(learn_mean, mean(samples), 0)
   sigma = sqrt(mean((samples-eta)^2))
   return(list(eta=eta,sigma=sigma))
 }
 
 # calculates hyper parameters for laplace distribution
 laplace_hyper = function(samples, learn_mean) {
-  eta = ifelse(learn_mean, median(samples,0))
+  eta = ifelse(learn_mean, median(samples), 0)
   sigma = mean(abs(samples-eta))
   return(list(eta=eta,sigma=sigma))
 }
 
-# MCEM algorithm for 
-em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'normal') {
+
+
+
+# MCEM algorithm for differential expression using Poisson model
+em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, dist = list(alpha = 'normal'),
+                         .parallel=FALSE, verbose=1) {
   parameter_names = c("phi","alpha")
   
   # Build X matrix
@@ -40,14 +44,14 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
   hyper$iteration = 0
   hyper$eta_phi = mean(initial$phi)
   hyper$sigma_phi = sd(initial$phi)
-  if (alpha_dist == 'normal') {
-    hyper$eta_alpha = ifelse(learn_eta_alpha, mean(initial$alpha), 0)
+  if (dist$alpha == 'normal') {
+    hyper$eta_alpha = ifelse(learn_alpha_mean, mean(initial$alpha), 0)
     hyper$sigma_alpha = sqrt(mean((initial$alpha-hyper$eta_alpha)^2))
-  } else if (alpha_dist == 'laplace') {
-    hyper$eta_alpha = ifelse(learn_eta_alpha, median(initial$alpha), 0)
+  } else if (dist$alpha == 'laplace') {
+    hyper$eta_alpha = ifelse(learn_alpha_mean, median(initial$alpha), 0)
     hyper$sigma_alpha = mean(abs(initial$alpha-hyper$eta_alpha))
   } else {
-    stop(paste('Alpha distribution',alpha_dist,'not implemented.'))
+    stop(paste('Alpha distribution',dist$alpha,'not implemented.'))
   }
   
   # Save structure
@@ -55,6 +59,7 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
   
   # MCEM
   for (i in 1:niter) {
+    if (verbose) cat(i, unlist(hyper), "\n")
     hyper$iteration = i
     # (Monte Carlo) Expectation
     mcmc = dlply(dat, .(gene), function(x) {
@@ -66,7 +71,7 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
                parameter_names, 
                iter=10^2+(i+2)^2, 
                chains=4)
-    }, .parallel=TRUE)
+    }, .parallel=.parallel)
     for(j in 1:length(mcmc)) attr(mcmc[[j]],"name") <- names(mcmc)[j]
     
     # Maximization
@@ -76,7 +81,7 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
       data.frame(gene  = attr(x, 'name'), 
                  phi   = tmp$phi, 
                  alpha = tmp$alpha)
-    }, .parallel=TRUE)
+    }, .parallel=.parallel)
     
     
     # Calculate gene specific summary statistics
@@ -84,7 +89,7 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
                phi_mean = mean(phi),
                phi_var  = var(phi),
                alpha_median = median(alpha),
-               .parallel=TRUE)
+               .parallel=.parallel)
     
     # phi
     tmp = normal_hyper(samps$phi, TRUE)
@@ -92,9 +97,9 @@ em_de_poisson = function(dat, niter, learn_alpha_mean = FALSE, alpha_dist = 'nor
     hyper$sigma_phi = tmp$sigma
     
     # alpha
-    if (alpha_dist=='normal' ) {
+    if (dist$alpha=='normal' ) {
       tmp = normal_hyper(samps$alpha, learn_alpha_mean)
-    } else if (alpha_dist=='laplace') {
+    } else if (dist$alpha=='laplace') {
       tmp = laplace_hyper(samps$alpha, learn_alpha_mean)
     }
     hyper$eta_alpha = tmp$eta
