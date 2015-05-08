@@ -1,0 +1,507 @@
+\documentclass[handout]{beamer}
+
+\usecolortheme[RGB={0,0,144}]{structure}
+\usetheme{AnnArbor}\usecolortheme{beaver}
+
+\usepackage{verbatim,xmpmulti,color,multicol,multirow}
+\setlength{\unitlength}{\textwidth}  % measure in textwidths
+\usepackage[normalem]{ulem}
+
+\graphicspath{{../figs/}}
+
+%\usepackage{beamerthemesplit}
+\setbeamertemplate{navigation symbols}{}
+%\setbeamercolor{alerted text}{fg=red}
+%\setbeamertemplate{block body theorem}{bg=orange}
+\setkeys{Gin}{width=0.6\textwidth}
+
+\title[EBayes for heterosis of RNAseq]{Empirical Bayes identification of gene heterosis using RNAseq counts}
+\author[Jarad Niemi]{Dr. Jarad Niemi \\ joint with Eric Mittman, Will Landau, and Dr. Dan Nettleton}
+\institute[Iowa State]{Iowa State University}
+\date{\today}
+
+\begin{document}
+
+%\section{Temp??} \begin{comment}
+
+<<chunk_options, echo=FALSE, message=FALSE>>=
+opts_chunk$set(fig.width=6, fig.height=5, out.width='.8\\linewidth', fig.align='center', size='tiny')
+@
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Outline}
+
+\begin{itemize}
+\item Data
+  \begin{itemize}
+  \item Phenotypic heterosis
+  \item RNAseq
+  \end{itemize}
+\item Methodology
+  \begin{itemize}
+  \item Model
+  \item Empircal Bayes
+  \item Stan
+  \end{itemize}
+\item Results
+  \begin{itemize}
+  \item Simulation study vs {\tt edgeR}, {\tt baySeq}, {\tt ShrinkBayes}
+  \item Real data analysis
+  \item Areas of improvement
+  \end{itemize}
+\item Current work
+  \begin{itemize}
+  \item Fully Bayesian with GPUs
+  \item Alternative priors
+  \item Bayesian nonparametrics - Dirichlet processes
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+
+\section{Data}
+\subsection{Phenotypic heterosis}
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in maize}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{heterosis_corn}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in cattle}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\vspace{-0.1in}
+
+\begin{center}
+\includegraphics{heterosis_cattle1}
+
+\includegraphics{heterosis_cattle2}
+\end{center}
+\end{frame}
+
+\subsection{RNAseq experiment}
+\begin{frame}
+\frametitle{RNAseq experiment}
+\setkeys{Gin}{width=0.55\textwidth}
+
+\begin{center}
+\includegraphics{rnaseq_experiment}
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in RNAseq}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{heterosis_rnaseq}
+\end{center}
+\end{frame}
+
+
+\section{Method}
+\subsection{Model}
+
+\begin{frame}
+\frametitle{RNAseq model}
+
+Let $Y_{gvi}$ be the count for 
+\begin{itemize}
+\item gene $g=1,\ldots,G$, 
+\item variety $v=1,\ldots,V$, and 
+\item replicate $i=1,\ldots,n_v$. 
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+We assume
+\[
+Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) 
+\]
+\pause
+where 
+\begin{itemize}
+\item $E[Y_{gvi}] = \zeta_{gvi} = e^{\mu_{gv}+\gamma_{vi}}$, \pause 
+\item $V[Y_{gvi}] = \zeta_{gvi}+e^{\psi_g}\zeta_{gvi}^2$, \pause and 
+\item $\gamma_{vi}$ controls sequencing depth (normalization factors).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Gene heterosis}
+
+For a particular gene $g$ with $v=1,2$ indicating the parental varieties and $v=3$ indicating the hybrid, we have the following definitions for \alert{gene heterosis}:
+
+\[ \begin{array}{rll}
+H_{g0}: & \mu_{g1}\le \mu_{g3} \le \mu_{g2} \mbox{ or } \mu_{g2}\le \mu_{g3} \le \mu_{g1} \pause \\
+H_{g,LPH}: & \mu_{g3}< \min(\mu_{g1},\mu_{g2})  & \mbox{low parent heterosis} \pause \\
+H_{g,HPH}: & \mu_{g3}> \max(\mu_{g1},\mu_{g2})  & \mbox{high parent heterosis} 
+\end{array} \]
+
+\pause
+
+We are interested in identifying genes with high posterior probabilities for LPH and HPH, i.e. 
+\begin{itemize}
+\item $P(H_{g,LPH}|y) = P(\mu_{g3}< \min(\mu_{g1},\mu_{g2}) |y)$ and 
+\item $P(H_{g,HPH}|y) = P(\mu_{g3}> \max(\mu_{g1},\mu_{g2}) |y)$. 
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Hierarchical model}
+\begin{itemize}
+\item Data model:
+\[ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) \]
+
+\pause
+
+\item Hierarchical structure:
+\[ \theta_g = \left( \begin{array}{c} \mu_{g1} \\ \mu_{g2} \\ \mu_{g3} \\ \psi_g \end{array} \right) \stackrel{ind}{\sim} N\left(\eta, \Sigma\right) 
+\pause 
+\qquad \mbox{and} \qquad 
+\gamma_{vi} \stackrel{ind}{\sim} N(0,\tau^2). \]
+
+\pause
+
+\item Priors 
+  \begin{itemize}[<+->]
+  \item $p(\eta) \propto 1 $
+  \item $\tau \sim Ca^+(0,3)$
+  \item $\Sigma$:
+    \begin{itemize}
+    \item independent: diagonal with $Ca^+(0,3)$ on the standard deviations
+    \item covariance: $\Sigma \sim IW(V+2,\mathrm{I})$
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Empirical Bayes}
+\begin{frame}
+\frametitle{Empirical Bayes}
+
+\begin{enumerate}
+\item Estimate hyperparameter, $\pi=(\eta,\Sigma,\gamma)$, MAP (maximum a posteriori): 
+
+{\tiny
+\[ \hat{\theta},\hat{\pi} = 
+\mbox{argmax}_{\theta,\pi} \left\{ \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\gamma_{vi}}, e^{\psi_g}\right) N\left(\gamma_{vi};0,\tau^2\right) \right] N\left(\theta_g;\eta,\Sigma\right) \right\} Ca^+(\tau;0,3) p(\Sigma)  \]
+}
+
+\pause
+\item Empirical Bayes posterior
+
+\[ p(\theta|y, \hat{\pi}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\pi}) \]
+where $y_g$ is all observations from gene $g$ \pause and 
+{\footnotesize
+\[ p(\theta_g|y_g,\hat{\pi}) \propto \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}}, e^{\psi_g}\right) \right] N\left(\theta_g;\hat{\eta},\hat{\Sigma}\right) \]
+}
+\end{enumerate}
+\end{frame}
+
+
+\subsection{Stan}
+\begin{frame}
+\frametitle{Stan}
+\setkeys{Gin}{width=1\textwidth}
+
+\begin{center}
+\includegraphics{stan}
+\end{center}
+
+For more information, go to \url{http:mc-stan.org}.
+
+\end{frame}
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{Stan all genes model file ({\tt model\_cov.txt})}
+
+{\tiny
+\begin{verbatim}
+data{
+  int N; //total # obs
+  int G; // # genes
+  int S; // # samples
+  int<lower=0> y[N];
+  int<lower=1,upper=G> g[N];        // obs -> gene
+  int<lower=1,upper=3> t[N];        // obs -> genotype
+  int<lower=1,upper=S> s[N];        // obs -> sample (genotype*rep)
+  row_vector[4] X[3];               // mean structure (genotype)
+}
+parameters{
+  vector[4] B[G];                   // mu1, mu2, mu3, psi by gene
+  vector[S] c;                      // lane sequencing depth
+  vector<lower=-20,upper=20>[4] mu;
+  cov_matrix[4] Sigma;
+  real<lower=0,upper=5> sigma_c;
+}
+
+model{
+  vector[4] x;
+  for(i in 1:G){
+    B[i] ~ multi_normal(mu, Sigma);
+  }
+  c ~ normal(0,sigma_c);
+  for(n in 1:N){
+    y[n] ~ neg_binomial_2_log(X[t[n]]*B[g[n]] + c[s[n]], 1 / exp(B[g[n],4]));
+  }
+  x <-rep_vector(1,4);
+  Sigma ~ inv_wishart(5.0,diag_matrix(x));
+}
+\end{verbatim}
+}
+
+\end{frame}
+
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{Stan single gene model file ({\tt sg\_model\_cov.txt})}
+
+{\tiny
+\begin{verbatim}
+data{
+  int N;                            // total # obs
+  int S;                            // # samples
+  int<lower=0> y[N];
+  int<lower=1,upper=3> t[N];        // obs -> genotype
+  int<lower=1,upper=S> s[N];        // obs -> sample (genotype*rep)
+  row_vector[4] X[3];               // mean structure (genotype)
+  vector[S] c;                      // lane sequencing depth
+  vector<lower=-20,upper=20>[4] mu;
+  cov_matrix[4] Sigma;
+  real<lower=0,upper=5> sigma_c;
+}
+parameters{
+  vector[4] B;                      // mu1, mu2, mu3, and psi
+}
+
+model{
+  B    ~ multi_normal(mu,Sigma);
+  for(n in 1:N){
+    y[n] ~ neg_binomial_2_log(X[t[n]]*B + c[s[n]], 1 / exp(B[4]));
+  }
+}
+\end{verbatim}
+}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{RStan}
+
+<<eval=FALSE>>=
+# set up data
+# ...
+# ...
+
+# get initial estimates
+initial = get_indep_est(counts.t,group,geneid.t)
+
+# change data to long format
+data_stan = w.to.l(counts.t,group)
+
+# compile Stan models (this can take some time, but only needs to be done once)
+model    = stan_model("model_cov.txt")
+sg_model = stan_model("sg_model_cov.txt")
+
+# use initial values to obtain MAP estimate
+MAP = optimizing(model, data=data_stan, init=initial, iter=1000, algorithm="LBFGS")
+
+# reorganize output
+# ...
+# ...
+
+# loop over all genes
+posterior = sampling(sg_model, data = stan_data, iter = 2000, thin=4)
+@
+
+\end{frame}
+
+
+\section{Results}
+\subsection{Simulation study}
+\begin{frame}
+\frametitle{Simulation study}
+
+Compared our method to {\tt edgeR}, {\tt baySeq}, {\tt ShrinkBayes} (not fair)
+
+\vspace{0.2in} \pause
+
+Simulation study:
+\begin{enumerate}
+\item Used {\tt edgeR} to estimate $\theta_g$ and $\gamma$ (about 30\% have heterosis)
+\item Simulated data from a negative binomial model using the estimated $\theta_g$ and $\gamma$
+\item Used each method to rank genes according to plausibility of heterosis
+\item Compared methods based on receiving operating characteristic (ROC) curves
+\end{enumerate}
+\end{frame}
+
+
+
+\subsection{ROC curves}
+\begin{frame}
+\frametitle{Example ROC curve}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{exampleROC0_1}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Area under ROC curve}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{auc-facet-TRUE}
+\end{center}
+\end{frame}
+
+
+\subsection{Real data analysis}
+\begin{frame}
+\frametitle{}
+{\tiny
+\input{../../include/map}
+}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Volcano plot for real data}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{maize_volcano_compare}
+\end{center}
+\end{frame}
+
+
+
+
+\subsection{Areas of improvement}
+\begin{frame}
+\frametitle{Calibration}
+\setkeys{Gin}{width=1\textwidth}
+\begin{center}
+\includegraphics{fdr-facet-dan-FALSE-leave-no}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Normality}
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{center}
+\includegraphics{scatterplot_cov_posterior_draw}
+\end{center}
+\end{frame}
+
+
+
+\section{Current work}
+\begin{frame}
+\frametitle{Current work}
+\begin{itemize}
+\item Alternative parameterization and priors
+\item Fully Bayesian with GPUs
+\item Bayesian nonparametrics
+\end{itemize}
+\end{frame}
+
+
+
+\subsection{Alternative priors}
+\begin{frame}
+\frametitle{Alternative parameterization}
+
+An alternative parameterization of the means is 
+\[ \begin{array}{rll}
+\phi_g &= (\mu_{g1}+\mu_{g2})/2 & \mbox{(log) parental mean} \\
+\alpha_g &= (\mu_{g1}-\mu_{g2})/2 & \mbox{(log) half-parental difference} \\
+\delta_g &= \phi_g - \mu_{g3} & \mbox{(log) hybrid effect}
+\end{array} \]
+
+\vspace{0.2in} \pause
+
+Benefits
+\begin{itemize}
+\item Approximate independence
+\item Approximate normality for $\phi_g$
+\item Allows alternative distributions for $\alpha_g$ and $\delta_g$, e.g. Laplace
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Laplace prior on $\phi-\alpha-\delta$ parameterization}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{auc-facet-TRUE_laplace}
+\end{center}
+\end{frame}
+
+
+\subsection{Fully Bayesian}
+\begin{frame}
+\frametitle{Fully Bayesian}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{bcg2}
+\end{center}
+\end{frame}
+
+
+\subsection{Bayesian nonparametrics}
+\begin{frame}
+\frametitle{Bayesian nonparametrics}
+\begin{itemize}
+\item Data model:
+\[ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) \]
+
+\pause
+
+\item Hierarchical structure:
+\[ \theta_g = \left( \begin{array}{c} \mu_{g1} \\ \mu_{g2} \\ \mu_{g3} \\ \psi_g \end{array} \right) \stackrel{ind}{\sim} \mathcal{F} \]
+
+\item Dirichlet process (or DP mixture)
+\[ \mathcal{F} \sim DP(\alpha F_0) \]
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Summary}
+
+\begin{itemize}
+\item Estimating gene heterosis from RNAseq data
+\item Methodology is best available for ranking genes
+\item Working to improve calibration and estimation
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+\begin{center}
+{\Huge Thanks!}
+\end{center}
+
+\end{frame}
+
+
+
+\end{document}
