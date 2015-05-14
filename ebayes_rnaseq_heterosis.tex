@@ -158,7 +158,7 @@ P(LPH_g|y,\hat{\pi},\hat{\gamma}) = P\left(\left.\delta_g < -|\alpha_g|\right|y,
 where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. HPH probability is defined similarly with the inequality reversed and without the negative sign. We construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities. Geneticists can use this list to prioritize future experiments to understand the molecular genetic mechanisms for heterosis.  
  
 
-\subsection{Implementation in \Stan{}}
+% \subsection{Implementation in \Stan{}}
 
 %To perform the optimization required for the MAP estimate $\hat{\pi}$, we use the statistical software, {\tt Stan} \citep{stan-software:2014}, executed through the \RStan{} interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows the construction of general Bayesian models with the primary restriction that all unknown parameters are continuous. With a fully constructed model, the software can obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in \RStan{}. Presumably due to the large dimension of the optimization, it was necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} and reasonable starting values obtained via \edgeR{} \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor}. 
 
@@ -319,12 +319,11 @@ The authors thank Andrew Lithio for help in implementing our model in \ShrinkBay
 
 \section*{Supplementary Materials}
 
-The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and the {\tt Stan} models: the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
+The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and the {\tt Stan} model (\verb@sg_model_ind.txt@).  
+%the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
 
 \bibliography{jarad}
 \bibliographystyle{biom}
-
-% From Dan, "There are some capitalization issues in the references section.  I think you need to protect "RNA" with curly braces so that it stays capitalized.  Also, in Hallauer et al. (2010), the last initial should presumably be "D." rather than "d."."
 
 % \appendix
 % %  To get the journal style of heading for an appendix, mimic the following.
