@@ -55,6 +55,37 @@ hyperparameters = list(eta_phi   = ss$mean[ss$parameter=='phi'],
 ######################################
 # Run individual gene analyses
 ######################################
+
+
+single_gene_analysis = function(counts) {
+  diverge = TRUE
+  attempt = 1
+  
+  
+  while (diverge) {
+    r = sampling(model, 
+                 data = c(list(S       = length(counts), 
+                               count   = as.numeric(counts),
+                               variety = as.numeric(factor(gsub("_[1-4]", "", colnames(counts)), levels=c("B73","Mo17","B73xMo17")))),
+                          hyperparameters),
+                 pars = c("phi","alpha","delta","psi","LPH","HPH","effectiveSize2"),
+                 iter = 2000*attempt,
+                 thin = attempt)
+    
+    # Check PSRF for (lack of) convergence
+    s = summary(r)$summary
+    diverge = any(s[,"n_eff"] < 1000)
+    attempt = attempt + 1
+  }
+  
+  data.frame(
+    prob_LPH = s[rownames(s) == "LPH","mean"],
+    prob_HPH = s[rownames(s) == "HPH","mean"],
+    effective = s[rownames(s) == "effectiveSize2","mean"])
+}
+
+
+
 # This will take a long time, so parallelize if possible
 if (parallel <- require(doMC)) {
   registerDoMC()
@@ -63,35 +94,11 @@ if (parallel <- require(doMC)) {
   registerDoParallel(cl)
 }
 
-single_gene_analysis = function(.data) {
-  diverge = TRUE
-  attempt = 1
-  
-  
-  while (!divere) {
-    r = sampling(model, 
-                 c(list(S       = nrow(.data), 
-                        count   = .data$value,
-                        variety = as.numeric(factor(gsub("_[1-4]", "", .data$sampleID), levels=c("B73","Mo17","B73xMo17")))),
-                   hyperparameters),
-                 iter = 2000*attempt,
-                 thin = attempt)
-    # Check PSRF for (lack of) convergence
-    diverge = any()
-    attempt = attempt + 1
-  }
-  
-  
-  
-  e = extract(r)
-  prob_HPH = mean(abs(e$delta) >  abs(e$alpha))
-  prob_LPH = mean(abs(e$delta) < -abs(e$alpha))
-}
+wh = 1:2 # which genes to run the analysis on
+analysis = adply(d[wh,],
+                 1,
+                 function(x) single_gene_analysis(x),
+                 .id = 'gene',
+                 .parallel = parallel,
+                 .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
 
-
-analysis = d %>% 
-  mutate(gene = 1:nrow(d)) %>%
-  melt(id.vars = 'gene', variable.name = 'sampleID') %>%
-  subset(gene<11) %>%
-  group_by(gene) 
-  
