@@ -41,3 +41,14 @@ model {
 
   count ~ neg_binomial_2_log(X*pad+c, 1/exp(psi));
 }
+generated quantities {
+  int<lower=0, upper=1> LPH;
+  int<lower=0, upper=1> HPH;
+//  real effectiveSize1;
+  real effectiveSize2;
+  
+  LPH <- fabs(delta) < -fabs(alpha);
+  HPH <- fabs(delta) >  fabs(alpha);
+//  effectiveSize1 <- 
+  effectiveSize2 <- delta/fabs(alpha);
+}
