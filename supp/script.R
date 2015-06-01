@@ -2,7 +2,6 @@ library(rstan)
 library(plyr)
 library(dplyr)
 library(reshape2)
-library(MASS) #?
 library(edgeR)
 
 # Compile stan model
@@ -42,8 +41,15 @@ ss = hat %>%
   group_by(parameter) %>%
   summarize(mean=mean(value), sd=sd(value))
 
-# Fix standard deviations for Laplace priors
-ss$sd[2:3] = ss$sd[2:3]/sqrt(2)
+hyperparameters = list(eta_phi   = ss$mean[ss$parameter=='phi'],
+                       eta_alpha = ss$mean[ss$parameter=='alpha'],
+                       eta_delta = ss$mean[ss$parameter=='delta'],
+                       eta_psi   = ss$mean[ss$parameter=='psi'],
+                       sigma_phi   = ss$sd[ss$parameter=='phi'],
+                       sigma_alpha = ss$sd[ss$parameter=='alpha']/sqrt(2), # Fix sd for Laplace priors
+                       sigma_delta = ss$sd[ss$parameter=='delta']/sqrt(2), # Fix sd for Laplace priors
+                       sigma_psi   = ss$sd[ss$parameter=='psi'],
+                       c = fit$offset[1,] - mean(fit$offset[1,]))
 
 
 ######################################
@@ -52,10 +58,40 @@ ss$sd[2:3] = ss$sd[2:3]/sqrt(2)
 # This will take a long time, so parallelize if possible
 if (parallel <- require(doMC)) {
   registerDoMC()
-} 
+} else if (parallel <- require(doParallel)) {
+  cl = makeCluster(detectCores(), type='PSOCK')
+  registerDoParallel(cl)
+}
+
+single_gene_analysis = function(.data) {
+  diverge = TRUE
+  attempt = 1
+  
+  
+  while (!divere) {
+    r = sampling(model, 
+                 c(list(S       = nrow(.data), 
+                        count   = .data$value,
+                        variety = as.numeric(factor(gsub("_[1-4]", "", .data$sampleID), levels=c("B73","Mo17","B73xMo17")))),
+                   hyperparameters),
+                 iter = 2000*attempt,
+                 thin = attempt)
+    # Check PSRF for (lack of) convergence
+    diverge = any()
+    attempt = attempt + 1
+  }
+  
+  
+  
+  e = extract(r)
+  prob_HPH = mean(abs(e$delta) >  abs(e$alpha))
+  prob_LPH = mean(abs(e$delta) < -abs(e$alpha))
+}
+
 
 analysis = d %>% 
   mutate(gene = 1:nrow(d)) %>%
   melt(id.vars = 'gene', variable.name = 'sampleID') %>%
+  subset(gene<11) %>%
   group_by(gene) 
   
