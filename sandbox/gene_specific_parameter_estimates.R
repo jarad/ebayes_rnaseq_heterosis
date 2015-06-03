@@ -7,11 +7,9 @@ source("Laplace.R")
 source("sim_heterosis_data.R")
 
 # 
-G = 250
+G = 2500
 d = sim_heterosis_data(G, nv=4, verbose=1)
 p = d$parameters # Get gene specific parameter draws
-
-for (i in 1:nrow(p)) p[,2:5] = p[84,2:5]
 
 # phi, alpha, delta parameterization
 variety = d$data$variety[d$data$gene==1]
@@ -20,7 +18,7 @@ design = cbind(1,
                variety == 3)
 
 tmp = 
-rdply(10, {
+rdply(100, {
   fit = sim_heterosis_data(G, parameters = p)$data[,c("gene","sample","count")]  %>% 
     dcast(formula = gene~sample, value.var='count') %>% # Assumes columns are in variety order
     select(-gene) %>%
@@ -36,6 +34,34 @@ rdply(10, {
              alpha = fit$coefficients[,2],
              delta = fit$coefficients[,3],
              psi   = log(fit$dispersion))
-}, .progress='text')
+}, .progress='text', .id=NULL)
 
 
+
+
+# Calculate bias and MSE
+p$type = 'truth'
+tmp$type = 'estimate'
+stats = rbind(p,tmp) %>%
+  melt(id.vars = c('gene','type'), variable.name='parameter') %>%
+  group_by(gene,parameter) %>%
+  summarize(truth = unique(value[type=='truth']),
+            bias  = mean(value[type=='estimate'] - value[type=='truth']), 
+            mse   = mean((value[type=='estimate'] - value[type=='truth'])^2))
+
+
+library(ggplot2)
+ggplot(stats %>% melt(id.vars=c('gene','parameter','truth'), variable.name='measure'), 
+       aes(truth,value)) +
+  geom_point() +
+  facet_grid(measure~parameter, scales='free')
+
+
+
+# Looking at sampling distributions of estimates for single genesopar = par(mfrow=c(2,2))
+i = sample(G,1)
+hist(tmp$phi[tmp$gene==i]); abline(v=p$phi[p$gene==i], col='red')
+hist(tmp$alpha[tmp$gene==i]); abline(v=p$alpha[p$gene==i], col='red')
+hist(tmp$delta[tmp$gene==i]); abline(v=p$delta[p$gene==i], col='red')
+hist(tmp$psi[tmp$gene==i]); abline(v=p$psi[p$gene==i], col='red')
+par(opar)
