@@ -13,7 +13,6 @@
 
 sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL, distributions=NULL, verbose=0) {
   require(plyr)
-  
   if (length(nv==1)) nv = rep(nv,3)
   
   if (is.null(hyperparameters) & is.null(parameters)) 
@@ -23,7 +22,7 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL,
                                  scale    = c(1.8,.1,.01,.1))
   
   # Simulate gene-specific parameters
-  if (is.null(distributions) & is.null(parameters)) 
+  if (is.null(distributions) & is.null(parameters)) {
     if (verbose) message('Simulating gene-specific parameters.')
     parameters = rdply(G, {
       with(hyperparameters, 
@@ -32,6 +31,7 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL,
                       delta = rlaplace(1, location[parameter == "delta"], scale[parameter == "delta"]),
                       psi   = rnorm   (1, location[parameter == "psi"  ], scale[parameter == "psi"  ])))
     }, .id="gene")
+  }
   
   if (verbose) message('Simulating data.')
   data = ddply(data.frame(gene=1:G), .(gene), function(x) {
@@ -41,6 +41,7 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL,
            eta = with(parameters, c(phi[g]+alpha[g], phi[g]-alpha[g], phi[g]+delta[g]))[variety],
            count = rnbinom(length(eta), size = 1/exp(parameters$psi[g]), mu = exp(eta)))
   }, .inform=T)
+
   
   return(list(data            = data, 
               parameters      = parameters,
