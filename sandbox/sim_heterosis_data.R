@@ -11,18 +11,18 @@
 #' @return list containing the hyperparameters, gene-specific parameters, and data
 #' 
 
-sim_heterosis_data = function(G=10, nv=4, parameters=NULL, distributions=NULL) {
+sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL, distributions=NULL) {
   require(plyr)
   
   if (length(nv==1)) nv = rep(nv,3)
   
-  if (is.null(parameters)) 
+  if (is.null(hyperparameters) & is.null(parameters)) 
     hyperparameters = data.frame(parameter      = c("phi","alpha","delta","psi"),
                                  location = c(4.6,0,0,-2),
-                                 scale    = c(1.8,.1,.1,.1))
+                                 scale    = c(1.8,.1,.01,.1))
   
   # Simulate gene-specific parameters
-  if (is.null(distributions)) 
+  if (is.null(distributions) & is.null(parameters)) 
     parameters = rdply(G, {
       with(hyperparameters, 
            data.frame(phi   = rnorm   (1, location[parameter == "phi"  ], scale[parameter == "phi"  ]),
