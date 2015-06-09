@@ -1,6 +1,6 @@
 library(edgeR)
 library(plyr)
-library(dplyr)
+library(dplyr) #must load dplyr second
 library(reshape2)
 
 source("Laplace.R")
@@ -40,16 +40,17 @@ rdply(100, {
 
 saveRDS(tmp,file="savedtmp.rds")
 
-
+# tmp = readRDS("savedtmp.rds")
 # Calculate bias and MSE
 p$type = 'truth'
 tmp$type = 'estimate'
-stats = rbind(p,select(tmp)) %>%
+stats = rbind(p,tmp) %>%
   melt(id.vars = c('gene','type'), variable.name='parameter') %>%
   group_by(gene,parameter) %>%
   summarize(truth = unique(value[type=='truth']),
             bias  = mean(value[type=='estimate'] - value[type=='truth']), 
             mse   = mean((value[type=='estimate'] - value[type=='truth'])^2))
+
 
 library(ggplot2)
 ggplot(stats %>% melt(id.vars=c('gene','parameter','truth'), variable.name='measure'), 
@@ -70,14 +71,27 @@ hyp.truth = data.frame(parameter = c("phi","alpha","delta","psi"),
                        tr.mean   = c(4.6,0,0,-2),
                        tr.scale  = c(1.8,.1,.01,.1))
 ggplot(MoM, aes(x=est_mean))+geom_histogram()+facet_wrap(~parameter,scales="free")+
-  geom_vline(data=hyp.truth, color = "red", aes(xintercept=tr.mean))
+  geom_vline(data=hyp.truth, color = "red", aes(xintercept=tr.mean))+theme_light()
 
 ggplot(MoM, aes(x=est_scl))+geom_histogram()+facet_wrap(~parameter,scales="free")+
-  geom_vline(data=hyp.truth, color = "red", aes(xintercept=tr.scale))
+  geom_vline(data=hyp.truth, color = "red", aes(xintercept=tr.scale))+theme_light()
 
+# Looking at parameter bias, mse conditional on true phi
+  filter(stats, parameter != "phi") %>%
+  select(-mse) %>%              
+  dcast(gene ~ parameter) %>%
+  cbind(phi=p$phi) %>%
+  melt(id.vars=c("gene","phi"),value.name="bias") %>%
+  ggplot(aes(x=phi,y=bias)) + geom_point() + facet_wrap(~variable,scales="free")
 
+  filter(stats, parameter != "phi") %>%
+    select(-bias) %>%              
+    dcast(gene ~ parameter) %>%
+    cbind(phi=p$phi) %>%
+    melt(id.vars=c("gene","phi"),value.name="mse") %>%
+    ggplot(aes(x=phi,y=mse)) + geom_point() + facet_wrap(~variable,scales="free")
 
-
+ggplot(aes())
 
 # Looking at sampling distributions of estimates for single genesopar = par(mfrow=c(2,2))
 i = sample(G,1)
