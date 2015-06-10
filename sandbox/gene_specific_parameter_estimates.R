@@ -6,6 +6,8 @@ library(reshape2)
 source("Laplace.R")
 source("sim_heterosis_data.R")
 
+set.seed(20150603)
+
 # 
 G = 2500
 d = sim_heterosis_data(G, nv=4, verbose=1)
