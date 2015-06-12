@@ -3,8 +3,8 @@ library(plyr)
 library(dplyr) #must load dplyr second
 library(reshape2)
 
-source("Laplace.R")
-source("sim_heterosis_data.R")
+source("../sandbox/Laplace.R")
+source("../sandbox/sim_heterosis_data.R")
 
 set.seed(101469)
 
@@ -99,9 +99,10 @@ stats = rbind(p,tmp) %>%
 library(ggplot2)
 ggplot(stats %>% melt(id.vars=c('gene','parameter','truth'), variable.name='measure'), 
        aes(truth,value)) +
-  geom_point() +
-  facet_grid(measure~parameter, scales='free')
-
+  geom_hex(bins=50) +
+  facet_grid(measure~parameter, scales='free') +
+  stat_smooth(method="loess",color="red")
+ggsave("bias_mse.pdf")
 # Calculate method of moments estimators
 tmp$sim = rep(1:100,each=G)
 MoM = select(tmp,-type) %>%
@@ -126,15 +127,20 @@ ggplot(MoM, aes(x=est_scl))+geom_histogram()+facet_wrap(~parameter,scales="free"
   dcast(gene ~ parameter) %>%
   cbind(phi=p$phi) %>%
   melt(id.vars=c("gene","phi"),value.name="bias") %>%
-  ggplot(aes(x=phi,y=bias)) + geom_point() + facet_wrap(~variable,scales="free")
-
+  ggplot(aes(x=phi,y=bias)) +
+    geom_hex(bins=50)+ 
+    facet_wrap(~variable,scales="free")+
+    stat_smooth(method="loess",color="red")
+  
   filter(stats, parameter != "phi") %>%
     select(-bias) %>%              
     dcast(gene ~ parameter) %>%
     cbind(phi=p$phi) %>%
     melt(id.vars=c("gene","phi"),value.name="mse") %>%
-    ggplot(aes(x=phi,y=mse)) + geom_point() + facet_wrap(~variable,scales="free")
-
+    ggplot(aes(x=phi,y=mse)) +
+    geom_hex(bins=50)+ 
+    facet_wrap(~variable,scales="free")+
+    stat_smooth(method="loess",color="red")
 
 # Looking at sampling distributions of estimates for single genesopar = par(mfrow=c(2,2))
 i = sample(G,1)
