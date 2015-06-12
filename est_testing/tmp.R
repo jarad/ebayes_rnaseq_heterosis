@@ -29,7 +29,7 @@ design = cbind(1,
 
 
 set.seed(691152)
-res = rdply(100,{
+res = ldply(1:100,function(i){
   sim = sim_heterosis_data(G, nv=4, parameters = p)
   fit = dcast(sim$data[,c("gene","sample","count")],formula=gene~sample, value.var='count') %>%
     select(-gene) %>%
