@@ -1,0 +1,205 @@
+\documentclass[handout]{beamer}
+
+\usecolortheme[RGB={0,0,144}]{structure}
+\usetheme{AnnArbor}\usecolortheme{beaver}
+
+\usepackage{verbatim,xmpmulti,color,multicol,multirow}
+\setlength{\unitlength}{\textwidth}  % measure in textwidths
+\usepackage[normalem]{ulem}
+
+\graphicspath{{../figs/}}
+
+%\usepackage{beamerthemesplit}
+\setbeamertemplate{navigation symbols}{}
+%\setbeamercolor{alerted text}{fg=red}
+%\setbeamertemplate{block body theorem}{bg=orange}
+\setkeys{Gin}{width=0.6\textwidth}
+
+\title{Monte Carlo Expectation Maximization for RNAseq}
+\author[Jarad Niemi]{Dr. Jarad Niemi}
+\institute[Iowa State]{Iowa State University}
+\date{\today}
+
+\begin{document}
+
+%\section{Temp??} \begin{comment}
+
+<<chunk_options, echo=FALSE, message=FALSE>>=
+opts_chunk$set(fig.width=6, fig.height=5, out.width='.8\\linewidth', fig.align='center', size='tiny')
+library(plyr)
+library(ggplot2)
+library(reshape2)
+@
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Outline}
+\begin{itemize}
+\item EM
+\end{itemize}
+\end{frame}
+
+
+
+\section{Expectation maximization}
+\subsection{Hierarchical models}
+\begin{frame}
+\frametitle{Hierarchical models}
+Generically 
+\[ y|\theta \sim p(y|\theta) \qquad \theta|\pi \sim p(\theta|\pi) \]
+
+\vspace{0.2in} \pause 
+
+Conditional independencies:
+\begin{itemize}[<+->]
+\item Data model 
+\[ p(y|\theta) = \prod_{g=1}^G p(y_g|\theta_g) \]
+\item Hierarchical distribution
+\[ p(\theta|\pi) = \prod_{g=1}^G p(\theta_g|\pi) \]
+\end{itemize}
+where $G$ is large, e.g. $\sim 10^4$. 
+\end{frame}
+
+
+
+
+\begin{frame}
+\frametitle{Expectation-Maximization algorithm}
+
+Suppose we wish to find 
+\[ \hat{\pi}_{MLE} = \mbox{argmax}_\pi p(y|\pi) \quad \mbox{where} \quad p(y|\pi) = \int p(y|\theta) p(\theta|\pi) d\theta \]
+
+\pause
+
+An expectation-maximization algorithm is 
+\begin{enumerate}
+\item Expectation: 
+\[ \begin{array}{rll}
+Q(\pi|\pi^{(t)}) &= E_{\theta|y,\pi^{(t)}}\left[\log L(\pi|y,\theta) \right] \pause \\
+& = E_{\theta|y,\pi^{(t)}}\left[\log p(y|\theta)\right] &+ E_{\theta|y,\pi^{(t)}}\left[\log p(\theta|\pi)\right] \pause \\
+& = C &+ E_{\theta|y,\pi^{(t)}}\left[\log p(\theta|\pi)\right] 
+\end{array} \]
+\item \pause Maximization:
+\[ \pi^{(t+1)} = \mbox{argmax}_{\pi} Q(\pi|\pi^{(t)}) \pause = \mbox{argmax}_{\pi} E_{\theta|y,\pi^{(t)}}\left[\log p(\theta|\pi)\right]  \]
+\end{enumerate}
+
+\pause
+
+Theory states that 
+\[ \pi^{(t)} \to \hat{\pi}_{MLE} \quad \mbox{as } t\to\infty. \]
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Normal with hierarchical mean}
+
+Let $y_{gi} \stackrel{ind}{\sim} N(\theta_g, s_g^2)$ and $\theta_g \sim N(\mu,\tau)$ for $i=1,\ldots,n_g=n$ and $g=1,\ldots,G$. \pause Let $\pi=(\mu,\tau)$,  
+\[ \begin{array}{rl}
+m_g^{(t)} &= E\left[\theta_g\left|y,\pi^{(t)}\right.\right] = v_g^{(t)}\left[\frac{\mu^{(t)}}{\tau^{(t)}} + \frac{\overline{y}_g}{s_g^2/n_g} \right] \\
+v_g^{(t)} &= V\left[\theta_g\left|y,\pi^{(t)}\right.\right] = \left[\frac{1}{\tau^{(t)}} + \frac{1}{s_g^2/n_g} \right]^{-1}
+\end{array} \]
+
+
+Then, we have 
+{\small
+\[ \begin{array}{rl}
+E_{\theta\left|y,\pi^{(t)}\right.}\left[\log p(\theta|\pi)\right]
+%&= \log \prod_{g=1}^G (2\pi \tau)^{-1/2} \exp\left(-\frac{1}{2\tau} (\theta_g-\mu)^2 \right) \\
+%&= \sum_{g=1}^G \left[ -\log(2\pi \tau)/2  -\frac{1}{2\tau} (\theta_g-\mu)^2\right] \\
+&= -\frac{G\log(2\pi \tau)}{2}-\frac{1}{2\tau}\sum_{g=1}^G  E_{\theta\left|y,\pi^{(t)}\right.}\left[(\theta_g-\mu)^2\right] \\
+&= -\frac{G\log(2\pi \tau)}{2}-\frac{1}{2\tau}\sum_{g=1}^G v_g^{(t)} - \frac{1}{2\tau}\sum_{g=1}^G (m_g^{(t)}-\mu)^2 \\
+\end{array} \]
+}
+\pause
+which is maximized when 
+{\small
+\[ \begin{array}{rl}
+\mu^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G m_g^{(t)} \pause \\ 
+\tau^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G  E_{\theta\left|y,\pi^{(t)}\right.}\left[(\theta_g-\mu)^2\right] =  \frac{1}{G} \sum_{g=1}^G \left[ v_g^{(t)} + \left(m_g^{(t)}-\mu^{(t+1)}\right)^2 \right]. 
+\end{array}\]
+}
+\end{frame}
+
+
+\begin{frame}[fragile]
+
+<<normal_hierarchical_mean, cache=TRUE, echo=FALSE>>=
+G = 1000
+truth = data.frame(mu = 0, tau = 1)
+d = ddply(data.frame(gene=1:G, theta = with(truth, rnorm(G, mu, sqrt(tau)))),
+          .(gene), function(x) data.frame(gene=x$gene, y=rnorm(4, x$theta)))
+sm = ddply(d, .(gene), summarize, n = length(y), ybar = mean(y))
+mu = tau = 1 # Initial values
+n_iter = 10
+keep = data.frame(iteration = 1:n_iter, mu = rep(NA, n_iter), tau = rep(NA, n_iter))
+for (i in 1:n_iter) {
+  sm$v = 1/(1/tau+sm$n)
+  sm$m = sm$v * (mu/tau + sm$ybar*sm$n)
+  mu = mean(sm$m)
+  tau = mean(sm$v + (sm$m-mu)^2)
+  keep$mu[i] = mu; keep$tau[i] = tau
+}
+ggplot(melt(keep, id.var="iteration", variable.name="parameter"), 
+       aes(iteration, value)) +
+  geom_point() + 
+  facet_wrap(~parameter, scales="free_y") +
+  geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value), color='red')
+@
+
+\end{frame}
+
+
+\subsection{Monte Carlo EM}
+\begin{frame}
+\frametitle{Monte Carlo EM}
+If the expectation step is not analytically tractible, we can replace the expectation with a Monte Carlo approximation, \pause e.g. 
+\[ 
+E_{\theta|y,\pi^{(t)}}\left[\log p(\theta|\pi)\right] \approx \frac{1}{M} \sum_{m=1}^M \log p\left(\left.\theta^{(m)}\right|\pi\right)
+\]
+where $\theta^{(m)} \sim p(\theta|y,\pi^{(t)})$. \pause since
+\[
+\frac{1}{M} \sum_{m=1}^M \log p\left(\left.\theta^{(m)}\right|\pi\right) \to E_{\theta|y,\pi^{(t)}}\left[\log p(\theta|\pi)\right]
+\]
+as $m\to \infty$.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Parallelism in hierarchical models}
+
+In hierarchical models, we have 
+\[ p\left(\theta\left|y,\pi^{(t)}\right.\right) = \prod_{g=1}^G p\left(\theta_g\left|y_g,\pi^{(t)}\right.\right)\]
+and thus we can simulate $\theta_g$ independently across $g$. \pause Also, since we have 
+\[ E_{\theta|y,\pi^{(t)}}[\log p(\theta|\pi)] = \sum_{g=1}^G E_{\theta|y,\pi^{(t)}}[\log p(\theta_g|\pi)] = \sum_{g=1}^G E_{\theta_{\alert{g}}|y,\pi^{(t)}}[\log p(\theta_g|\pi)] \]
+we can approximate the expectation via 
+\[
+E_{\theta|y,\pi^{(t)}}[\log p(\theta|\pi)] \approx \frac{1}{M} \sum_{m=1}^M \sum_{g=1}^G \log p\left(\left.\theta_g^{(m)}\right|\pi\right).
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Normal with hierarchical mean}
+
+This Monte Carlo approximation to the desired expectation 
+
+{\small
+\[ \begin{array}{rl}
+E_{\theta|y,\pi^{(t)}}[\log p(\theta|\pi)] &= -\frac{G\log(2\pi \tau)}{2}-\frac{1}{2\tau}\sum_{g=1}^G  E_{\theta_g\left|y,\pi^{(t)}\right.}\left[(\theta_g-\mu)^2\right] \\
+&\approx -\frac{G\log(2\pi \tau)}{2}-\frac{1}{2\tau}\sum_{g=1}^G \frac{1}{M} \sum_{m=1}^M (\theta_g^{(m)}-\mu)^2
+\end{array} \]
+}
+
+is maximized with 
+
+\[ \begin{array}{rl}
+\mu^{(t+1)} &= \frac{1}{MG} \sum_{m=1}^M \sum_{g=1}^G \theta_g^{(m)} \\
+\tau^{(t+1)} &= \frac{1}{MG} \sum_{m=1}^M \sum_{g=1}^G \left(\theta_g^{(m)} - \mu^{(t+1)} \right)^2
+\end{array} \]
+\end{frame}
+
+
+
+\end{document}
