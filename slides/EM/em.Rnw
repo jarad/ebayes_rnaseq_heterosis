@@ -15,7 +15,7 @@
 %\setbeamertemplate{block body theorem}{bg=orange}
 \setkeys{Gin}{width=0.6\textwidth}
 
-\title{Monte Carlo Expectation Maximization for RNAseq}
+\title[MCMCEM for RNAseq]{Monte Carlo Expectation Maximization for RNAseq}
 \author[Jarad Niemi]{Dr. Jarad Niemi}
 \institute[Iowa State]{Iowa State University}
 \date{\today}
@@ -29,6 +29,7 @@ opts_chunk$set(fig.width=6, fig.height=5, out.width='.8\\linewidth', fig.align='
 library(plyr)
 library(ggplot2)
 library(reshape2)
+library(rstan)
 @
 
 \frame{\titlepage}
@@ -125,15 +126,15 @@ which is maximized when
 
 \begin{frame}[fragile]
 
-<<normal_hierarchical_mean, cache=TRUE, echo=FALSE>>=
-G = 1000
+<<normal_hierarchical_mean_em, cache=TRUE, echo=FALSE>>=
+G = 100
 truth = data.frame(mu = 0, tau = 1)
 d = ddply(data.frame(gene=1:G, theta = with(truth, rnorm(G, mu, sqrt(tau)))),
           .(gene), function(x) data.frame(gene=x$gene, y=rnorm(4, x$theta)))
 sm = ddply(d, .(gene), summarize, n = length(y), ybar = mean(y))
 mu = tau = 1 # Initial values
 n_iter = 10
-keep = data.frame(iteration = 1:n_iter, mu = rep(NA, n_iter), tau = rep(NA, n_iter))
+keep = data.frame(iteration = 1:n_iter, mu = rep(NA, n_iter), tau = rep(NA, n_iter), method="em")
 for (i in 1:n_iter) {
   sm$v = 1/(1/tau+sm$n)
   sm$m = sm$v * (mu/tau + sm$ybar*sm$n)
@@ -141,7 +142,10 @@ for (i in 1:n_iter) {
   tau = mean(sm$v + (sm$m-mu)^2)
   keep$mu[i] = mu; keep$tau[i] = tau
 }
-ggplot(melt(keep, id.var="iteration", variable.name="parameter"), 
+@
+
+<<, dependson='normal_hierarchical_mean_em', echo=FALSE>>=
+ggplot(melt(keep, id.var=c("iteration","method"), variable.name="parameter"), 
        aes(iteration, value)) +
   geom_point() + 
   facet_wrap(~parameter, scales="free_y") +
@@ -183,7 +187,7 @@ E_{\theta|y,\pi^{(t)}}[\log p(\theta|\pi)] \approx \frac{1}{M} \sum_{m=1}^M \sum
 \begin{frame}
 \frametitle{Normal with hierarchical mean}
 
-This Monte Carlo approximation to the desired expectation 
+The Monte Carlo approximation to the desired expectation is
 
 {\small
 \[ \begin{array}{rl}
@@ -195,11 +199,216 @@ E_{\theta|y,\pi^{(t)}}[\log p(\theta|\pi)] &= -\frac{G\log(2\pi \tau)}{2}-\frac{
 is maximized with 
 
 \[ \begin{array}{rl}
-\mu^{(t+1)} &= \frac{1}{MG} \sum_{m=1}^M \sum_{g=1}^G \theta_g^{(m)} \\
-\tau^{(t+1)} &= \frac{1}{MG} \sum_{m=1}^M \sum_{g=1}^G \left(\theta_g^{(m)} - \mu^{(t+1)} \right)^2
+\mu^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G \frac{1}{M}\sum_{m=1}^M \theta_g^{(m)} \\
+\tau^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G  \frac{1}{M}\sum_{m=1}^M\left(\theta_g^{(m)} - \mu^{(t+1)} \right)^2
 \end{array} \]
+\pause 
+where $\theta_g^{(m)} \stackrel{ind}{\sim} p\left(\theta_g\left| y_g,\pi^{(t)}\right.\right)$.
 \end{frame}
 
 
+\begin{frame}[fragile]
+<<normal_hierarchical_mean_mcem, dependson="normal_hierarchical_mean_em", cache=TRUE, echo=FALSE>>=
+M = 1000
+mu = tau = 1 # Initial values
+keep2 = data.frame(iteration = 1:n_iter, mu = rep(NA, n_iter), tau = rep(NA, n_iter), method='mcem')
+for (i in 1:n_iter) {
+  sm$v = 1/(1/tau+sm$n)
+  sm$m = sm$v * (mu/tau + sm$ybar*sm$n)
+  draws = ddply(sm, .(gene), function(x) {
+    data.frame(theta = rnorm(M, x$m, sqrt(x$v)))
+  })
+  mu = mean(draws$theta)
+  tau = mean((draws$theta-mu)^2)
+  keep2$mu[i] = mu; keep2$tau[i] = tau
+}
+@
+
+<<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
+ggplot(melt(rbind(keep,keep2), id.var=c("iteration","method"), variable.name="parameter"), 
+       aes(iteration, value, color=method)) +
+  geom_point() + 
+  facet_wrap(~parameter, scales="free_y") +
+  geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
+@
+\end{frame}
+
+
+\subsection{MCMC EM}
+\begin{frame}
+\frametitle{Markov chain Monte Carlo EM}
+
+It will not always be easy to sample from $p\left(\theta\left|y,\pi^{(t)}\right.\right)$, so we may want to use an MCMC approach to sample from this distribution. \pause The resulting MCMCEM algorithm is identical to the MCEM algorithm, i.e. 
+
+\[ \begin{array}{rl}
+\mu^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G \frac{1}{M}\sum_{m=1}^M \theta_g^{(m)} \\
+\tau^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G  \frac{1}{M}\sum_{m=1}^M\left(\theta_g^{(m)} - \mu^{(t+1)} \right)^2
+\end{array} \]
+\pause where 
+\[ \theta_g^{(m)} \sim p\left(\theta_g\left|y_g,\pi^{(t)}\right.\right) \]
+but now $\theta_g^{(m)}$ and $\theta_g^{(m+1)}$ are not independent \pause (they are still independent across $g$). 
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+<<normal_hierarchical_mean_mcmcem, dependson="normal_hierarchical_mean_em", cache=TRUE, echo=FALSE, results='hide'>>=
+normal_hierarchical_mean_model = "
+data {
+  int<lower=1> n;
+  real y[n];
+  real mu;
+  real<lower=0> s;
+  real<lower=0> tau;
+}
+parameters {
+  real theta;
+}
+model {
+  theta ~ normal(mu,sqrt(tau));
+  y ~ normal(theta, s);
+}
+"
+
+m = stan_model(model_code = normal_hierarchical_mean_model)
+
+mu = tau = 1 # Initial values
+keep3 = data.frame(iteration = 1:n_iter, mu = rep(NA, n_iter), tau = rep(NA, n_iter), method='mcmcem')
+for (i in 1:n_iter) {
+  # Run MCMC using rstan
+  draws = ddply(d, .(gene), function(x) {
+    s = sampling(m, data = list(n = length(x$y), y=x$y, mu=mu, s=1, tau=tau), iter=M/2)
+    data.frame(theta = as.numeric(extract(s, 'theta')$theta))
+  })
+  
+  mu = mean(draws$theta)
+  tau = mean((draws$theta-mu)^2)
+  keep3$mu[i] = mu; keep3$tau[i] = tau
+}
+@
+
+<<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
+ggplot(melt(rbind(keep,keep2,keep3), id.var=c("iteration","method"), variable.name="parameter"), 
+       aes(iteration, value, color=method)) +
+  geom_point() + 
+  facet_wrap(~parameter, scales="free_y") +
+  geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
+@
+
+\end{frame}
+
+
+\section{Applications}
+\begin{frame}
+\frametitle{Negative binomial example}
+
+Let's suppose $y_{gi} \stackrel{ind}{\sim} NB(\theta_g,\psi_g)$, i.e. 
+\[ E[y_{gi}] = \eta_g = e^{\theta_g} \quad\mbox{and}\quad V[y_{gi}] = \eta_g + e^{\psi_g}\eta_g \]
+\pause 
+and we assume a hierarchical distribution for $\theta_g$ and $\psi_g$:
+\[ 
+\theta_g \stackrel{ind}{\sim} N(\mu_\theta,\tau_\theta) \quad\mbox{and, independently,}\quad \psi_g \stackrel{ind}{\sim} N(\mu_\psi, \tau_\psi).
+\]
+\end{frame}
+
+
+\begin{frame}
+\frametitle{MCMCEM for negative binomial hierarchical model}
+
+Let $\pi=(\mu_\theta, \tau_\theta, \mu_\psi, \tau_\psi)$, then 
+\[ 
+E_{\theta,\psi|y,\pi^{(t)}}[\log p(\theta,\psi|\pi)] = E_{\theta|y,\pi^{(t)}}[\log p(\theta|\mu_\theta,\tau_\theta)] + E_{\psi|y,\pi^{(t)}}[\log p(\psi|\mu_\psi,\tau_\psi)]
+ \]
+ which is maximized with
+\[ \begin{array}{rl}
+\mu_\theta^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G \frac{1}{M}\sum_{m=1}^M \theta_g^{(m)} \\
+\tau_\theta^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G  \frac{1}{M}\sum_{m=1}^M\left(\theta_g^{(m)} - \mu_\theta^{(t+1)} \right)^2 \\
+\mu_\psi^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G \frac{1}{M}\sum_{m=1}^M \psi_g^{(m)} \\
+\tau_\psi^{(t+1)} &= \frac{1}{G} \sum_{g=1}^G  \frac{1}{M}\sum_{m=1}^M\left(\psi_g^{(m)} - \mu_\psi^{(t+1)} \right)^2
+\end{array} \]
+\pause where 
+\[ \theta_g^{(m)},\psi_g^{(m)} \sim p\left(\theta_g,\psi_g\left|y_g,\pi^{(t)}\right.\right) \]
+via MCMC. 
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+
+<<negative_binomial_data, cache=TRUE>>=
+G = 100
+n = 4
+truth = data.frame(mu_theta = 3, tau_theta = 1, mu_psi = 0, tau_psi = 1)
+par = data.frame(gene=1:G, 
+                 theta = with(truth, rnorm(G, mu_theta, sqrt(tau_theta))),
+                 psi   = with(truth, rnorm(G, mu_psi, sqrt(tau_psi))))
+d = ddply(par, .(gene), function(x) {
+  data.frame(y = rnbinom(n, mu = exp(x$theta), size=1/exp(x$psi)))
+})
+@
+
+<<negative_binomial_stan, cache=TRUE>>=
+negative_binomial_model = "
+data {
+  int<lower=1> n;
+  int<lower=0> count;
+  real mu_theta;
+  real<lower=0> tau_theta;
+  real mu_psi;
+  real<lower=0> tau_psi;
+}
+parameters {
+  real theta;
+  real psi;
+}
+model {
+  theta ~ normal(mu_theta, sqrt(tau_theta));
+  psi   ~ normal(mu_psi  , sqrt(tau_psi  ));
+  count ~ neg_binomial_2_log(theta, 1/psi);
+}
+"
+nb_m = stan_model(model_code = negative_binomial_model)
+@
+
+<<negative_binomial_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
+M = 1000
+mu_theta = 0; tau_theta=1, mu_psi = 0; mu_psi = 1 # Initial values
+n_iter = 10
+keep = data.frame(iteration = 1:n_iter, 
+                  mu_theta = rep(NA, n_iter), 
+                  tau_theta = rep(NA, n_iter), 
+                  mu_psi = rep(NA,n_iter),
+                  tau_psi = rep(NA,n_iter))
+for (i in 1:n_iter) {
+  # Run MCMC using rstan
+  draws = ddply(d, .(gene), function(x) {
+    s = sampling(nb_m, data = list(n = length(x$y), y=x$y, 
+                                   mu_theta=mu_theta, tau_psi=tau_theta, 
+                                   mu_psi=mu_psi, tau_psi=tau_psi))
+    e = extract(s, c('theta','psi'))
+    data.frame(theta = as.numeric(e$theta),
+               psi = as.numeric(e$psi))
+  })
+  
+  mu_theta = mean(draws$theta)
+  tau_theta = mean((draws$theta-mu_theta)^2)
+  mu_psi = mean(draws$psi)
+  tau_psi = mean((draws$psi-mu_psi)^2)
+  keep$mu_theta[i] = mu_theta; keep$tau_theta[i] = tau_theta
+  keep$mu_psi[i] = mu_psi; keep$tau_psi[i] = tau_psi
+}
+@
+
+<<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
+ggplot(keep, id.var=c("iteration"), variable.name="parameter"), 
+       aes(iteration, value, color=method)) +
+  geom_point() + 
+  facet_wrap(~parameter, scales="free_y") +
+  geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
+@
+
+
+\end{frame}
 
 \end{document}
