@@ -352,7 +352,7 @@ d = ddply(par, .(gene), function(x) {
 negative_binomial_model = "
 data {
   int<lower=1> n;
-  int<lower=0> count;
+  int<lower=0> count[n];
   real mu_theta;
   real<lower=0> tau_theta;
   real mu_psi;
@@ -365,16 +365,15 @@ parameters {
 model {
   theta ~ normal(mu_theta, sqrt(tau_theta));
   psi   ~ normal(mu_psi  , sqrt(tau_psi  ));
-  count ~ neg_binomial_2_log(theta, 1/psi);
+  count ~ neg_binomial_2_log(theta, 1/exp(psi));
 }
 "
 nb_m = stan_model(model_code = negative_binomial_model)
 @
 
 <<negative_binomial_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
-M = 1000
-mu_theta = 0; tau_theta=1, mu_psi = 0; mu_psi = 1 # Initial values
-n_iter = 10
+mu_theta = 0; tau_theta=1; mu_psi = 0; tau_psi = 1 # Initial values
+n_iter = 100
 keep = data.frame(iteration = 1:n_iter, 
                   mu_theta = rep(NA, n_iter), 
                   tau_theta = rep(NA, n_iter), 
@@ -383,8 +382,8 @@ keep = data.frame(iteration = 1:n_iter,
 for (i in 1:n_iter) {
   # Run MCMC using rstan
   draws = ddply(d, .(gene), function(x) {
-    s = sampling(nb_m, data = list(n = length(x$y), y=x$y, 
-                                   mu_theta=mu_theta, tau_psi=tau_theta, 
+    s = sampling(nb_m, data = list(n = length(x$y), count=x$y, 
+                                   mu_theta=mu_theta, tau_theta=tau_theta, 
                                    mu_psi=mu_psi, tau_psi=tau_psi))
     e = extract(s, c('theta','psi'))
     data.frame(theta = as.numeric(e$theta),
@@ -401,8 +400,8 @@ for (i in 1:n_iter) {
 @
 
 <<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
-ggplot(keep, id.var=c("iteration"), variable.name="parameter"), 
-       aes(iteration, value, color=method)) +
+ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
+       aes(iteration, value)) +
   geom_point() + 
   facet_wrap(~parameter, scales="free_y") +
   geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
