@@ -467,7 +467,7 @@ h_m = stan_model(model_code = heterosis_model)
 
 
 <<heterosis_data, cache=TRUE>>=
-G = 10
+G = 100
 n = 4
 truth = data.frame(mu_phi   = 3, tau_phi   = 1, mu_psi = 0, tau_psi = 1,
                    mu_alpha = 0, tau_alpha = 1, mu_delta = 0, tau_delta = .1^2)
@@ -486,7 +486,7 @@ d = ddply(par, .(gene), function(x) {
 
 <<heterosis_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
 current = as.list(truth)
-n_iter = 10
+n_iter = 100
 keep = data.frame(iteration = 1:n_iter, 
                   mu_phi    = rep(NA, n_iter), 
                   mu_alpha  = rep(NA, n_iter), 
