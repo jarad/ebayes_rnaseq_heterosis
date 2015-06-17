@@ -1,0 +1,73 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\useoutertheme{infolines}
+\author{Eric Mittman, Jarad Niemi, Dan Nettleton}
+\title{Empirical study of edgeR gene-level parameter estimates and standard errors for heterosis model}
+\usetheme{Ilmenau}
+\usecolortheme{beaver}
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+\begin{frame}
+Gene-level model parameters:\\
+\vspace{.1in}
+$\phi_g$ = parental log-mean\\
+$\alpha_g$ = parental log-half-difference\\
+$\delta_g$ = hybrid effect\\
+$\psi_g$ = log-dispersion\\
+Data Model:
+$Y_gvi \sim NB(e^{\mu_gv},e^\psi_g)$
+\vspace{.1in}
+
+Distribution of gene-level parameters:\\
+\vspace{.1in}
+$\phi_g \sim Normal(\mu_\phi,\sigma_\phi^2),\alpha_g \sim Laplace(\mu_\alpha,\sigma_\alpha^2)$,\\
+$\delta_g \sim Laplace(\mu_\delta,\sigma_\delta^2),\psi_g \sim Normal(\mu_\psi,\sigma_\psi^2)$
+\begin{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\includegraphics[width=\textwidth]{bias_mse.pdf}
+
+\end{frame}
+
+
+\begin{frame}
+\includegraphics[width=\textwidth]{bias_v_phi.pdf}
+
+
+\end{frame}
+\begin{frame}
+\includegraphics[width=\textwidth]{mse_v_phi.pdf}
+
+\end{frame}\begin{frame}
+\includegraphics[width=\textwidth]{hyp_means.pdf}
+
+\end{frame}\begin{frame}
+\includegraphics[width=\textwidth]{hyp_scl.pdf}
+
+\end{frame}
+
+\begin{frame}
+We might try to adjust the moment estimators using the relation:\\
+\[Var(\hat{\delta_g}) = E(Var(\hat{\delta_g}|\delta_g)) + Var(E(\hat{\delta_g}|\delta_g))\]
+Rearranging yields
+\[ Var(\delta_g) \approx Var(E(\hat{\delta_g}|\delta_g)) = Var(\hat{\delta_g}) - E(Var(\hat{\delta_g}|\delta_g))\]
+Which we might estimate by
+\[Var(\delta_g) \approx \widehat{Var}(\hat{\delta_g}) - \widehat{E}(SE(\hat{\delta})^2)\]
+
+To estimate $\widehat{E}(SE(\hat{\delta})^2)$, we can use estimated inverse information from genewise MLE fitting conditional on edgeR estimates of $\psi_g$.
+\end{frame}
+
+\begin{frame}
+\includegraphics[width=\textwidth]{avgest_v_emp_se.pdf}
+\end{frame}
+
+\end{frame}
+\begin{frame}
+\includegraphics[width=\textwidth]{adjust_scl.pdf}
+\end{frame}
+\end{document}
