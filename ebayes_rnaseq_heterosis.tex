@@ -19,6 +19,8 @@
 \newcommand{\ShrinkBayes}{{\tt ShrinkBayes}}
 \newcommand{\RNAseq}{RNAseq}
 
+%\renewcommand{\gamma}{c}
+
 
 \title{Empirical Bayes analysis of \RNAseq{} data for detection of gene expression heterosis}
 
@@ -87,9 +89,9 @@ Following \cite{ji2014estimation}, we reparameterize the gene-variety mean struc
 \alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2}, \quad \mbox{and} \quad
 \delta_g = \phi_g-\mu_{g3}. \]
 
-We present a hierarchical model for the normalization factors, overdispersions, and gene-specific mean parameters. The normalization factors, parental averages, and overdispersion parameters are assumed to follow a normal distribution, i.e.
+We assume a hierarchical model for the gene-specific mean parameters and overdispersion parameters. The parental averages and overdispersion parameters are assumed to follow a normal distribution, i.e.
 \[ 
-\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
+%\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
 \phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), \quad \mbox{and}\quad 
 \psi_g \stackrel{ind}{\sim} N(0,\sigma_\psi^2). 
 \]
@@ -98,17 +100,21 @@ To allow for more shrinkage with the half-parental and hybrid differences, we us
 \alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad \mbox{and} \qquad
 \delta_g \stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) 
 \]
-where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $p(\alpha|\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$, expectation $\eta$, and variance $2\sigma^2$. We assume independence amongst the normalization factors, parental averages, half parental differences, hybrid differences, and overdispersion parameters.
+where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $p(\alpha|\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$ with expectation $\eta$ and variance $2\sigma^2$. We assume independence amongst the parental averages, half parental differences, hybrid differences, and overdispersion parameters.
 
-We assume improper uniform priors for $\eta_\phi$, $\eta_\alpha$, and $\eta_\delta$ and independent half-cauchy priors for all standard deviations \citep{gelman2006prior}.
+%We assume improper uniform priors for $\eta_\phi$, $\eta_\alpha$, and $\eta_\delta$ and independent half-cauchy priors for all standard deviations \citep{gelman2006prior}.
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$ and hyperparameters $\pi = (\gamma, \eta, \sigma)$, where $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta)$, and $\sigma=(\sigma_\gamma,\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_\psi)$. We employ an optimization procedure to obtain the \emph{maximum a posteriori} (MAP) estimate for $\pi$, denoted $\hat{\pi}$, and then base gene-specific inference on the posterior conditional on this MAP estimate. Conditional on the hyperparameters, the gene-specific parameters are independent, i.e., 
+We separate the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$, normalization factors $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, and hyperparameters $\pi = (\eta, \sigma)$ where $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta)$ and $\sigma=(\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_\psi)$. We obtain estimates for the hyperparameters and then base gene-specific inference on the posterior conditional on these estimates. 
+
+To obtain normalization factors $\hat{\gamma}$, we use the weighted trimmed mean of $M$ values (TMM) method of \cite{robinson2010scaling}. We then use the methods of \cite{mccarthy2012differential}, to obtain genewise dispersion estimates, $\hat{\phi}_g$, and their generalized linear model methods to obtain estimates for the remaining gene-specific parameters, i.e. $\hat{\phi}_g$, $\hat{\alpha}_g$, and $\hat{\delta}_g$. Using the gene-specific parameter estimates, we estimate hyperparameters for the location and scale parameters in the hierarchical model using a central method of moments approach, e.g. $\hat{\eta}_\delta = \sum_{g=1}^G \hat{\delta}_g/G$ and $2\hat{\sigma}_\delta^2 = \sum_{g=1}^G (\hat{\delta}_g - \hat{\eta}_\delta)^2/(G-1)$. 
+
+Conditional on the estimated normalization factors $\hat{\gamma}$ and hyperparameters $\hat{\pi}$, we perform a Bayesian analysis to re-estimate the gene-specific parameters and describe their uncertainty. Conditional on $\hat{\gamma}$ and $\hat{\pi}$ the gene-specific parameters are independent, i.e.
 \begin{equation}
 \begin{split}
-p\left(\theta\left|y,\hat{\pi}\right.\right) 
+p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
 %&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] p(\theta_g|\hat{\eta},\hat{\sigma}) \\
 \propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
@@ -122,14 +128,14 @@ N(\psi_g;\hat{\eta}_\psi, \hat{\sigma}_\psi^2)
 \label{e:condind}
 \end{split}
 \end{equation}
-Thus, conditional posterior inference for the gene-specific parameters can be obtained independently and in parallel.
+Thus, conditional posterior inference across the genes can be obtained independently and in parallel.
 
-As we have not integrated out the gene-specific parameters when obtaining the MAP estimate, we actually receive a joint MAP estimate of $\theta$ and $\pi$. We explicitly use the MAP estimate of $\pi$ when obtaining empirical Bayes posterior samples for the gene-specific parameters as in equation \eqref{e:condind}. The MAP estimate of $\theta$ could be used as initial values in the MCMC, although we did not find this necessary.
+To perform this Bayesian analysis, we used the statistical software \Stan which implements a variant of Markov chain Monte Carlo (MCMC) called Hamiltonion Monte Carlo (HMC) \citep{neal2011mcmc} to obtaining samples from the posterior in equation \eqref{e:condind}. We ran 4 simultaneous chains with random initial starting values for 1000 burnin (and tuning) iterations followed by another 1000 iterations thinned by 4 (to reduce storage space) for inference. We monitored convergence using the potential scale reduction factor (PSRF) \citep{Gelm:Rubi:infe:1992} for $\phi_g$, $\alpha_g$, $\delta_g$, and $\psi_g$. If the maximum PSRF was greater than 1.1, we reran the chain with an additional 500 iterations (250 burnin and 250 for inference) and repeated this process until all PSRF's were less than 1.1. 
 
 \subsection{Gene expression heterosis}
 \label{s:gene_heterosis}
 
-For a specific gene $g$, low-parent heteorisis (LPH) of gene expression occurs when average expression in the hybrid is less than the average expression of either parent, i.e. $\delta_g < -|\alpha_g|$, and high-parent heterosis (HPH) occurs when average expression in the hybrid is greater than the average expression of either parent, i.e. $\delta_g > |\alpha_g|$. 
+For a specific gene $g$, low-parent heterosis (LPH) of gene expression occurs when average expression in the hybrid is less than the average expression of either parent, i.e. $\delta_g < -|\alpha_g|$, and high-parent heterosis (HPH) occurs when average expression in the hybrid is greater than the average expression of either parent, i.e. $\delta_g > |\alpha_g|$. 
 % and high-parent  heterosis (HPH) of gene expression occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{heterosis} of gene expression to be the event of LPH or HPH. The most important hypotheses are
 % \begin{align}
 % H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
@@ -146,15 +152,15 @@ For a specific gene $g$, low-parent heteorisis (LPH) of gene expression occurs w
 We evaluate these probabilities based on empirical Bayes estimates of their posterior probabilities, e.g., 
 \begin{equation}
 %P(LPH_g|y) \approx 
-P(LPH_g|y,\hat{\pi}_{MAP}) = P\left(\left.\delta_g < -|\alpha_g|\right|y, \hat{\pi}_{MAP}\right) = \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\delta_g^{(m)} < -\left|\alpha_g^{(m)}\right|\right), 
+P(LPH_g|y,\hat{\pi},\hat{\gamma}) = P\left(\left.\delta_g < -|\alpha_g|\right|y, \hat{\pi},\hat{\gamma}\right) = \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\delta_g^{(m)} < -\left|\alpha_g^{(m)}\right|\right), 
 \label{e:probs}
 \end{equation}
 where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. HPH probability is defined similarly with the inequality reversed and without the negative sign. We construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities. Geneticists can use this list to prioritize future experiments to understand the molecular genetic mechanisms for heterosis.  
  
 
-\subsection{Implementation in \Stan{}}
+% \subsection{Implementation in \Stan{}}
 
-To perform the optimization required for the MAP estimate $\hat{\pi}$, we use the statistical software, {\tt Stan} \citep{stan-software:2014}, executed through the \RStan{} interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows the construction of general Bayesian models with the primary restriction that all unknown parameters are continuous. With a fully constructed model, the software can obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in \RStan{}. Presumably due to the large dimension of the optimization, it was necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} and reasonable starting values obtained via \edgeR{} \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor}. The {\tt Stan} software also includes the \RStan{} function, {\tt sampling}, an implementation of a Markov chain Monte Carlo (MCMC) algorithm for obtaining samples from the posterior. By default, Stan uses a no-U-turn sampler \citep{hoffman2013no}, a variant of Hamiltonion Monte Carlo \citep{neal2011mcmc}.
+%To perform the optimization required for the MAP estimate $\hat{\pi}$, we use the statistical software, {\tt Stan} \citep{stan-software:2014}, executed through the \RStan{} interface \citep{rstan-software:2014} in R \citep{R2014}. The Stan software allows the construction of general Bayesian models with the primary restriction that all unknown parameters are continuous. With a fully constructed model, the software can obtain MAP estimates \cite[Section 50.3,][]{stan-manual:2014} using the {\tt optimizing} function in \RStan{}. Presumably due to the large dimension of the optimization, it was necessary to use the L-BFGS algorithm \cite[Section 55,][]{stan-manual:2014} and reasonable starting values obtained via \edgeR{} \citep{robinson2010edgeR} from Bioconductor \citep{gentleman2004bioconductor}. 
 
 
 \subsection{Implementation in \ShrinkBayes{}}
@@ -233,12 +239,12 @@ The pattern appears to hold, with the \RStan{} and \ShrinkBayes{} techniques out
 \section{Searching for gene expression heterosis in the maize experiment}
 \label{s:maize}
 
-We used our method to analyze the maize data set, generated by \cite{paschold2012complementation}, on gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17). The data are available in the Supplemental Materials. Each variety had four biological replicates measured with Illumina methodology and equipment. Reads were mapped to the whole reference genome using the short reads aligner, NOVOALIGN. For more specifics, please see \cite{paschold2012complementation}. 
+We used our method to analyze a maize data set \citep{paschold2012complementation} on gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17). The data are available in the Supplemental Materials. Each variety had four biological replicates measured with Illumina methodology and equipment. Reads were mapped to the whole reference genome using the short reads aligner, NOVOALIGN. For more specifics, please see \cite{paschold2012complementation}. 
 
 As explained in Section~\ref{s:sim_data}, we analyzed a set of $G=27,888$ genes for $V=3$ varieties and $n_v=4$ replicates ($v=1,2,3$). 
 
 We found MAP estimates for both the independence and dependence models as shown in Table \ref{t:map}. 
-\input{include/map}
+\input{include/map-laplace}
 The MAP estimates for the hierarchical means, $\eta$, and standard deviations, $\sigma$, are consistent between the independence and dependence models with, perhaps, a slightly larger mean and smaller standard deviation for the logarithm of the overdispersion parameter, $\psi_g$, in the dependence model relative to the independence model. In the dependence model, there appears to be high correlation amongst $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$, and negative correlation between $\psi_g$ and each of $\mu_{g1}$, $\mu_{g2}$, and $\mu_{g3}$. The normalization factors, and their variance, are consistent between the two models, with the estimates for the dependence model being consistently 0.02 larger than the estimates for the independence model, and both indicating that there is about a 25\% increase in counts between the least and most thoroughly sequenced samples. 
 
 
@@ -313,12 +319,11 @@ The authors thank Andrew Lithio for help in implementing our model in \ShrinkBay
 
 \section*{Supplementary Materials}
 
-The supplementary materials include the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}), and the {\tt Stan} models: the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
+The supplementary materials include three plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on this data, and the {\tt Stan} model ({\tt model.stan}).  
+%the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
 
 \bibliography{jarad}
 \bibliographystyle{biom}
-
-% From Dan, "There are some capitalization issues in the references section.  I think you need to protect "RNA" with curly braces so that it stays capitalized.  Also, in Hallauer et al. (2010), the last initial should presumably be "D." rather than "d."."
 
 % \appendix
 % %  To get the journal style of heading for an appendix, mimic the following.

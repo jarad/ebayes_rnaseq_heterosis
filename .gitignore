@@ -21,3 +21,9 @@
 *.fff
 *.ttt
 *.aux
+*.nav
+*.snm
+*.toc
+*.vrb
+*concordance.tex
+
