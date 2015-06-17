@@ -372,7 +372,7 @@ nb_m = stan_model(model_code = negative_binomial_model)
 @
 
 <<negative_binomial_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
-mu_theta = 0; tau_theta=1; mu_psi = 0; tau_psi = 1 # Initial values
+mu_theta = 0; tau_theta=1; mu_psi = -2; tau_psi = 1 # Initial values
 n_iter = 100
 keep = data.frame(iteration = 1:n_iter, 
                   mu_theta = rep(NA, n_iter), 
@@ -411,5 +411,128 @@ ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
 
 
 \end{frame}
+
+
+\section{Heterosis}
+\begin{frame}[fragile]
+\frametitle{Heterosis}
+
+<<>>=
+heterosis_model = "
+data {
+  int<lower=1> n;
+  int<lower=0> count[n];
+  int<lower=1, upper=3> variety[n];
+  real mu_phi;
+  real mu_alpha;
+  real mu_delta;
+  real mu_psi;
+  real<lower=0> tau_phi;
+  real<lower=0> tau_alpha;
+  real<lower=0> tau_delta;
+  real<lower=0> tau_psi;
+}
+transformed data {
+  matrix[n,3] X;
+  for (i in 1:n) {
+    if (variety[i] == 1) { X[i,1] <-  1; X[i,2] <- -1; X[i,3] <-  0; }
+    if (variety[i] == 2) { X[i,1] <-  1; X[i,2] <-  1; X[i,3] <-  0; }
+    if (variety[i] == 3) { X[i,1] <-  1; X[i,2] <-  0; X[i,3] <-  1; }
+  }
+}
+parameters {
+  real phi;
+  real alpha;
+  real delta;
+  real psi;
+}
+transformed parameters {
+  vector[3] pad;
+
+  pad[1] <- phi;
+  pad[2] <- alpha;
+  pad[3] <- delta;
+}
+model {
+  phi   ~ normal(mu_phi  , sqrt(tau_phi  ));
+  alpha ~ normal(mu_alpha, sqrt(tau_alpha));
+  delta ~ normal(mu_delta, sqrt(tau_delta));
+  psi   ~ normal(mu_psi  , sqrt(tau_psi  ));
+  count ~ neg_binomial_2_log(X*pad, 1/exp(psi));
+}
+"
+h_m = stan_model(model_code = heterosis_model)
+@
+\end{frame}
+
+
+<<heterosis_data, cache=TRUE>>=
+G = 10
+n = 4
+truth = data.frame(mu_phi   = 3, tau_phi   = 1, mu_psi = 0, tau_psi = 1,
+                   mu_alpha = 0, tau_alpha = 1, mu_delta = 0, tau_delta = .1^2)
+par = data.frame(gene=1:G, 
+                 phi   = with(truth, rnorm(G, mu_phi  , sqrt(tau_phi  ))),
+                 alpha = with(truth, rnorm(G, mu_alpha, sqrt(tau_alpha))),
+                 delta = with(truth, rnorm(G, mu_delta, sqrt(tau_delta))),
+                 psi   = with(truth, rnorm(G, mu_psi  , sqrt(tau_psi  ))))
+X = cbind(1, rep(c(-1,1,0), each=n), rep(c(0,0,1), each=n))
+d = ddply(par, .(gene), function(x) {
+  pad = with(x, c(phi,alpha,delta))
+  data.frame(y = rnbinom(3*n, mu = exp(X%*%pad), size=1/exp(x$psi)),
+             variety = rep(1:3, each=n))
+})
+@
+
+<<heterosis_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
+current = as.list(truth)
+n_iter = 10
+keep = data.frame(iteration = 1:n_iter, 
+                  mu_phi    = rep(NA, n_iter), 
+                  mu_alpha  = rep(NA, n_iter), 
+                  mu_delta  = rep(NA, n_iter), 
+                  mu_psi    = rep(NA,n_iter),
+                  tau_phi   = rep(NA, n_iter),
+                  tau_alpha = rep(NA, n_iter), 
+                  tau_delta = rep(NA, n_iter),
+                  tau_psi   = rep(NA,n_iter))
+
+for (i in 1:n_iter) {
+  # Run MCMC using rstan
+  draws = ddply(d, .(gene), function(x) {
+    s = sampling(h_m, data = c(list(n = length(x$y), count=x$y, variety = x$variety), current))
+    e = extract(s, c('phi','alpha','delta','psi'))
+    data.frame(phi   = as.numeric(e$phi),
+               alpha = as.numeric(e$alpha),
+               delta = as.numeric(e$delta),
+               psi   = as.numeric(e$psi))
+  })
+  
+  current = list(mu_phi   = mean(draws$phi)  , tau_phi   = mean((draws$phi-mu_phi)^2),
+                 mu_alpha = mean(draws$alpha), tau_alpha = mean((draws$alpha-mu_alpha)^2),
+                 mu_delta = mean(draws$delta), tau_delta = mean((draws$delta-mu_delta)^2),
+                 mu_psi   = mean(draws$psi)  , tau_psi   = mean((draws$psi-mu_psi)^2))
+  keep$mu_phi[i]   = current$mu_phi;   keep$tau_phi[i]   = current$tau_phi
+  keep$mu_alpha[i] = current$mu_alpha; keep$tau_alpha[i] = current$tau_alpha
+  keep$mu_delta[i] = current$mu_delta; keep$tau_delta[i] = current$tau_delta
+  keep$mu_psi[i]   = current$mu_psi;   keep$tau_psi[i]   = current$tau_psi
+}
+@
+\end{frame}
+
+\begin{frame}[fragile]
+<<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
+ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
+       aes(iteration, value)) +
+  geom_point() + 
+  facet_wrap(~parameter, scales="free_y", nrow=2) +
+  geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
+@
+
+
+\end{frame}
+
+
+
 
 \end{document}
