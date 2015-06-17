@@ -398,7 +398,9 @@ for (i in 1:n_iter) {
   keep$mu_psi[i] = mu_psi; keep$tau_psi[i] = tau_psi
 }
 @
+\end{frame}
 
+\begin{frame}[fragile]
 <<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
 ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
        aes(iteration, value)) +
