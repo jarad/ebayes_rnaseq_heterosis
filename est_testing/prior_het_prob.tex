@@ -1,0 +1,19 @@
+\documentclass{article}
+\usepackage{amsmath,amsfonts}
+\usepackage{setspace}
+\begin{document}
+
+\doublespace
+
+Calculating prior probability of heterosis when
+\[\alpha \sim Laplace(0,\sigma_\alpha),\; \delta \sim Laplace(0,\sigma_\delta)\]
+
+First, note that $X = |\alpha| \sim Exp(\sigma_\alpha)$ and $Y = |\delta| \sim Exp(\sigma_\delta)$. Note also the pivotal quantities $X/\sigma_{\alpha}, Y/\sigma_{\delta} \sim Exp(1)$. Since we interested in the probability of the event $\{Y > X\} = \{Y/X>1\}$, consider the pivotal quantity, $Z = \frac{Y/\sigma_\delta}{X/\sigma_\alpha}$. By identifying $\frac{\sigma_\alpha}{\sigma_\delta} = c$, it is clear that $P(Z>c) = P(X/Y > 1)$.We can calculate the density of $Z$ by the transformation method as follows:
+
+\[f_Z(z) = \int t\cdot f_{X,Y}(t,zt) dt = \int  t\cdot e^{-t(z+1)} dt = \frac{1}{(z+1)^2},\]
+
+where the last equality comes from recognizing the integrand as the kernel of a gamma distribution.\\
+
+Integrating this density, we find that $P(Z>c) = 1/(c+1)$. Given a probability $p$, $c$ can be calculated by $c = 1/p - 1$.\\
+
+\end{document}
