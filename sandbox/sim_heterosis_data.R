@@ -11,18 +11,19 @@
 #' @return list containing the hyperparameters, gene-specific parameters, and data
 #' 
 
-sim_heterosis_data = function(G=10, nv=4, parameters=NULL, distributions=NULL) {
+sim_heterosis_data = function(G=10, nv=4, parameters=NULL, hyperparameters=NULL, distributions=NULL, verbose=0) {
   require(plyr)
-  
   if (length(nv==1)) nv = rep(nv,3)
   
-  if (is.null(parameters)) 
+  if (is.null(hyperparameters) & is.null(parameters)) 
+    if (verbose) message('Using default hyperparameters.')
     hyperparameters = data.frame(parameter      = c("phi","alpha","delta","psi"),
                                  location = c(4.6,0,0,-2),
                                  scale    = c(1.8,.1,.01,.1))
   
   # Simulate gene-specific parameters
-  if (is.null(distributions)) 
+  if (is.null(distributions) & is.null(parameters)) {
+    if (verbose) message('Simulating gene-specific parameters.')
     parameters = rdply(G, {
       with(hyperparameters, 
            data.frame(phi   = rnorm   (1, location[parameter == "phi"  ], scale[parameter == "phi"  ]),
@@ -30,14 +31,17 @@ sim_heterosis_data = function(G=10, nv=4, parameters=NULL, distributions=NULL) {
                       delta = rlaplace(1, location[parameter == "delta"], scale[parameter == "delta"]),
                       psi   = rnorm   (1, location[parameter == "psi"  ], scale[parameter == "psi"  ])))
     }, .id="gene")
+  }
   
+  if (verbose) message('Simulating data.')
   data = ddply(data.frame(gene=1:G), .(gene), function(x) {
     g = as.numeric(x$gene)
-    mutate(data.frame(parent = rep(1:3, times = nv)),
+    mutate(data.frame(variety = rep(1:3, times = nv)),
            sample = 1:sum(nv),
-           eta = with(parameters, c(phi[g]+alpha[g], phi[g]-alpha[g], phi[g]+delta[g]))[parent],
-           y = rnbinom(length(eta), size = 1/exp(parameters$psi[g]), mu = exp(eta)))
+           eta = with(parameters, c(phi[g]+alpha[g], phi[g]-alpha[g], phi[g]+delta[g]))[variety],
+           count = rnbinom(length(eta), size = 1/exp(parameters$psi[g]), mu = exp(eta)))
   }, .inform=T)
+
   
   return(list(data            = data, 
               parameters      = parameters,
