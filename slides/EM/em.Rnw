@@ -27,6 +27,7 @@
 <<chunk_options, echo=FALSE, message=FALSE>>=
 opts_chunk$set(fig.width=6, fig.height=5, out.width='.8\\linewidth', fig.align='center', size='tiny')
 library(plyr)
+library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(rstan)
@@ -417,7 +418,7 @@ ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
 \begin{frame}[fragile]
 \frametitle{Heterosis}
 
-<<>>=
+<<heterosis_model, cache=TRUE>>=
 heterosis_model = "
 data {
   int<lower=1> n;
@@ -465,7 +466,7 @@ h_m = stan_model(model_code = heterosis_model)
 @
 \end{frame}
 
-
+\begin{frame}[fragile]
 <<heterosis_data, cache=TRUE>>=
 G = 100
 n = 4
@@ -483,9 +484,11 @@ d = ddply(par, .(gene), function(x) {
              variety = rep(1:3, each=n))
 })
 @
+\end{frame}
 
-<<heterosis_mcmcem, dependson=c('negative_binomial_data','negative_binomial_stan'), cache=TRUE, echo=FALSE, results='hide'>>=
-current = as.list(truth)
+\begin{frame}[fragile]
+<<heterosis_mcmcem, dependson=c('heterosis_data','heterosis_model'), cache=TRUE, echo=FALSE, results='hide'>>=
+current = truth
 n_iter = 100
 keep = data.frame(iteration = 1:n_iter, 
                   mu_phi    = rep(NA, n_iter), 
@@ -500,7 +503,7 @@ keep = data.frame(iteration = 1:n_iter,
 for (i in 1:n_iter) {
   # Run MCMC using rstan
   draws = ddply(d, .(gene), function(x) {
-    s = sampling(h_m, data = c(list(n = length(x$y), count=x$y, variety = x$variety), current))
+    s = sampling(h_m, data = c(list(n = length(x$y), count=x$y, variety = x$variety), as.list(current)))
     e = extract(s, c('phi','alpha','delta','psi'))
     data.frame(phi   = as.numeric(e$phi),
                alpha = as.numeric(e$alpha),
@@ -508,19 +511,22 @@ for (i in 1:n_iter) {
                psi   = as.numeric(e$psi))
   })
   
-  current = list(mu_phi   = mean(draws$phi)  , tau_phi   = mean((draws$phi-mu_phi)^2),
-                 mu_alpha = mean(draws$alpha), tau_alpha = mean((draws$alpha-mu_alpha)^2),
-                 mu_delta = mean(draws$delta), tau_delta = mean((draws$delta-mu_delta)^2),
-                 mu_psi   = mean(draws$psi)  , tau_psi   = mean((draws$psi-mu_psi)^2))
+  current = data.frame(mu_phi = mean(draws$phi)) %>%
+    mutate(mu_alpha = mean(draws$alpha),
+           mu_delta = mean(draws$delta),
+           mu_psi   = mean(draws$psi),
+           tau_phi    = mean((draws$phi   - current$mu_phi)^2),
+           tau_alpha  = mean((draws$alpha - current$mu_alpha)^2),
+           tau_delta  = mean((draws$delta - current$mu_delta)^2),
+           tau_psi    = mean((draws$psi   - current$mu_psi)^2))
+  
   keep$mu_phi[i]   = current$mu_phi;   keep$tau_phi[i]   = current$tau_phi
   keep$mu_alpha[i] = current$mu_alpha; keep$tau_alpha[i] = current$tau_alpha
   keep$mu_delta[i] = current$mu_delta; keep$tau_delta[i] = current$tau_delta
   keep$mu_psi[i]   = current$mu_psi;   keep$tau_psi[i]   = current$tau_psi
 }
 @
-\end{frame}
 
-\begin{frame}[fragile]
 <<dependson=c('normal_hierarchical_mean_em','normal_hierarchical_mean_mcem'), echo=FALSE>>=
 ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
        aes(iteration, value)) +
@@ -528,8 +534,6 @@ ggplot(melt(keep, id.var=c("iteration"), variable.name="parameter"),
   facet_wrap(~parameter, scales="free_y", nrow=2) +
   geom_hline(data=melt(truth, variable.name='parameter'), aes(yintercept=value))
 @
-
-
 \end{frame}
 
 
