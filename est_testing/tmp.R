@@ -51,8 +51,9 @@ res = ldply(1:100,function(i){
     one_g = filter(sim$data,gene==i)
     X=matrix(c(rep(c(1,1,1),each=4),rep(c(-1,1,0),each=4),rep(c(0,0,1),each=4)),12,3)
     ffit = glm.fit(x=X,
-                   y=one_g$count,offset = fit$offset[1,]-mean(fit$offset[1,]),
+                   y=one_g$count, offset = fit$offset[1,]-mean(fit$offset[1,]),
                    family=negative.binomial(theta=theta[i]))
+    
     se = sqrt(diag(solve(t(X)%*%diag(ffit$weights)%*%X))) #std errors
   })
   cbind(hat,SE)
@@ -60,24 +61,24 @@ res = ldply(1:100,function(i){
 
 
 
-res$sim = rep(1:100,each=G)
-res$gene = rep(1:G,times=100)
-emp_sd = ddply(res, .(gene), summarise,
-               sd_phat = sd(phi),
-               sd_ahat = sd(alpha),
-               sd_dhat = sd(delta))
-
-g = sample(G, 1)
-filter(res, gene == g, -psi) %>%
-  ggplot(aes(x = V3)) + geom_histogram(binwidth=.02) +
-  geom_vline(xintercept=emp_sd$sd_dhat[g])
-
-emp_tr_se = filter(res,)
-  melt(res,id.vars="sim",value.name = "mean") %>%
-  ddply(.(sim,par),summarise,
-        sd())
-
-round(cbind(sd(res$delta[,3]),quantile(res$V3,0:10*.1)),3)
-
-
-
+# res$sim = rep(1:100,each=G)
+# res$gene = rep(1:G,times=100)
+# emp_sd = ddply(res, .(gene), summarise,
+#                sd_phat = sd(phi),
+#                sd_ahat = sd(alpha),
+#                sd_dhat = sd(delta))
+# 
+# g = sample(G, 1)
+# filter(res, gene == g, -psi) %>%
+#   ggplot(aes(x = V3)) + geom_histogram(binwidth=.02) +
+#   geom_vline(xintercept=emp_sd$sd_dhat[g])
+# 
+# emp_tr_se = filter(res,)
+#   melt(res,id.vars="sim",value.name = "mean") %>%
+#   ddply(.(sim,par),summarise,
+#         sd())
+# 
+# round(cbind(sd(res$delta[,3]),quantile(res$V3,0:10*.1)),3)
+# 
+# 
+# 
