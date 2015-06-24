@@ -7,6 +7,7 @@ library(stats)
 
 parallel=FALSE
 if(require(doMC)){
+  registerDoMC(12)
   parallel=TRUE
 }
 
