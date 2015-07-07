@@ -7,7 +7,7 @@ single_gene_analysis = function(counts) {
     r = sampling(model, 
                  data = c(list(S       = length(counts), 
                                count   = as.numeric(counts),
-                               variety = as.numeric(factor(gsub("_[1-4]", "", colnames(counts)), levels=c("B73","Mo17","B73xMo17")))),
+                               variety = as.numeric(factor(gsub("_[0-9]{1,2}", "", colnames(counts)), levels=c("B73","Mo17","B73xMo17")))),
                           hyperparameters),
                  pars = c("phi","alpha","delta","psi","LPH","HPH"),
                  iter = 2000*attempt,
