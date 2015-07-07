@@ -60,6 +60,9 @@ std_errs = res2 %>%
                 q25 = quantile(se,.01),
                 q75 = quantile(se,.95))
 
+emp_exp_se = ddply(std_errs,.(parameter), summarize,
+                    m = mean(emp_se))
+
 ggplot(filter(std_errs,mean_se<10),aes(x=emp_se, y=median_se, ymin=q25, ymax=q75))+
   geom_errorbar(alpha=0.1) + geom_point(color="red",alpha=0.1) + geom_abline(yintercept=0,slope=1)+
   facet_wrap(~parameter,scales="free")
@@ -73,6 +76,12 @@ upper.trim.mean <- function(x,trim) {
   x <- sort(x) 
   mean(x[1:floor(length(x)*(1-trim))])
 }
+
+ddply(res2,.(sim,parameter),summarise,
+      m = median(se)
+) %>%
+    ggplot(aes(x=m)) + geom_histogram() + facet_wrap(~parameter, scales="free") +
+      geom_vline(aes(xintercept=m),data=emp_exp_se)
 
 adjusted_scls = filter(res2, !(gene %in% extra_look)) %>%
                   ddply(.(sim,parameter),summarise,
