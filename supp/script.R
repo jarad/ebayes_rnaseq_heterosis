@@ -11,7 +11,7 @@ source("single_gene_analysis.R")
 # Get hyperparameters
 ##################################################
 d = read.csv("data.csv", row.names=1)
-variety = factor(gsub("_[1-4]", "", names(d)), levels=c("B73","Mo17","B73xMo17"))
+variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xMo17"))
 
 # trim genes for average count greater than 1
 #d = d[which(rowMeans(d)>1),] 
