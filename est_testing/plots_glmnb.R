@@ -27,7 +27,7 @@ res$type = 'estimate'
 p = melt(p, id.vars = c('gene','type'), variable.name = 'par', value.name = 'coef')
 
 
-stats = rbind(p,select(filter(res,method=='glm.nb',par!='theta'), -se, -method)) %>%
+stats = rbind(p,select(filter(res,method=='glm.nb',par!='theta'), -se, -method,-sim)) %>%
   group_by(gene,par) %>%
   summarize(truth = unique(coef[type=='truth']),
             bias  = mean(coef[type=='estimate'] - coef[type=='truth'],na.rm=T), 
@@ -69,32 +69,34 @@ extra_look = filter(std_errs, !(par %in% c('psi','theta')), median_se>1) %>%
 
 p[extra_look[,1],]
 
-upper.trim.mean <- function(x,trim) {
-  x <- sort(x) 
-  mean(x[1:floor(length(x)*(1-trim))])
-}
 
-index = which(res$gene==100)
-times = diff(c(1,index[1:99*5+1]))
-res$sim = sapply(1:100,function(x) rep(x,times[x]))
+# index = which(res$gene==100)
+# times = diff(c(1,index[1:99*5+1]))
+# res$sim = sapply(1:100,function(x) rep(x,times[x]))
+
+
 ddply(res,.(sim,par),summarise,
       m = median(se)
       ) %>%
     ggplot(aes(x=m)) + geom_histogram() + facet_wrap(~par, scales="free") +
       geom_vline(aes(xintercept=m),data=emp_exp_se)
 
-adjusted_scls = filter(res2, !(gene %in% extra_look)) %>%
-                  ddply(.(sim,parameter),summarise,
-                      mom = sd(est),
-                      adj = sqrt(var(est) - upper.trim.mean(se^2,trim=.05))) %>%
-                  mutate(mom = ifelse(parameter %in% c('alpha','delta'), mom / sqrt(2), mom)) %>%
-                  mutate(adj = ifelse(parameter %in% c('alpha','delta'), adj / sqrt(2), adj))
+adjusted_scls = filter(res, !(gene %in% extra_look)) %>%
+                  ddply(.(sim,par),summarise,
+                      mom = sd(coef),
+                      adj = sqrt(var(coef) - median(se^2))) %>%
+                  mutate(mom = ifelse(par %in% c('alpha','delta'), mom / sqrt(2), mom)) %>%
+                  mutate(adj = ifelse(par %in% c('alpha','delta'), adj / sqrt(2), adj))
 
+names(hyp.truth)[1] <- "par"
+fadj_scl = filter(adjusted_scls, !(par %in% c("psi","theta")))
+fadj_scl$par = factor(fadj_scl$par)
 
-ggplot(adjusted_scls, aes(x=adj)) + geom_histogram() + 
-  facet_wrap(~parameter,scales="free") +
-  geom_vline(aes(xintercept=tr.scale), color="red",
-    data=filter(hyp.truth, parameter != 'psi'))
+filter(fadj_scl, !(is.na(par))) %>%
+  ggplot(aes(x=adj)) + geom_histogram() + 
+    facet_wrap(~par,scales="free") +
+    geom_vline(aes(xintercept=tr.scale), color="red",
+      data=filter(hyp.truth, par != 'psi'))
 
 
 #plot sample se's for arbitrary gene vs. empirical std. error
