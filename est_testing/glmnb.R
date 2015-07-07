@@ -7,7 +7,7 @@ library(stats)
 
 parallel=FALSE
 if(require(doMC)){
-  registerDoMC(12)
+  registerDoMC(8)
   parallel=TRUE
 }
 
@@ -73,7 +73,7 @@ res = ldply(1:100, function(r){
           return(valid.res(f))
     })
   fit$sim = r
-  fit
+  return(fit)
 }, .progress = 'text', .parallel = parallel)
 
 
