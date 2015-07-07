@@ -19,7 +19,10 @@ set.seed(101469)
 
 # 
 G = 2500
-d = sim_heterosis_data(G, nv=4, verbose=1)
+hyp.truth = data.frame(parameter = c("phi","alpha","delta","psi"),
+                       tr.mean   = c(4.6,0,0,-2),
+                       tr.scale  = c(1.8,.1,.01,.1))
+d = sim_heterosis_data(G, nv=4, hyperparameters = hyp.truth, verbose=1)
 p = d$parameters # Get gene specific parameter draws
 
 # phi, alpha, delta parameterization
@@ -69,7 +72,7 @@ res = ldply(1:100, function(r){
                        error = function(e){NULL})
           return(valid.res(f))
     })
-  fit
+  fit$sim = r
 }, .progress = 'text', .parallel = parallel)
 
 
