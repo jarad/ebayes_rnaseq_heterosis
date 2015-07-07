@@ -48,7 +48,7 @@ extract.fit = function(f){
     se   = c(se, Inf, 0)
   } else {
     coef = c(coef,f$theta,-log(f$theta))
-    se   = c(se,f$SE.theta, 1/f$theta * f$SE.theta^2) #delta method
+    se   = c(se,f$SE.theta, 1/f$theta * f$SE.theta) #delta method
   }
   
   data.frame(par = c("phi","alpha","delta","theta","psi"), coef, se, method)
@@ -73,6 +73,7 @@ res = ldply(1:100, function(r){
           return(valid.res(f))
     })
   fit$sim = r
+  fit
 }, .progress = 'text', .parallel = parallel)
 
 
