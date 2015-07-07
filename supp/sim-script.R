@@ -43,7 +43,7 @@ for (rds in rds_files) {
                    .parallel = parallel,
                    .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
   
-  rownames(analysis) = rownames(d)[wh]
+  rownames(analysis) = rownames(d)
   
 
   results[[rds]] = analysis[,c("prob_LPH","prob_HPH","effectiveSize")]
