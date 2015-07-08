@@ -35,11 +35,19 @@ if (parallel <- require(doMC)) {
   registerDoParallel(cl)
 }
 
-wh = 1:200
-analysis = adply(d[wh,],
+sink("script.temp")
+
+analysis = adply(d,
                  1,
                  function(x) single_gene_analysis(x),
                  .id = 'gene',
                  .parallel = parallel,
                  .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
 
+sink()
+unlink("script.temp")
+
+rownames(analysis) = rownames(d)
+saveRDS(analysis, file="script.rds")
+
+q(ifelse(interactive(), "ask", "no"))
