@@ -53,5 +53,5 @@ get_std_err_adj_hyperpar = function(d, variety) {
        sigma_alpha = sqrt(ss$sd[ss$parameter=='alpha']^2 - med_se$alpha^2)/sqrt(2), # Fix sd for Laplace priors
        sigma_delta = sqrt(ss$sd[ss$parameter=='delta']^2 - med_se$delta^2)/sqrt(2), # Fix sd for Laplace priors
        sigma_psi   = ss$sd[ss$parameter=='psi'],
-       c = fit$offset[1,] - mean(fit$offset[1,]))
+       c = offset)
 }
