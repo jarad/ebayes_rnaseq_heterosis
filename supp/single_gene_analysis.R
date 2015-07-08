@@ -27,7 +27,11 @@ single_gene_analysis = function(counts) {
     
   
   data.frame(
-    prob_LPH = s[rownames(s) == "LPH","mean"],
-    prob_HPH = s[rownames(s) == "HPH","mean"],
+    phi      = s[rownames(s) == "phi",  "mean"],
+    alpha    = s[rownames(s) == "alpha","mean"],
+    delta    = s[rownames(s) == "delta","mean"],
+    psi      = s[rownames(s) == "psi",  "mean"],
+    prob_LPH = s[rownames(s) == "LPH",  "mean"],
+    prob_HPH = s[rownames(s) == "HPH",  "mean"],
     effectiveSize = effectiveSize)
 }
