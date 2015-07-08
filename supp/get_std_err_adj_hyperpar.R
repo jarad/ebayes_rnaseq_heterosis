@@ -1,4 +1,7 @@
 get_std_err_adj_hyperpar = function(d, variety) {
+  
+  require(MASS)
+  
   # phi, alpha, delta parameterization
   design = cbind(1,
                  c(1,-1,0)[as.numeric(variety)],
@@ -20,11 +23,12 @@ get_std_err_adj_hyperpar = function(d, variety) {
                    psi   = log(fit$dispersion))
   
   theta = 1/fit$dispersion
+  offset = fit$offset[1,] - mean(fit$offset[1,])
   
   med_se = ldply(1:nrow(d), function(gene){
     wts = glm.fit(x=design,
-                 y=d[gene,],
-                 offset = fit$offset[1,]-mean(fit$offset[1,]),
+                 y=as.numeric(d[gene,]),
+                 offset = offset,
                  family=negative.binomial(theta=theta[gene]))$weights
     
     se = sqrt(diag(solve(t(design) %*% diag(wts) %*% design))) #std errors
