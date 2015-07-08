@@ -50,7 +50,7 @@ melt(stats,id.vars=c('gene','par','truth'), variable.name='measure') %>%
 
 
 # calculate empirical standard errors, summary of est. std. errors
-std_errs = filter(res,se < 10) %>%
+std_errs = filter(res,se < 10,method=="glm.nb") %>%
               ddply(.(gene,par),summarize,
                 emp_se = sd(coef,na.rm=T),
                 mean_se = mean(se,na.rm=T),

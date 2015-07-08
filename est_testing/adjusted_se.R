@@ -1,3 +1,6 @@
+#While fitting to simulated data, follow DN's suggestion
+# of correcting moment estimate with "expected" variance of estimate
+
 library(MASS)
 library(plyr)
 library(dplyr)
