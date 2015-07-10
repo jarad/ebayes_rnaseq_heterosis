@@ -10,8 +10,8 @@ single_gene_analysis = function(counts) {
                                variety = as.numeric(factor(gsub("_[0-9]{1,2}", "", colnames(counts)), levels=c("B73","Mo17","B73xMo17")))),
                           hyperparameters),
                  pars = c("phi","alpha","delta","psi","LPH","HPH"),
-                 iter = 2000*attempt,
-                 thin = attempt)
+                 iter = 2000*2^(attempt-1),
+                 thin = 2^(attempt-1))
     
     # Check PSRF for (lack of) convergence
     s = summary(r)$summary
