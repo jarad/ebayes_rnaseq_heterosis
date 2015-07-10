@@ -45,6 +45,6 @@ generated quantities {
   int<lower=0, upper=1> LPH;
   int<lower=0, upper=1> HPH;
   
-  LPH <- fabs(delta) < -fabs(alpha);
+  LPH <-      delta  < -fabs(alpha);
   HPH <- fabs(delta) >  fabs(alpha);
 }
