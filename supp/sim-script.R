@@ -24,9 +24,9 @@ if(length(args)==0){
   }
 }
 
-rds = system("ls -S -r sim-data/*.rds", TRUE)[i]
+data_file = paste0("sim-data/sim-", r, "-", 1:n_sims,'.rds')
 
-d = as.data.frame(readRDS(rds)); n = ncol(d)/3
+d = as.data.frame(readRDS(data_file)); n = ncol(d)/3
 names(d) = c(paste("B73_",1:n, sep=''), paste('Mo17_',1:n, sep=''), paste('B73xMo17_',1:n, sep=''))
 variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xMo17"))
 
@@ -36,7 +36,7 @@ hyperparameters = get_hyperparameters(d, variety)
 
 
 
-######################################
+# ######################################
 # Run individual gene analyses
 ######################################
 
@@ -48,19 +48,19 @@ if (parallel <- require(doMC)) {
   registerDoParallel(cl)
 }
 
-wh = 1:2
-analysis = adply(d[wh,],
+analysis = adply(d,
                  1,
                  function(x) single_gene_analysis(x),
                  .id = 'gene', 
                  .parallel = parallel,
                  .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
 
-rownames(analysis) = rownames(d)[wh]
+rownames(analysis) = rownames(d)
 
 
 results = analysis[,c("prob_LPH","prob_HPH","effectiveSize")]
-saveRDS(results, file=paste('sim-results',i,'.rds',sep=''))
+
+saveRDS(results, file=paste0("results/results-", r, "-", i,'.rds'))
 
 
 q(ifelse(interactive(), "ask","no"))
