@@ -24,7 +24,7 @@ if(length(args)==0){
   }
 }
 
-data_file = paste0("sim-data/sim-", r, "-", 1:n_sims,'.rds')
+data_file = paste0("sim-data/sim-", r, "-", i,'.rds')
 
 d = as.data.frame(readRDS(data_file)); n = ncol(d)/3
 names(d) = c(paste("B73_",1:n, sep=''), paste('Mo17_',1:n, sep=''), paste('B73xMo17_',1:n, sep=''))
