@@ -8,7 +8,7 @@ r_command = 'R CMD BATCH --vanilla'
 screen_width = 60
 
 cat(rep('#', screen_width), '\n', sep='', file=makefile, append=FALSE)
-cat('     DO NOT TOUCH \n', file=makefile, append=TRUE)
+cat('#     DO NOT TOUCH \n', file=makefile, append=TRUE)
 cat(rep('#', screen_width), '\n', sep='', file=makefile, append=TRUE)
 cat('# Automatically created using make_makefile.R\n\n', 
     file=makefile, 
@@ -16,7 +16,7 @@ cat('# Automatically created using make_makefile.R\n\n',
 
 for (r in n_reps) {
   cat(rep("#",screen_width), "\n", sep='', file=makefile, append=TRUE)
-  cat("#Targets for ", r, "reps per variety\n", file=makefile, append=TRUE)
+  cat("# Targets for ", r, "reps per variety\n", file=makefile, append=TRUE)
   cat(rep("#",screen_width), "\n", sep='', file=makefile, append=TRUE)  
   
   # Vectors of files
