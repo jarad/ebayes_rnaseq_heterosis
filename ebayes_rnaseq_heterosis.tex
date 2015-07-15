@@ -93,7 +93,7 @@ We assume a hierarchical model for the gene-specific mean parameters and overdis
 \[ 
 %\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
 \phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), \quad \mbox{and}\quad 
-\psi_g \stackrel{ind}{\sim} N(0,\sigma_\psi^2). 
+\psi_g \stackrel{ind}{\sim} N(\eta_\psi,\sigma_\psi^2). 
 \]
 To allow for more shrinkage with the half-parental and hybrid differences, we use a Laplace (or double exponential prior) and thus implement a Bayesian LASSO \citep{park2008bayesian}, i.e. 
 \[ 
@@ -117,7 +117,7 @@ Conditional on the estimated normalization factors $\hat{\gamma}$ and hyperparam
 p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right) 
 %&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
 %&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] p(\theta_g|\hat{\eta},\hat{\sigma}) \\
-\propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
+\propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} \mbox{NB}\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
 &\times 
 \left. \vphantom{\prod_{v=1}^V}
 N(\phi_g;\hat{\eta}_\phi, \hat{\sigma}_\phi^2)
@@ -165,7 +165,7 @@ where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample f
 
 \subsection{Implementation in \ShrinkBayes{}} \label{s:shrinkbayes}
 
-\ShrinkBayes{} utilizes integrated nested Laplace approximation (INLA) \citep{rue2009approximate} in combination with empirical Bayes ideas \citep{van2014shrinkbayes}. One limitation with inferential methods based on INLA is that all distributions, except for the data distribution, must have tails as light or lighter than the normal density. Thus, we cannot implement the Laplace priors for the half-parental difference ($\alpha_g$) and the hybrid difference ($\delta_g$) and instead use normal priors in this situation. An additional limitation is that INLA provides approximations to marginal posteriors for parameters or linear combinations of parameters, but not an approximation to the full posterior. Since we are interested in non-linear quantities such as $P(\delta_g > |\alpha_g||y)$, we cannot compute these directly using \ShrinkBayes{}. Instead, for \ShrinkBayes{}, we calculate heterosis probabilities conditional on posterior means for $\hat{\delta}_g$ and $\hat{\alpha}_g$, e.g. 
+In addition to the approach above, we utilized \ShrinkBayes{} to estimate heterosis probabilities with two modifications described here. \ShrinkBayes{} utilizes integrated nested Laplace approximation (INLA) \citep{rue2009approximate} in combination with empirical Bayes ideas \citep{van2014shrinkbayes}. One limitation with inferential methods based on INLA is that all distributions, except for the data distribution, must have tails as light or lighter than the normal density. Thus, we cannot implement the Laplace priors for the half-parental difference ($\alpha_g$) and the hybrid difference ($\delta_g$) and instead use normal priors in this situation. An additional limitation is that INLA provides approximations to marginal posteriors for parameters or linear combinations of parameters, but not an approximation to the full posterior. Since we are interested in non-linear quantities such as $P(\delta_g > |\alpha_g||y)$, we cannot compute these directly using \ShrinkBayes{}. Instead, for \ShrinkBayes{}, we calculate heterosis probabilities conditional on posterior means for $\hat{\delta}_g$ and $\hat{\alpha}_g$, e.g. 
 \[ 
 % P_{\ShrinkBayes{}}(LPH_g|y) \equiv \left\{ \begin{array}{ll}
 % P(\delta_g>-\alpha_g|y) & \mbox{if } \hat{\delta}_g > -\hat{\alpha}_g \ge 0 \\
