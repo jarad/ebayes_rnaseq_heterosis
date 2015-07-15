@@ -1,9 +1,7 @@
 library(ggplot2)
+library(gridExtra)
 
 d = readRDS("script.rds")
-
-d$prob_HPH = d$prob_HPH - d$prob_LPH # fix until model.stan is updated
-
 
 ##########################################################################################
 # Volcano plot
