@@ -9,7 +9,7 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-\newcommand{\blind}{0} % 0 = not blind, 1 = blind
+\newcommand{\blind}{1} % 0 = not blind, 1 = blind
 
 %\newcommand{\Stan}{{\tt Stan}}
 \newcommand{\Stan}{Stan}
@@ -34,7 +34,7 @@ Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
 
 \begin{document}
 
-\date{{\it Received December} 2014} 
+\date{{\it Received July} 2015} 
 
 \pagerange{\pageref{firstpage}--\pageref{lastpage}} 
 \volume{VV}
@@ -45,7 +45,8 @@ Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
 \label{firstpage}
 
 \begin{abstract}
-Heterosis, or hybrid vigor, refers to the enhancements in the phenotype of hybrid progeny relative to their inbred parents. Although the heterosis phenomenon is extensively utilized in agriculture, the molecular basis of heterosis is still largely unknown. In an effort to understand phenotypic heterosis at the molecular level, researchers have begun to measure transcript abundance levels of thousands of genes in parental inbred lines and their hybrid offspring using RNA sequencing (\RNAseq{}) technology.  The resulting data allow researchers to search for evidence of gene expression heterosis as one potential molecular mechanism underlying heterosis of agriculturally important traits.  The null hypotheses of greatest interest in testing for gene expression heterosis are composite null hypotheses that are difficult to test with standard statistical approaches for \RNAseq{} analysis. To address these shortcomings, we develop a hierarchical negative binomial model and draw inferences using a computationally tractable empirical Bayes approach to inference. We demonstrate improvements over alternative methods via a simulation study based on a maize experiment and then analyze that maize experiment with our newly proposed methodology. This article has supplementary material online.
+Heterosis, or hybrid vigor, refers to the enhancements in the phenotype of hybrid progeny relative to their inbred parents. Although the heterosis phenomenon is extensively utilized in agriculture, the molecular basis of heterosis is still largely unknown. In an effort to understand phenotypic heterosis at the molecular level, researchers have begun to measure transcript abundance levels of thousands of genes in parental inbred lines and their hybrid offspring using RNA sequencing (\RNAseq{}) technology.  The resulting data allow researchers to search for evidence of gene expression heterosis as one potential molecular mechanism underlying heterosis of agriculturally important traits.  The null hypotheses of greatest interest in testing for gene expression heterosis are composite null hypotheses that are difficult to test with standard statistical approaches for \RNAseq{} analysis. To address these shortcomings, we develop a hierarchical negative binomial model and draw inferences using a computationally tractable empirical Bayes approach to inference. We demonstrate improvements over alternative methods via a simulation study based on a maize experiment and then analyze that maize experiment with our newly proposed methodology. 
+% This article has supplementary material online.
 \end{abstract}
 
 \begin{keywords}
@@ -309,10 +310,10 @@ The authors thank Andrew Lithio for help in implementing our model in \ShrinkBay
 %  include this section!!  See Instructions for Authors at the journal
 %  website http://www.biometrics.tibs.org
 
-\section*{Supplementary Materials}
+%\section*{Supplementary Materials}
 
-The supplementary materials include three plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on this data, and the \Stan{} model ({\tt model.stan}).  
-%the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
+%The supplementary materials include three plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on this data, and the \Stan{} model ({\tt model.stan}).  
+ 
 
 \bibliography{jarad}
 \bibliographystyle{biom}
