@@ -7,7 +7,7 @@ combined = ddply(expand.grid(r = c(4,8,16), i = 1:10), .(r,i), function(x) {
   data.frame(geneid = rownames(d),
              sim = x$i, 
              sample.size = x$r, 
-             phph = d$prob_HPH - d$prob_LPH, # temporary fix until model.stan gets fixed
+             phph = d$prob_HPH, 
              plph = d$prob_LPH)
 })
 

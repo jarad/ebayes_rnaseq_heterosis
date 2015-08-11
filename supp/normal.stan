@@ -34,10 +34,10 @@ transformed parameters {
   pad[3] <- delta;
 }
 model {
-  phi   ~ normal(            eta_phi,   sigma_phi);
-  alpha ~ double_exponential(eta_alpha, sigma_alpha); // Laplace
-  delta ~ double_exponential(eta_delta, sigma_delta); // Laplace
-  psi   ~ normal(            eta_psi,   sigma_psi);
+  phi   ~ normal(eta_phi,   sigma_phi);
+  alpha ~ normal(eta_alpha, sigma_alpha); 
+  delta ~ normal(eta_delta, sigma_delta); 
+  psi   ~ normal(eta_psi,   sigma_psi);
 
   count ~ neg_binomial_2_log(X*pad+c, 1/exp(psi));
 }
@@ -45,6 +45,6 @@ generated quantities {
   int<lower=0, upper=1> LPH;
   int<lower=0, upper=1> HPH;
   
-  LPH <-      delta  < -fabs(alpha);
-  HPH <- fabs(delta) >  fabs(alpha); // Need to remove fabs
+  LPH <- delta < -fabs(alpha);
+  HPH <- delta >  fabs(alpha); 
 }

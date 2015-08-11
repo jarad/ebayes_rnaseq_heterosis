@@ -1,7 +1,0 @@
-data.csv:   the B73-Mo17 data set
-model.stan: the stan model file
-
-script.R:     an R script to run the data analysis
-sim_script.R: an R script to run the simulation analysis
-get_hyperparameters: function to obtain hyperparameters
-single_gene_analysis: function to run MCMC for a gene conditional on hyperparameters
