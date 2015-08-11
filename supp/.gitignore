@@ -5,3 +5,8 @@ script.Rout
 script.rds
 script.temp
 supp.zip
+
+nohup.out
+
+Rout/
+
