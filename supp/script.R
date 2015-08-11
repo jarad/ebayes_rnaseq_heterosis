@@ -4,7 +4,6 @@ library(dplyr)
 library(reshape2)
 library(edgeR)
 
-source("get_std_err_adj_hyperpar.R")
 source("get_hyperparameters.R")
 source("single_gene_analysis.R")
 
@@ -16,8 +15,6 @@ variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xM
 
 # trim genes for average count greater than 1
 #d = d[which(rowMeans(d)>1),] 
-
-hyperparameters = get_std_err_adj_hyperpar(d, variety)
 hyperparameters = get_hyperparameters(d, variety)
 
 
