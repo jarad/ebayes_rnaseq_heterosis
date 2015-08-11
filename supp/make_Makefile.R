@@ -23,7 +23,7 @@ for (r in n_reps) {
   cat(rep("#",screen_width), "\n", sep='', file=makefile, append=TRUE)  
   
   # Vectors of files
-  result_file = paste0("results-2/results-", r, "-", 1:n_sims,'.rds')
+  result_file = paste0("results/results-", r, "-", 1:n_sims,'.rds')
   data_file   = paste0("sim-data/sim-", r, "-", 1:n_sims,'.rds')
   Rout_file   = paste0("sim-", r, "-", 1:n_sims,'.Rout')
   
@@ -33,7 +33,7 @@ for (r in n_reps) {
     append=TRUE)
   
   for (i in 1:n_sims) {
-    cat(result_file[i], ": sim-script2.R ", data_file[i], "\n\t", 
+    cat(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
         r_command, " '--args r=", r, " i=", i, "' sim-script2.R ",
         Rout_file[i], " \n\n",
         sep='',
