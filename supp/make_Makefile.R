@@ -9,7 +9,7 @@ screen_width = 60
 
 catf = function(...) cat(..., sep='', file=makefile, append=TRUE)
 
-cat(rep('#', screen_width), '\n', file=makefile, append=FALSE)
+cat(rep('#', screen_width), '\n', sep='', file=makefile, append=FALSE)
 catf('#     DO NOT TOUCH \n')
 catf(rep('#', screen_width), '\n')
 catf('# Automatically created using make_Makefile.R\n\n')
@@ -17,13 +17,21 @@ catf('# Automatically created using make_Makefile.R\n\n')
 # Main targets
 methods = c('laplace','normal')
 
-catf('all: ', paste(methods, collapse=' '), '\n\n')
+catf('all: ', paste(methods, collapse=' '), '\n')
 
 for (m in methods) {
-  catf(m, ': ', paste(m, n_reps, sep='', collapse=' '), '\n\n')
+  catf(m, ': ', paste(m, n_reps, sep='', collapse=' '), '\n')
 }
 
-catf('files = README.txt script.R figs.R get_hyperparameters.R single_gene_analysis.R model.stan\n\nzip: $(files); zip supp.zip $(files)\n\n')
+
+catf('\nclean: ', paste('clean-', methods, sep='', collapse=' '), '\n')
+
+for (m in methods) {
+  catf('clean-', m, ': ', paste('clean-', m, n_reps, sep='', collapse=' '), '\n')
+}
+
+
+catf('\nfiles = README.txt script.R figs.R get_hyperparameters.R single_gene_analysis.R model.stan\n\nzip: $(files); zip supp.zip $(files)\n\n')
 
 
 # Sub targets
@@ -31,7 +39,7 @@ catf('files = README.txt script.R figs.R get_hyperparameters.R single_gene_analy
 for (m in methods) {
   for (r in n_reps) {
     catf(rep('#',screen_width), '\n')
-    catf('# Targets for ', r, 'reps per variety\n')
+    catf('# Targets for ', r, ' reps per variety using method ', m, '\n')
     catf(rep('#',screen_width), '\n')  
     
     # Vectors of files
@@ -43,12 +51,12 @@ for (m in methods) {
     
     for (i in 1:n_sims) {
       catf(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
-           r_command, " '--args r=", r, " i=", i, ," m=", m, "' sim-script.R ",
+           r_command, " '--args r=", r, " i=", i,' m=\"', m, "\"' sim-script.R ",
            Rout_file[i], " \n\n")
     }
     
     catf("clean-", m, r,":\n\trm -fv ", 
-         paste(result_file, collapse=' '),"\n\n")
+         paste(result_file, Rout_file, collapse=' '),"\n\n")
   }
 }
 
