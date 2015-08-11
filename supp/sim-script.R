@@ -4,11 +4,18 @@ library(dplyr)
 library(reshape2)
 library(edgeR)
 
+# Need to pass as arguments (or assign)
+# r: number of replicates per variety (4, 8, 16)
+# i: simulation number (1-10)
+# m: statistical method ('laplace' or 'normal')
+
+
 source("get_hyperparameters.R")
 source("single_gene_analysis.R")
 
 # Compile stan model
-model = stan_model("model.stan")
+if (m == 'laplace') model = stan_model("laplace.stan")
+if (m == 'normal' ) model = stan_model("normal.stan")
 
 # Use command line arguments
 # R CMD BATCH --vanilla '--args i=1' sim-script.R 
@@ -32,7 +39,7 @@ variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xM
 
 # trim genes for average count greater than 1
 # d = d[which(rowMeans(d)>1),] 
-hyperparameters = get_hyperparameters(d, variety)
+hyperparameters = get_hyperparameters(d, variety, method=m)
 
 
 
