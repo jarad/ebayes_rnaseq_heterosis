@@ -9,16 +9,7 @@ library(edgeR)
 # i: simulation number (1-10)
 # m: statistical method ('laplace' or 'normal')
 
-
-source("get_hyperparameters.R")
-source("single_gene_analysis.R")
-
-# Compile stan model
-if (m == 'laplace') model = stan_model("laplace.stan")
-if (m == 'normal' ) model = stan_model("normal.stan")
-
-# Use command line arguments
-# R CMD BATCH --vanilla '--args i=1' sim-script.R 
+# R CMD BATCH --vanilla '--args r=4 i=1 m ="laplace"' sim-script.R 
 args=(commandArgs(TRUE))
 
 if(length(args)==0){
@@ -30,6 +21,17 @@ if(length(args)==0){
     eval(parse(text=args[[i]]))
   }
 }
+
+
+
+
+source("get_hyperparameters.R")
+source("single_gene_analysis.R")
+
+# Compile stan model
+if (m == 'laplace') model = stan_model("laplace.stan")
+if (m == 'normal' ) model = stan_model("normal.stan")
+
 
 data_file = paste0("sim-data/sim-", r, "-", i,'.rds')
 
