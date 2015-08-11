@@ -9,7 +9,7 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-\newcommand{\blind}{0} % 0 = not blind, 1 = blind
+\newcommand{\blind}{1} % 0 = not blind, 1 = blind
 
 %\newcommand{\Stan}{{\tt Stan}}
 \newcommand{\Stan}{Stan}
@@ -34,7 +34,7 @@ Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
 
 \begin{document}
 
-\date{{\it Received December} 2014} 
+\date{{\it Received July} 2015} 
 
 \pagerange{\pageref{firstpage}--\pageref{lastpage}} 
 \volume{VV}
@@ -291,7 +291,7 @@ These figures show markedly departure from marginal model assumptions, e.g. norm
 
 In addition to improving the hierarchical distribution, we believe better estimates of the parameters of this distribution, i.e. the hyperparameters, will also improve detection of gene-expression heterosis. Our current method, based on moment matching of essentially independently estimated gene-specific parameters provides consistent estimators as the number of replicates per variety increases. But typically the number of replicates per variety is quite small, in our data there are only four replicates per variety, and therefore assymptotic justifications are deficient. There are a variety of hyperparameter estimation approaches to explore, e.g. expectation-maximization algorithms or fully Bayesian approaches.
 
-Notwithstanding these improvements, we believe our approach is a computationally efficient method that can immediately aid scientists who are interested in identifying candidate genes to explore a genetic mechanism of heterosis. 
+Notwithstanding these improvements, we believe our approach is a computationally efficient method that can immediately aid scientists who are interested in identifying candidate genes for a genetic mechanism of heterosis. 
 
 
 
@@ -311,8 +311,7 @@ The authors thank Andrew Lithio for help in implementing our model in \ShrinkBay
 
 \section*{Supplementary Materials}
 
-The supplementary materials include three plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on this data, and the \Stan{} model ({\tt model.stan}).  
-%the all-genes-independent (\verb@model_ind.txt@) and covariance (\verb@model_cov.txt@) models used in obtaining MAP estimates, along with the single-gene-independent (\verb@sg_model_ind.txt@) and covariance (\verb@sg_model_cov.txt@) models used in performing the MCMC on single genes. 
+The supplementary materials include these plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on these data, a script to create the figures ({\tt figs.R}), two functions ({\tt get\_hyperparameters.R} and {\tt single\_gene\_analysis.R}), and the \Stan{} model ({\tt model.stan}).  
 
 \bibliography{jarad}
 \bibliographystyle{biom}
