@@ -43,7 +43,7 @@ for (m in methods) {
     
     for (i in 1:n_sims) {
       catf(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
-           r_command, " '--args r=", r, " i=", i, "' sim-script.R ",
+           r_command, " '--args r=", r, " i=", i, ," m=", m, "' sim-script.R ",
            Rout_file[i], " \n\n")
     }
     
