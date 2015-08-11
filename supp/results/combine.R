@@ -2,7 +2,7 @@
 
 library(plyr)
 
-combined = ddply(expand.grid(r = c(4,8), i = 1:10), .(r,i), function(x) {  
+combined = ddply(expand.grid(r = c(4,8,16), i = 1:10), .(r,i), function(x) {  
   d = readRDS(paste("results-",x$r,"-",x$i,".rds", sep=''))
   data.frame(geneid = rownames(d),
              sim = x$i, 
