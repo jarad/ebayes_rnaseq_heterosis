@@ -34,7 +34,7 @@ for (r in n_reps) {
   
   for (i in 1:n_sims) {
     cat(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
-        r_command, " '--args r=", r, " i=", i, "' sim-script2.R ",
+        r_command, " '--args r=", r, " i=", i, "' sim-script.R ",
         Rout_file[i], " \n\n",
         sep='',
         file=makefile,
