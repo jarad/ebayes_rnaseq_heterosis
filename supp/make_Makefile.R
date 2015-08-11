@@ -19,7 +19,9 @@ methods = c('laplace','normal')
 
 catf('all: ', paste(methods, collapse=' '), '\n\n')
 
-catf('laplace: ', paste('laplace',n_reps, sep='', collapse=' '), '\n\n')
+for (m in methods) {
+  catf(m, ': ', paste(m, n_reps, sep='', collapse=' '), '\n\n')
+}
 
 catf('files = README.txt script.R figs.R get_hyperparameters.R single_gene_analysis.R model.stan\n\nzip: $(files); zip supp.zip $(files)\n\n')
 
@@ -37,7 +39,7 @@ for (m in methods) {
     data_file   = paste0('sim-data/sim-',          r, '-', 1:n_sims,'.rds')
     Rout_file   = paste0('Rout/',m,'/sim-',        r, '-', 1:n_sims,'.Rout')
     
-    catf(m,r, ': ', paste(result_file, collapse=' '),'\n\n')
+    catf(m, r, ': ', paste(result_file, collapse=' '),'\n\n')
     
     for (i in 1:n_sims) {
       catf(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
@@ -45,7 +47,7 @@ for (m in methods) {
            Rout_file[i], " \n\n")
     }
     
-    catf("clean",r,":\n\trm -fv ", 
+    catf("clean-", m, r,":\n\trm -fv ", 
          paste(result_file, collapse=' '),"\n\n")
   }
 }
