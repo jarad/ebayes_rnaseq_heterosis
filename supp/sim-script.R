@@ -57,14 +57,19 @@ if (parallel <- require(doMC)) {
   registerDoParallel(cl)
 }
 
+# Divert Stan out put to temporary file
 tmp_file = paste0("Rout/", m, "/sim-", r, "-", i,'.tmp')
 sink(file=tmp_file)
+
+# Run MCMC analysis on each gene
 analysis = adply(d,
                  1,
                  function(x) single_gene_analysis(x),
                  .id = 'gene', 
                  .parallel = parallel,
                  .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
+
+# Remove temporary file
 sink()
 unlink(tmp_file)
 
