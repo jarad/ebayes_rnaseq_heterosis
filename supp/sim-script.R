@@ -57,19 +57,24 @@ if (parallel <- require(doMC)) {
   registerDoParallel(cl)
 }
 
+tmp_file = paste0("Rout/", m, "/sim-", r, "-", i,'.tmp')
+sink(file=tmp_file)
 analysis = adply(d,
                  1,
                  function(x) single_gene_analysis(x),
                  .id = 'gene', 
                  .parallel = parallel,
                  .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
+sink()
+unlink(tmp_file)
+
 
 rownames(analysis) = rownames(d)
 
 
 results = analysis[,c("prob_LPH","prob_HPH","effectiveSize")]
 
-saveRDS(results, file=paste0("results/results-", r, "-", i,'.rds'))
+saveRDS(results, file=paste0("results/", m, "/sim-", r, "-", i,'.rds'))
 
 
 q(ifelse(interactive(), "ask","no"))
