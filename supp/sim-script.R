@@ -17,8 +17,8 @@ if(length(args)==0){
   ##supply default values
   i = 1
 }else{
-  for(i in 1:length(args)){
-    eval(parse(text=args[[i]]))
+  for(ii in 1:length(args)){
+    eval(parse(text=args[[ii]]))
   }
 }
 
