@@ -12,7 +12,7 @@ get_hyperparameters = function(d, variety, method) {
     estimateGLMTagwiseDisp(design) %>%
     glmFit(design)
   
-  # Calculate gene-specific estimates for phi, alpha, and delta
+  # Calculate gene-specific estimates for phi, alpha, delta, and psi
   hat = data.frame(gene = 1:length(fit$dispersion),
                    phi   = fit$coefficients[,1] + mean(fit$offset[1,]),
                    alpha = fit$coefficients[,2],
