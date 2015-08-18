@@ -1,24 +1,33 @@
 \documentclass{article}
 
+\usepackage{color}
+
+\usepackage[parfill]{parskip}
+
 \newcommand{\comment}[1]{\textit{#1}}
 \newcommand{\response}[1]{#1}
+\newcommand{\todo}[1]{{\color{red} #1}}
 
 \begin{document}
 
 
 Editor comments:
 
-\comment{The proposed model appears to be an extension of Ji et al. (2014) albeit with a differently specified likelihood function (negative binomial or Poisson-gamma) as perceived to be more appropriate for count data relative to the Gaussian likelihood function pursued in Ji et al. (2014). Both reviewers indicate that they are little underwhelmed by the performance of your proposed procedure relative to some of the existing methods that you compare against (i.e., ShrinkBayes, edgeR and baySeq).  Furthermore, they seem somewhat concerned about an ‘apples vs. oranges’ types of comparisons since the proposed hypothesis testing strategy in the proposed method is really not an option in the other methods.
-Perhaps a reference to the promise of allele specific expression analyses (Discussion section) for inferring upon gene-expression heterosis might be useful to point readers into other directions with this work (Bell et al., 2013; Wei and Wang, 2013).}
+\comment{The proposed model appears to be an extension of Ji et al. (2014) albeit with a differently specified likelihood function (negative binomial or Poisson-gamma) as perceived to be more appropriate for count data relative to the Gaussian likelihood function pursued in Ji et al. (2014). Both reviewers indicate that they are little underwhelmed by the performance of your proposed procedure relative to some of the existing methods that you compare against (i.e., ShrinkBayes, edgeR and baySeq).  Furthermore, they seem somewhat concerned about an ‘apples vs. oranges’ types of comparisons since the proposed hypothesis testing strategy in the proposed method is really not an option in the other methods.}
+
+\comment{Perhaps a reference to the promise of allele specific expression analyses (Discussion section) for inferring upon gene-expression heterosis might be useful to point readers into other directions with this work (Bell et al., 2013; Wei and Wang, 2013).}
 
 \comment{I realize that Ji et al.’s (2014) work was intended for microarray data, or more specifically Gaussian likelihoods, but there has been some work that suggests that Gaussian likelihood specifications in MAANOVA may, oddly enough, have better properties for the analysis of RNA-seq data than more popular methods specifically intended for count data (edgeR and DESeq).  See Reeb and Steibel (2013) and also comments from one reviewer along these lines.  Since Ji et al.’s work also derives from ISU, have you assessed its performance relative to your proposed method on RNA-seq data?}
 
-\comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing?
-The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
+% Email sent to Tieming Ji to see if she has the script.
 
-\comment{Page 1.  I was instructed that heterosis is merely characterized by the hybrid performance not being equal to the average of the two parental lines.  So in your very first sentence, I might write “Heterosis, or hybrid vigor, occurs when hybrid progeny display phenotypes that are superior to the average phenotypes of their parents.” i.e., I might be only interested in the $\delta_g$’s. However, your later characterization of heterosis is really something called overdominance to me…where the hybrid performance exceeds the performance of either parent.  I wonder if you could then be more specific in your definitions in your first sentence…and also in your third sentence in this particular paragraph.}
+\comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing?}
 
-\comment{Page 1 lines 48-59.  Perhaps this was already captured well in the Ji et al. (2014) paper but why not simply test heterosis as the difference between the hybrid and the average parental performance (i.e. $\mu_3 – 0.5 \mu_1 -0.5 \mu_2$).  Again, I think your issue pertains really to an overdominance test of some sort.}
+\comment{The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
+
+\comment{Page 1.  I was instructed that heterosis is merely characterized by the hybrid performance not being equal to the average of the two parental lines.  So in your very first sentence, I might write “Heterosis, or hybrid vigor, occurs when hybrid progeny display phenotypes that are superior to the average phenotypes of their parents.” i.e., I might be only interested in the $\delta_g$’s. However, your later characterization of heterosis is really something called overdominance to me…where the hybrid performance exceeds the performance of either parent.  I wonder if you could then be more specific in your definitions in your first sentence…and also in your third sentence in this particular paragraph. lines 48-59.  Perhaps this was already captured well in the Ji et al. (2014) paper but why not simply test heterosis as the difference between the hybrid and the average parental performance (i.e. $\mu_3 - 0.5 \mu_1 - 0.5 \mu_2$).  Again, I think your issue pertains really to an overdominance test of some sort.}
+
+\response{Yes, overdominance is the scenario were are interested in. We have added the term in the introduction as well as in Section 2.3 to make this clear.}
 
 \comment{Page 2 line 35.  “We CONSIDER an…”}
 
@@ -26,31 +35,51 @@ The comments made by one reviewer regarding a relative assessment of computing t
 
 \comment{Page 3 Line 7.  I don’t it is sufficient to mention the statistical software “Stan”.  Please provide a suitable description and citation.}
 
+\response{Added citation.}
+
 \comment{Page 3 Line 26.  There are several ways to construct a Poisson-gamma distribution, all leading to different specifications of the relationship between the mean and variance of a negative binomial.  I apologize for the admittedly vain self-citation but there is one specification, for example, that specifies the variance to be a linear function of the mean of a negative binomial…see Equation 2.12b in  Tempelman and Gianola (1996).  I guess I’m not sure why most RNA-seq data analysts gravitate to a specification where the variance is specified to be linear and quadratic function of the mean as you do here.}
 
 \comment{Page 3. Bottom.  Shouldn’t you at least provide a justification when one would use a normal prior and when one would or should use a Laplace prior?}
 
+\todo{currently have normal versions running}
+
 \comment{Page 4, bottom half.  The strategy described here, also somewhat attested to by a reviewer, is a little disconcerting with respect to the “double estimation” of gene-specific parameters…first to estimate they hyperparameters and then again conditioned on the estimates of these hyperparameters.  Perhaps you should characterize that these second-stage gene-specific estimates are shrunk relative to those estimates used to estimate the hyperparameters and that they then have lead to predictions with better properties?  Ideally, I would have liked to see these hyperparameters be also formally estimated together with the gene specific parameters within one MCMC analyses…authors should address why they didn’t do this.}
 
-
+\response{We have added a paragraph to the beginning of Section 2.2 to share our experience with a fully MCMC analysis which took too long and had poor mixing.}
 
 \comment{Page 5, lines 37-47.  Since you’re doing MCMC, why not simply tabulate the number of times samples of $\mu_3$ exceeds either $\mu_1$ or $\mu_2$….and/or the number of times that $\mu_3$ is less than $\mu_1$ or $\mu_2$.  I suspect that what your test is really doing….in which case it might be useful to explicitly state this equivalence as such.}
 
+\response{Yes, that is what the test is doing. We have now stated the case for LPH, i.e. ``$\delta_g < -|\alpha_g|$ (equivalently $\mu_{g3} < \min\{\mu_{g1},\mu_{g2}\}$).''
+
 \comment{Page 6, top.  Is it possible then to assess your proposed method using Laplace versus normal priors to assess if that seems to be contributing to any differences between ShrinkBayes and your proposed method?  Maybe that is the real reason for the small improvements?...., and not the differences in sophistication of the constructed statistical tests?}
+
+\todo{currently have normal versions running}
 
 \comment{Page 7, line 15.  Why delete the low counts?  Data quality issues?}
 
 \comment{Page 7, lines 17-22.  Can you provide us any information on how well the hyperparameters were estimated based on your empirical Bayes strategy?}
 
+\todo{No, because we did not simulate from our model since we wanted to maintain the inherent structure of the gene-specific parameters. Perhaps include a sentence based on the other simulation study. Perhaps say that we do not believe they are estimated very well.}
+
 \comment{Page 8, line 37.  It is not obvious to me why $H_g2*$ (are the two parents the same?) is a necessary component of a heterosis (overdominance) test!?}
+
+\response{It is not necessary, but it is sufficient. If the parents are the same, then the hybrid must have overdominance.}
 
 \comment{Page 9, lines 23-25.  In tandem with another reviewer’s comments, the real question is why?  Is it because of the suboptimality of the test that you contrived for ShrinkBayesA?}
 
+\todo{Why does ShrinkBayes perform worse? When the normal results are done, we can speak more directly to this.}
+
 \comment{Page 10, Line 29.  Don’t you mean “nadir” rather than peak?}
+
+\response{No, although we do mean ridge rather than peak, i.e. the count is high for effect size of zero and probabilities below 0.5.}
 
 \comment{Page 11 line 39.  Is it really “independence” or nearly non-identifiability that is the issue?}
 
+\todo{??}
+
 \comment{Page 11 last paragraph.  So this then begs an assessment of how good/poor these hyperparameter estimates were.}
+
+\todo{Add discussion of quality of hyperparameter estimates.}
 
 \comment{Page 11 last line “ASYMPTOTIC”}}
 
@@ -62,22 +91,35 @@ Reviewer \#1
 
 \comment{(1) In the simulations, the authors should also compare the eBayes method to the method of Ji et al. (2014). Although developed for continuous microarray data, the authors could apply a simple transformation to the count data in order to make them continuous. I would be curious to know whether the eBayes method out-performs the method of Ji et al. (2014) on the transformed data.}
 
+\todo{Will run when we get the code. If we don't get the code, will figure out how to run it. Ideally it would be nice to see the eBayes version as well as the approximation in Ji et al.}
+
 \comment{(2) The authors should provide more details on the computational price of the eBayes method? How long (in comparison to edgeR, baySeq, ShrinkBayes) did the eBayes method take to run? Are these methods comparable in terms of computational cost?}
 
+\todo{We will do this.}
+
 \comment{(3) In the description of the simulation results, the eBayes and ShrinkBayes methods display very similar performance. The distinction between the results on the Figures is quite minimal. The authors should attempt to quantify the difference in performance in a single metric. For instance, in Figure 1, take the average percent difference in TPR across the FPRs that were used to generate the plot.}
+
+\todo{I think the main point is that they aren't very different. Somehow I am not able to communicate that the model is novel and that here are a couple of different estimation approaches.}
 
 Reviewer \#4
 
 \comment{1. The authors propose a method to assess "gene expression heterosis."   While it is mentioned that this type of heterosis is a possible explanation for phenotypic heterosis, I'd like more discussion regarding this point.  The two references seem a bit outdated (for bioinformatics) so I'm wondering if this explanation is still being considered.  If it is, than I'd like to see more discussion about how the analytic results would be used to investigate this explanation.   Wouldn't scientists have specific phenotypic traits in mind and know of genes associated with these traits?  I'm a little confused why the search through the whole genome for this type of heterosis if they're looking to draw inference on the association.}
 
+\todo{Dan? Even though some genes may be good candidates. An exploratory analysis to suggest other genes seems relevant.}
 
 \comment{2. The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.}
 
 \comment{a. How robust do you feel your method is?  There is no discussion along these lines.}
 
+\todo{Good question. Although we suggest the gene-specific parameter distributions do not fit very well, how much better do we really think we can get if we model it well?}
+
 \comment{b.      Why is there more of an improvement over ShrinkBayes with more replicates?  Is it because of the method used to calculate the posterior probabilities?  I'd like to see some discussion on this.}
 
+\todo{Once normal runs are completed, we can comment on this more.}
+
 \comment{c.      The ROC curves are not particularly impressive.  Even with 16 reps, the true positive rate is below 50\% (controlling for the false positive rate).  The real data example included only 4 reps, which is far more likely a scenario.  Very little discussion is devoted to this.}
+
+\todo{Yes, but we haven't created artificially large signals.}
 
 \comment{3.      Minor edits or comments}
 
@@ -95,11 +137,14 @@ Reviewer \#4
 
 \comment{d.      Page 4: You have a two-step approach where you estimate the parameters of interest to get estimates of the hyperparameters and then restimate.  How much change is there is these estimates?  Why aren't the methods of McCarthy used as a competitor?}
 
+\todo{Comment on the change in gene-specific parameter estimates, e.g. shrinkage.}
+
 \comment{e.      Page 11 "These figures show marked departures from ……"}
 
 \response{Fixed.}
 
 \comment{f.      Page 11 : Does it really matter that the posterior is different from the prior?  One often assume aprior independence but expects there to be posterior correlation.  Perhaps I'm just missing something in this discussion.}
 
+\todo{Yes, because we are only estimating the parameters of assumed marginal distributions that are assumed independent. If we were performing a fully Bayesian analysis, then we could learn about the joint distribution of the gene-specific parameters.}
 
 \end{document}
