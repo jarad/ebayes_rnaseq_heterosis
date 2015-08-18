@@ -147,7 +147,7 @@ Reviewer \#4
 
 \comment{d.      Page 4: You have a two-step approach where you estimate the parameters of interest to get estimates of the hyperparameters and then restimate.  How much change is there is these estimates?  Why aren't the methods of McCarthy used as a competitor?}
 
-\todo{Comment on the change in gene-specific parameter estimates, e.g. shrinkage.}
+\response{We have added a figure (Fig 3) to compare gene-specific parameter estimates and a paragraphing describing the comparison in Section 4. We aren't exactly sure which McCarthy methods you are referring to. We already use an approach based on edgeR and the point estimates themselves do not naturally lead to a statistic for determining the plausibility of heterosis.}
 
 \comment{e.      Page 11 "These figures show marked departures from ……"}
 
@@ -155,6 +155,6 @@ Reviewer \#4
 
 \comment{f.      Page 11 : Does it really matter that the posterior is different from the prior?  One often assume aprior independence but expects there to be posterior correlation.  Perhaps I'm just missing something in this discussion.}
 
-\todo{Yes, because we are only estimating the parameters of assumed marginal distributions that are assumed independent. If we were performing a fully Bayesian analysis, then we could learn about the joint distribution of the gene-specific parameters.}
+\todo{Due to the nature of an empirical Bayes analysis, we are learning nothing about the distribution of the gene-specific parameter estimates other than through the hyperparameters. Yes, we can learn something about the parameters for a particular gene, but the information content in the data is very poor, i.e. only 12 total observations to infer about 4 parameters. Had we performed a fully Bayesian analysis, we could have learned more about the distribution of the gene-specific parameter estimates via the joint distributions of the hyperparameters (we believe this is what you are referring to). We believe that improved estimation of the gene-specific parameter distribution should lead to improved ability to detect heterosis.}
 
 \end{document}
