@@ -241,6 +241,14 @@ We used our method to analyze a maize data set \citep{paschold2012complementatio
 
 As explained in Section~\ref{s:sim_data}, we analyzed a set of $G=27,888$ genes for $V=3$ varieties and $n_v=4$ replicates ($v=1,2,3$). We estimated the hyperparameters to be $\hat{\eta}_\phi = 3.44$, $\hat{\sigma}_\phi = 2.74$, $\hat{\eta}_\alpha = -0.05$, $\hat{\sigma}_\alpha=0.36$, $\hat{\eta}_\delta = 0.08$, $\hat{\sigma}_\delta=0.33$, $\hat{\eta}_\psi = -2.35$, and $\hat{\sigma}_\psi=0.60$. 
 
+Figure \ref{f:gene_specific_estimates} provides point estimates from the initial \edgeR{} estimation step and after the eBayes procedure described in Section \ref{s:ebayes}. 
+\begin{figure}
+\centerline{\includegraphics[width=\textwidth]{gene_specific_estimates.pdf}}
+\caption{Two-dimensional histogram of point estimates from \edgeR{} and eBayes (posterior means) along with the $y=x$ diagonal.}
+\label{f:gene_specific_estimates}
+\end{figure}
+This figure shows shrinkage for large absolute values of $\alpha$ and $\delta$ from the \edgeR{} estimation toward $\hat{\eta}_\alpha$ and $\hat{\eta}_\delta$ which are both approximately zero. The figure also shows decreased values for the overdispersion parameter with larger decreases for high and low values of overdispersion. Finally, very little, if any, shrinkage is observed for $\phi$. 
+
 With posteriors for all parameters, we can calculate empirical Bayes posterior probabilities for LPH and HPH. For each gene, the quantity of interest is likely to be the maximum of these two probabilities. For each gene with a high probability of either HPH or LPH, the magnitude of the effect is of interest. We calculate 
 \begin{equation}
 % \mbox{estimated effect size}_g = \left\{ 
