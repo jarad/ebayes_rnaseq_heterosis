@@ -26,7 +26,7 @@ fit = d %>%
 
 # Calculate gene-specific estimates for phi, alpha, delta, and psi
 hat = data.frame(phi   = fit$coefficients[,1] + mean(fit$offset[1,]),
-                 alpha = -fit$coefficients[,2],
+                 alpha = fit$coefficients[,2], 
                  delta = fit$coefficients[,3],
                  psi   = log(fit$dispersion),
                  method="edgeR")
@@ -37,6 +37,7 @@ hat$gene = rownames(hat)
 tmp = readRDS("script.rds")[,c("phi","alpha","delta","psi")]
 tmp$gene = rownames(tmp)
 tmp$method = 'eBayes'
+tmp$alpha = -tmp$alpha # Fixed in the stan model files, but the rds file has swapped parents
 
 # Combine estimates
 combined = rbind(melt(hat, id.vars=c("method","gene")),

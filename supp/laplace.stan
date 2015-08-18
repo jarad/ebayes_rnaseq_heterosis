@@ -15,8 +15,8 @@ data {
 transformed data {
   matrix[S,3] X;
   for (s in 1:S) {
-    if (variety[s] == 1) { X[s,1] <-  1; X[s,2] <- -1; X[s,3] <-  0; }
-    if (variety[s] == 2) { X[s,1] <-  1; X[s,2] <-  1; X[s,3] <-  0; }
+    if (variety[s] == 1) { X[s,1] <-  1; X[s,2] <-  1; X[s,3] <-  0; }
+    if (variety[s] == 2) { X[s,1] <-  1; X[s,2] <- -1; X[s,3] <-  0; }
     if (variety[s] == 3) { X[s,1] <-  1; X[s,2] <-  0; X[s,3] <-  1; }
   }
 }
