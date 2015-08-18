@@ -22,6 +22,8 @@ The comments made by one reviewer regarding a relative assessment of computing t
 
 \comment{Page 2 line 35.  “We CONSIDER an…”}
 
+\response{Fixed.}
+
 \comment{Page 3 Line 7.  I don’t it is sufficient to mention the statistical software “Stan”.  Please provide a suitable description and citation.}
 
 \comment{Page 3 Line 26.  There are several ways to construct a Poisson-gamma distribution, all leading to different specifications of the relationship between the mean and variance of a negative binomial.  I apologize for the admittedly vain self-citation but there is one specification, for example, that specifies the variance to be a linear function of the mean of a negative binomial…see Equation 2.12b in  Tempelman and Gianola (1996).  I guess I’m not sure why most RNA-seq data analysts gravitate to a specification where the variance is specified to be linear and quadratic function of the mean as you do here.}
@@ -29,6 +31,8 @@ The comments made by one reviewer regarding a relative assessment of computing t
 \comment{Page 3. Bottom.  Shouldn’t you at least provide a justification when one would use a normal prior and when one would or should use a Laplace prior?}
 
 \comment{Page 4, bottom half.  The strategy described here, also somewhat attested to by a reviewer, is a little disconcerting with respect to the “double estimation” of gene-specific parameters…first to estimate they hyperparameters and then again conditioned on the estimates of these hyperparameters.  Perhaps you should characterize that these second-stage gene-specific estimates are shrunk relative to those estimates used to estimate the hyperparameters and that they then have lead to predictions with better properties?  Ideally, I would have liked to see these hyperparameters be also formally estimated together with the gene specific parameters within one MCMC analyses…authors should address why they didn’t do this.}
+
+
 
 \comment{Page 5, lines 37-47.  Since you’re doing MCMC, why not simply tabulate the number of times samples of $\mu_3$ exceeds either $\mu_1$ or $\mu_2$….and/or the number of times that $\mu_3$ is less than $\mu_1$ or $\mu_2$.  I suspect that what your test is really doing….in which case it might be useful to explicitly state this equivalence as such.}
 
@@ -50,6 +54,7 @@ The comments made by one reviewer regarding a relative assessment of computing t
 
 \comment{Page 11 last line “ASYMPTOTIC”}}
 
+\response{Fixed.}
 
 Reviewer \#1
 
@@ -66,17 +71,35 @@ Reviewer \#4
 \comment{1. The authors propose a method to assess "gene expression heterosis."   While it is mentioned that this type of heterosis is a possible explanation for phenotypic heterosis, I'd like more discussion regarding this point.  The two references seem a bit outdated (for bioinformatics) so I'm wondering if this explanation is still being considered.  If it is, than I'd like to see more discussion about how the analytic results would be used to investigate this explanation.   Wouldn't scientists have specific phenotypic traits in mind and know of genes associated with these traits?  I'm a little confused why the search through the whole genome for this type of heterosis if they're looking to draw inference on the association.}
 
 
-\comment{2.      The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.
-a.      How robust do you feel your method is?  There is no discussion along these lines.
-b.      Why is there more of an improvement over ShrinkBayes with more replicates?  Is it because of the method used to calculate the posterior probabilities?  I'd like to see some discussion on this
-c.      The ROC curves are not particularly impressive.  Even with 16 reps, the true positive rate is below 50\% (controlling for the false positive rate).  The real data example included only 4 reps, which is far more likely a scenario.  Very little discussion is devoted to this.
-3.      Minor edits or comments
-a.      Start of Section 2 on page 2  :  Replace "We considering" with just "Consider"
-b.      Page 3: "The parental averages and overdispersion parameters are assumed to follow normal distributions, i.e.,"
-c.      Right before Section 2.2…it is assumed apriori independence, correct?
-d.      Page 4: You have a two-step approach where you estimate the parameters of interest to get estimates of the hyperparameters and then restimate.  How much change is there is these estimates?  Why aren't the methods of McCarthy used as a competitor?
-e.      Page 11 "These figures show marked departures from ……"
-f.      Page 11 : Does it really matter that the posterior is different from the prior?  One often assume aprior independence but expects there to be posterior correlation.  Perhaps I'm just missing something in this discussion.}
+\comment{2. The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.}
+
+\comment{a. How robust do you feel your method is?  There is no discussion along these lines.}
+
+\comment{b.      Why is there more of an improvement over ShrinkBayes with more replicates?  Is it because of the method used to calculate the posterior probabilities?  I'd like to see some discussion on this.}
+
+\comment{c.      The ROC curves are not particularly impressive.  Even with 16 reps, the true positive rate is below 50\% (controlling for the false positive rate).  The real data example included only 4 reps, which is far more likely a scenario.  Very little discussion is devoted to this.}
+
+\comment{3.      Minor edits or comments}
+
+\comment{a.      Start of Section 2 on page 2  :  Replace "We considering" with just "Consider"}
+
+\response{Fixed.}
+
+\comment{b.      Page 3: "The parental averages and overdispersion parameters are assumed to follow normal distributions, i.e.,"}
+
+\response{Fixed.}
+
+\comment{c.      Right before Section 2.2…it is assumed apriori independence, correct?}
+
+\response{Yes, added \emph{a priori}.}
+
+\comment{d.      Page 4: You have a two-step approach where you estimate the parameters of interest to get estimates of the hyperparameters and then restimate.  How much change is there is these estimates?  Why aren't the methods of McCarthy used as a competitor?}
+
+\comment{e.      Page 11 "These figures show marked departures from ……"}
+
+\response{Fixed.}
+
+\comment{f.      Page 11 : Does it really matter that the posterior is different from the prior?  One often assume aprior independence but expects there to be posterior correlation.  Perhaps I'm just missing something in this discussion.}
 
 
 \end{document}
