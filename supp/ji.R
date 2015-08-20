@@ -6,7 +6,7 @@ library(edgeR)
 source("empirical_estimate_function.R")
 
 # Data set
-d = read.csv("data.csv")[1:2639,]
+d = read.csv("data.csv")
 variety = factor(gsub("_[0-9]{1,2}", "", names(d)[-1]), levels=c("B73","Mo17","B73xMo17"))
 
 # GLM fit using edgeR
@@ -43,5 +43,5 @@ est = estimate(simd = NULL,              # Was used for ROC calculations
                delta.obs = ss$delta_hat, 
                s2.ej.obs = ss$S2, 
                I = tmp$n[1],             # number of reps per variety
-               J = nrow(original),       # number of genes 
+               J = nrow(d),              # number of genes 
                mcn = 1000)               # Monte Carlo reps?
