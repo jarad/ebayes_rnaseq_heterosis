@@ -1,14 +1,4 @@
-#
-#
-#  estimate function.
-#
-#  12/7/10. Tieming
-#
-#
-
-
-
-
+# From https://github.com/Tieming/Gene-Expression-Heterosis/blob/master/empirical_estimate_function.R
 estimate <- function(simd, alpha.obs, delta.obs, s2.ej.obs, I, J, mcn){
   ## This is the function to analyze the simualted data by two methods.
   ## d: a list containing (1) data; (2) t.diff; (3) true.max.
