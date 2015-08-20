@@ -15,6 +15,7 @@ fit = d[,-1] %>% # remove geneID
   calcNormFactors 
 lnorm_factors = log(fit$samples$norm.factors)
 
+# Transform data to log([count+1]/norm_factor)
 ld = d %>%
   rename(geneID = X) %>%
   melt(id.vars="geneID", variable.name="sampleID", value.name="count") %>%
