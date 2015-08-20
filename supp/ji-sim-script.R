@@ -42,3 +42,15 @@ est = estimate(simd = NULL,              # Was used for ROC calculations
                I = tmp$n[1],             # number of reps per variety
                J = nrow(d),              # number of genes 
                mcn = 1000)               # Monte Carlo reps?
+
+
+results = data.frame(prob_HPH = est$hph.p,
+                     prob_LPH = est$lph.p,
+                     prob_MPH = est$mph.p)
+rownames(results) = rownames(d)
+saveRDS(results, file=paste0("results/", m, "/sim-", r, "-", i,'.rds'))
+
+
+q(ifelse(interactive(), "ask","no"))
+
+
