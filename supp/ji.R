@@ -1,20 +1,28 @@
 library(plyr)
 library(dplyr)
 library(reshape2)
+library(edgeR)
 
 source("empirical_estimate_function.R")
 
 # Data set
-original = read.csv("data.csv")[1:2639,]
+d = read.csv("data.csv")[1:2639,]
+variety = factor(gsub("_[0-9]{1,2}", "", names(d)[-1]), levels=c("B73","Mo17","B73xMo17"))
 
-d = original %>%
+# GLM fit using edgeR
+fit = d[,-1] %>% # remove geneID
+  DGEList() %>%
+  calcNormFactors 
+lnorm_factors = log(fit$samples$norm.factors)
+
+ld = d %>%
   rename(geneID = X) %>%
   melt(id.vars="geneID", variable.name="sampleID", value.name="count") %>%
   mutate(variety = factor(gsub("_[0-9]{1,2}", "", sampleID), levels=c("B73","Mo17","B73xMo17")),
-         y = log(count+1)) 
+         y = log(count+1)-lnorm_factors) 
   
 # Summary statistics
-tmp = d %>% 
+tmp = ld %>% 
   group_by(geneID, variety) %>%
   summarize(n = length(y), mean = mean(y), SS=sum((y-mean)^2)) 
 
