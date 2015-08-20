@@ -103,7 +103,10 @@ casted$variable = revalue(casted$variable, c("phi"   = "parental average",
 ggplot(casted, aes(edgeR, eBayes)) + 
   stat_binhex() + 
   geom_abline(intercept=0,slope=1) +
-  facet_wrap(~variable, scales='free')
+  facet_wrap(~variable, scales='free') +
+  theme_bw() + 
+  coord_fixed() +
+  scale_fill_gradientn(trans='log',breaks=c(1,10,100,1000), colours=c("gray","black"))
 
 
 ggsave(file="../include/gene_specific_estimates.pdf", width=8, height=8)
