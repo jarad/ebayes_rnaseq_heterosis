@@ -27,3 +27,4 @@
 *.vrb
 *concordance.tex
 
+shiny/*

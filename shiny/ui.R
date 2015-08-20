@@ -1,6 +1,6 @@
 library(shiny)
 
-d = read.csv("gene_names.csv")
+d = read.csv("gene_names.csv", stringsAsFactors=FALSE)
 
 
 shinyUI(fluidPage(
@@ -10,12 +10,12 @@ shinyUI(fluidPage(
   sidebarLayout(
   
     sidebarPanel(
-      selectInput('geneid', 'Gene ID', d$GeneID)
+      selectizeInput('geneid', 'Gene ID', 1:40000)
     ),
     
     mainPanel(
       tabsetPanel(
-        tabPanel("Data", dataTableOutput(data) )
+        tabPanel("Data", dataTableOutput('data') )
       )
     )
   )
