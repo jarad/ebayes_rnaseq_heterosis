@@ -14,7 +14,7 @@ catf(rep('#', screen_width),'\n')
 catf('RCMD = R CMD BATCH --vanilla\n')
 
 # Main targets
-methods = c('laplace','normal')
+methods = c('laplace','normal', 'ji')
 
 catf('all: ', paste(methods, collapse=' '))
 
@@ -35,7 +35,6 @@ catf('zip: $(files); zip supp.zip $(files)\n')
 
 
 # Sub targets
-
 for (m in methods) {
   for (r in n_reps) {
     catf(rep('#',screen_width))
@@ -50,9 +49,19 @@ for (m in methods) {
     catf(m, r, ': ', paste(result_file, collapse=' '),'\n')
     
     for (i in 1:n_sims) {
-      catf(result_file[i], ": sim-script.R ", data_file[i], "\n\t", 
-           "$(RCMD) '--args r=", r, " i=", i,' m=\"', m, "\"' sim-script.R ",
-           Rout_file[i], " \n")
+      catf(result_file[i], 
+           ifelse(m=='ji', ": ji-sim-script.R ", ": sim-script.R "), # a hack
+           data_file[i], 
+           "\n\t", 
+           "$(RCMD) '--args r=", 
+           r, 
+           " i=", 
+           i,
+           ' m=\"', 
+           m, 
+           ifelse(m=='ji', "\"' ji-sim-script.R ", "\"' sim-script.R "), # hack
+           Rout_file[i], 
+           " \n")
     }
     
     catf("clean-", m, r,":\n\trm -fv ", 
