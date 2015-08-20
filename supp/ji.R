@@ -27,7 +27,7 @@ tmp = ld %>%
   group_by(geneID, variety) %>%
   summarize(n = length(y), mean = mean(y), SS=sum((y-mean)^2)) 
 
-# Check to make sure # reps per variety are all the same and assign to I
+# Check to make sure # reps per variety are all the same 
 stopifnot(abs(max(tmp$n) - min(tmp$n)) < .5)
 
 ss = ddply(tmp, .(geneID), function(x) {
