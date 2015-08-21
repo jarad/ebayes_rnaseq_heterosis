@@ -16,7 +16,7 @@ estimate <- function(simd, alpha.obs, delta.obs, s2.ej.obs, I, J, mcn){
   d0  <- limma.para[1]
   s20 <- limma.para[2]
   ## (1) Other hyper-parameters:
-  pos.expected.s2.ej <- (df*s2.ej.obs + d0*s20)/(df+d0-2)
+  pos.expected.s2.ej <- (df*s2.ej.obs + d0*s20)/(df+d0)
   pos.expected.s2.j  <- pos.expected.s2.ej*2/I
   para.est.1 <- p.solution(alpha.obs, pos.expected.s2.j/4)
   para.lik.1 <- p.likhood.solution(alpha.obs, pos.expected.s2.j/4,
