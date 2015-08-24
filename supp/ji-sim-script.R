@@ -1,5 +1,6 @@
 library(plyr)
 library(dplyr)
+library(edgeR)
 library(reshape2)
 
 source("args.R")
