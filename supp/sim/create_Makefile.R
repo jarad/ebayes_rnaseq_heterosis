@@ -43,14 +43,14 @@ for (m in methods) {
     
     # Vectors of files
     result_file = paste0('results/',m,'/results-', r, '-', 1:n_sims,'.rds')
-    data_file   = paste0('sim-data/sim-',          r, '-', 1:n_sims,'.rds')
-    Rout_file   = paste0('Rout/',m,'/sim-',        r, '-', 1:n_sims,'.Rout')
+    data_file   = paste0('data/sim-',          r, '-', 1:n_sims,'.rds')
+    Rout_file   = paste0('Rout/',m,'/',        r, '-', 1:n_sims,'.Rout')
     
     catf(m, r, ': ', paste(result_file, collapse=' '),'\n')
     
     for (i in 1:n_sims) {
       catf(result_file[i], 
-           ifelse(m=='ji', ": ji-sim-script.R ", ": sim-script.R "), # a hack
+           ifelse(m=='ji', ": ji-sim-script.R ", ": script.R "), # a hack
            data_file[i], 
            "\n\t", 
            "$(RCMD) '--args r=", 
@@ -59,7 +59,7 @@ for (m in methods) {
            i,
            ' m=\"', 
            m, 
-           ifelse(m=='ji', "\"' ji-sim-script.R ", "\"' sim-script.R "), # hack
+           ifelse(m=='ji', "\"' ji-sim-script.R ", "\"' script.R "), # hack
            Rout_file[i], 
            " \n")
     }
