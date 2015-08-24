@@ -4,18 +4,18 @@ library(dplyr)
 library(reshape2)
 library(edgeR)
 
-source("get_hyperparameters.R")
-source("single_gene_analysis.R")
+source("../common/get_hyperparameters.R")
+source("../common/single_gene_analysis.R")
 
 ##################################################
 # Get hyperparameters
 ##################################################
-d = read.csv("data.csv", row.names=1)
+d = read.csv("data/data.csv", row.names=1)
 variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xMo17"))
 
 # trim genes for average count greater than 1
 #d = d[which(rowMeans(d)>1),] 
-hyperparameters = get_hyperparameters(d, variety)
+hyperparameters = get_hyperparameters(d, variety, method='laplace')
 
 
 
@@ -24,15 +24,11 @@ hyperparameters = get_hyperparameters(d, variety)
 ##################################################
 
 # Compile stan model
-model = stan_model("model.stan")
+model = stan_model("../common/laplace.stan")
 
 # This will take a long time, so parallelize if possible
-if (parallel <- require(doMC)) {
-  registerDoMC()
-} else if (parallel <- require(doParallel)) {
-  cl = makeCluster(detectCores(), type='PSOCK')
-  registerDoParallel(cl)
-}
+require(doMC)
+registerDoMC(5)
 
 sink("script.temp")
 
@@ -40,13 +36,13 @@ analysis = adply(d,
                  1,
                  function(x) single_gene_analysis(x),
                  .id = 'gene',
-                 .parallel = parallel,
+                 .parallel = TRUE,
                  .paropts = list(.export=c('single_gene_analysis','model','hyperparameters'), .packages='rstan'))
 
 sink()
 unlink("script.temp")
 
 rownames(analysis) = rownames(d)
-saveRDS(analysis, file="script.rds")
+saveRDS(analysis, file="results/laplace-parallel.rds")
 
 q(ifelse(interactive(), "ask", "no"))
