@@ -90,18 +90,20 @@ Following \cite{ji2014estimation}, we reparameterize the gene-variety mean struc
 \alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2}, \quad \mbox{and} \quad
 \delta_g = \phi_g-\mu_{g3}. \]
 
-We assume a hierarchical model for the gene-specific mean parameters and overdispersion parameters. The parental averages and overdispersion parameters are assumed to follow normal distributions, i.e.
+We assume a hierarchical model for the gene-specific mean parameters and overdispersion parameters. Initially, we assume the parental averages, half-parently differences, hybrid effect, and overdispersion parameters follow normal distributions, i.e.
 \[ 
 %\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
-\phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), \quad \mbox{and}\quad 
+\phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), 
+\alpha_g \stackrel{ind}{\sim} N(\eta_\alpha, \sigma_\alpha^2),
+\delta_g \stackrel{ind}{\sim} N(\eta_\delta, \sigma_\delta^2), \mbox{ and }
 \psi_g \stackrel{ind}{\sim} N(\eta_\psi,\sigma_\psi^2). 
 \]
-To allow for more shrinkage with the half-parental and hybrid differences, we use a Laplace (or double exponential prior) and thus implement a Bayesian LASSO \citep{park2008bayesian}, i.e. 
+Empirical plots of estimated values of $\alpha_g$ and $\delta_g$ for our maize data set (described in Section \ref{s:maize}) suggest that the distribution of these parameters are more peaked near zero and have heavier tails than a normal distribution allows. For differential expression between the two parental phenotypes, we would expect many genes to have small effects and only a few genes to have relatively large effects. For these many genes with small effects, we might expect the hybrid to act similar to its parents and therefore also have many genes where the hybrid effect is small and only a few genes where this hybrid effect is large. For these reasons, we also assessed Laplace (or double exponential) distributions for the half-parental difference and hybrid effect and thus implement a Bayesian LASSO \citep{park2008bayesian}, i.e. 
 \[ 
 \alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad \mbox{and} \qquad
 \delta_g \stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) 
 \]
-where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $La(\alpha;\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$ with expectation $\eta$ and variance $2\sigma^2$. We assume \emph{a priori} independence amongst the parental averages, half parental differences, hybrid differences, and overdispersion parameters.
+where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $La(\alpha;\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$ with expectation $\eta$ and variance $2\sigma^2$. Whether using normal or Laplace distributions, we assume \emph{a priori} independence amongst the parental averages, half parental differences, hybrid effects, and overdispersion parameters.
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
@@ -220,7 +222,7 @@ For the methods in Sections \ref{s:ebayes}, \ref{s:shrinkbayes}, and \ref{s:alte
 from those without heterosis \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
-\caption{Representative ROC curves for false positive rates below 0.1 for the approaches using \edgeR{} and \baySeq{} described in Section \ref{s:alternative}, the approach of \cite{} using log-counts, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and the eBayes approach described in Section \ref{s:ebayes} using both normal and laplace distributions for the half-parental difference and hybrid effect.}
+\caption{Representative ROC curves for false positive rates below 0.1 for the approaches using \citeauthor{ji2014estimation}, \edgeR{}, and \baySeq{} described in Section \ref{s:alternative}, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and the eBayes approach described in Section \ref{s:ebayes} using both normal and laplace distributions for the half-parental difference and hybrid effect.}
 \label{f:roc}
 \end{figure}
 For this simulation, we can see that the approaches based most closely on the model in Section \ref{s:model}, i.e. eBayes and \ShrinkBayes{}, provide the best true positive rate for a given false positive rate. Also, as expected, as the sample size increases, our ability to distinguish genes with heterosis from genes without improves. 
