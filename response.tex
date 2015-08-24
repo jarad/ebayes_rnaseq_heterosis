@@ -68,7 +68,7 @@ Associate Editor comments:
 
 \comment{Page 7, line 15.  Why delete the low counts?  Data quality issues?}
 
-\todo{During the course of our research, we were initially estimating hyperparameters based on moment matching of gene-specific parameters estimated using negative binomial regression independently for all genes. This procedure had issues whenever a gene-variety combination had counts that were all zeros, thus leading to an unidentified regression parameter, or too little variability, leading to an unidentified overdispersion parameter. This cut off appeared to fix the problem. None of the current methods suffer from this problem, in particular the \edgeR{} based parameter estimations have a built shrinkage to estimate parameters. We did not change the simulations we were using and thus report the deletion of low counts for reproducible accuracy. We do not believe removing this deletion would change any of our results.}
+\todo{During the course of our research, we were initially estimating hyperparameters based on moment matching of gene-specific parameters estimated using negative binomial regression independently for all genes. This procedure had issues whenever a gene-variety combination had counts that were all zeros, thus leading to an unidentified regression parameter, or too little variability, leading to an unidentified overdispersion parameter. This cut off appeared to fix the problem. None of the current methods suffer from this problem, in particular the edgeR based parameter estimations have a built shrinkage to estimate parameters. We did not change the simulations we were using and thus report the deletion of low counts for reproducible accuracy. We do not believe removing this deletion would change any of our results.}
 
 \comment{Page 7, lines 17-22.  Can you provide us any information on how well the hyperparameters were estimated based on your empirical Bayes strategy?}
 
@@ -126,7 +126,7 @@ Reviewer \#4
 
 \comment{2. The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.}
 
-\response{We simulate data from the negative-binomial portion of the model, but do not simulate from the hierarchical portion of the model. Instead, we use \edgeR{} estimates for gene-specific parameters which provide some shrinkage for the overdispersion parameters but none for the other gene-specific parameters. We have tried to make this clear in Section 3.1. In addition, we have performed the analysis by simulating entirely from our model and achieve similar results.}
+\response{We simulate data from the negative-binomial portion of the model, but do not simulate from the hierarchical portion of the model. Instead, we use edgeR estimates for gene-specific parameters which provide some shrinkage for the overdispersion parameters but none for the other gene-specific parameters. We have tried to make this clear in Section 3.1. In addition, we have performed the analysis by simulating entirely from our model and achieve similar results.}
 
 \response{We also tried to emphasize in Section 2 that ``our'' approach includes the implementation in ShrinkBayes as the model itself is novel and the eBayes and ShrinkBayes are just two different approaches to estimation.}
 
