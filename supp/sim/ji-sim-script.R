@@ -5,10 +5,10 @@ library(reshape2)
 
 source("args.R")
 
-source("empirical_estimate_function.R")
+source("../common/empirical_estimate_function.R")
 
 # Data set
-data_file = paste0("sim-data/sim-", r, "-", i,'.rds')
+data_file = paste0("data/sim-", r, "-", i,'.rds')
 
 d = as.data.frame(readRDS(data_file)); n = ncol(d)/3
 names(d) = c(paste("B73_",1:n, sep=''), paste('Mo17_',1:n, sep=''), paste('B73xMo17_',1:n, sep=''))
