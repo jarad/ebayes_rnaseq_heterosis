@@ -218,7 +218,7 @@ For the methods in Sections \ref{s:ebayes}, \ref{s:shrinkbayes}, and \ref{s:alte
 from those without heterosis \citep{landau2013dispersion}. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
-\caption{Representative ROC curves for false positive rates below 0.1 for the approaches using \edgeR{} and \baySeq{} described in Section \ref{s:alternative}, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and our eBayes approach described in Section \ref{s:ebayes}.}
+\caption{Representative ROC curves for false positive rates below 0.1 for the approaches using \edgeR{} and \baySeq{} described in Section \ref{s:alternative}, the approach of \cite{} using log-counts, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and the eBayes approach described in Section \ref{s:ebayes} using both normal and laplace distributions for the half-parental difference and hybrid effect.}
 \label{f:roc}
 \end{figure}
 For this simulation, we can see that the approaches based most closely on the model in Section \ref{s:model}, i.e. eBayes and \ShrinkBayes{}, provide the best true positive rate for a given false positive rate. Also, as expected, as the sample size increases, our ability to distinguish genes with heterosis from genes without improves. 
