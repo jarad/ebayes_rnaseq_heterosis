@@ -1,4 +1,8 @@
 get_hyperparameters = function(d, variety, method) {
+  require(reshape2)
+  require(dplyr)
+  require(edgeR)
+  
   # phi, alpha, delta parameterization
   design = cbind(1,
                  c(1,-1,0)[as.numeric(variety)],
