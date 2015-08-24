@@ -229,7 +229,7 @@ For this simulation, we can see that the approaches based most closely on the mo
 Figure \ref{f:auc} provides the area under the ROC curve below a false positive rate of 0.1 across the 10 simulations for each of the 3 different sample sizes. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{auc-facet-TRUE}}
-\caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different replicates per variety for the approaches using \edgeR{} and \baySeq{} described in Section \ref{s:alternative}, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and our eBayes approach described in Section \ref{s:ebayes}. Each line is a different simulation while the blue box indicates mean AUC (plus or minus one standard error).}
+\caption{Area under the ROC curves below a false positive rate of 0.1 for 3 different replicates per variety for the approaches using \citeauthor{ji2014estimation}, \edgeR{}, and \baySeq{} as described in Section \ref{s:alternative}, the \ShrinkBayes{} approach described in Section \ref{s:shrinkbayes} and the eBayes approach described in Section \ref{s:ebayes} using both normal and laplace distributions for the half-parental difference and hybrid effect. Each line is a different simulation while the blue box indicates mean AUC (plus or minus one standard error).}
 \label{f:auc}
 \end{figure}
 The pattern appears to hold, with the eBayes and \ShrinkBayes{} methods outperforming the other two. With 4 replicates per variety, there does not appear to be much of a difference between \ShrinkBayes{} and our eBayes approach, but as the number of replicates increases our eBayes approach appears to improve relative to \ShrinkBayes{}.
