@@ -1,6 +1,6 @@
 library(edgeR)
 library(baySeq)
-library(ShrinkBayes)
+#library(ShrinkBayes)
 
 source("andyspost.R")
 source("utils.R")
@@ -9,7 +9,7 @@ real_data_pvals = function(ncores = 1){
   group = as.factor(rep(c("parent1", "parent2", "hybrid"), each = 4))
   cts = as.matrix(readRDS("paschold_counts.rds"))
   cts = trim_genes(cts, group, rownames(cts))[[1]]
-  for(mtd in c("edgeR", "baySeq", "ShrinkBayes")){
+  for(mtd in c("edgeR", "baySeq")){ # add back "ShrinkBayes"
     for(cp in ncores){
       print(mtd)
       print(cp)
