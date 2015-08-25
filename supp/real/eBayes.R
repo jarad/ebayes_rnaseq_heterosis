@@ -28,9 +28,9 @@ hyperparameters = get_hyperparameters(d, variety, method=method)
 # Compile stan model
 model = stan_model(paste0("../common/",method,".stan"))
 
-con = 'script.temp'
-sink(con)
-sink(con, type='message')
+con = file('script.temp')
+sink(con, append=TRUE)
+sink(con, append=TRUE, type='message')
 
 analysis = adply(d,
                  1,
@@ -41,7 +41,8 @@ analysis = adply(d,
 
 sink()
 sink(type='message')
-unlink(con)
+close(con)
+unlink(con, force=TRUE)
 
 rownames(analysis) = rownames(d)
 saveRDS(analysis, file=paste0("results/",
