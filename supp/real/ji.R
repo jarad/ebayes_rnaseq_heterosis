@@ -46,7 +46,7 @@ est = estimate(simd = NULL,              # Was used for ROC calculations
                J = nrow(d),              # number of genes 
                mcn = 1000)               # Monte Carlo reps?
 
-writeRDS(est, file='results/ji.rds')
+saveRDS(est, file='results/ji.rds')
 
 q(ifelse(interactive(), "ask","no"))
 
