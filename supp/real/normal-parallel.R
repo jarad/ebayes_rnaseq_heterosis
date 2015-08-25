@@ -1,4 +1,4 @@
 parallel = TRUE
 method = 'normal'
 
-source("eBayes.R")
+source("eBayes.R", echo=TRUE)
