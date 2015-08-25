@@ -20,3 +20,5 @@ real_data_pvals = function(ncores = 1){
     }
   }
 }
+
+real_data_pvals()
