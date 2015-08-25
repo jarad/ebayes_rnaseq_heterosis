@@ -1,4 +1,4 @@
 parallel = FALSE
 method = 'laplace'
 
-source("eBayes.R")
+source("eBayes.R", echo=TRUE)
