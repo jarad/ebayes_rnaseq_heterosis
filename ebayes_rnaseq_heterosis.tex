@@ -250,10 +250,12 @@ We used our method to analyze a maize data set \citep{paschold2012complementatio
 
 As explained in Section~\ref{s:sim_data}, we analyzed a set of $G=27,888$ genes for $V=3$ varieties and $n_v=4$ replicates ($v=1,2,3$). We estimated the hyperparameters to be $\hat{\eta}_\phi = 3.44$, $\hat{\sigma}_\phi = 2.74$, $\hat{\eta}_\alpha = -0.05$, $\hat{\sigma}_\alpha=0.36$, $\hat{\eta}_\delta = 0.08$, $\hat{\sigma}_\delta=0.33$, $\hat{\eta}_\psi = -2.35$, and $\hat{\sigma}_\psi=0.60$. 
 
+We analyzed the data using all the methods compared in the previous section. The computation time on a Dell Precision T3600 with a 3.6GHz intel Xeon processor was 14 seconds for \edgeR{}, 1.3 minutes for \citeauthor{ji2014estimation}, 10 hours for the eBayes approaches, and 17 hours for \baySeq{}. In the eBayes approach, the vast majority of the time is spent on independent MCMC analysis for each gene. Thus we parallelized this step using {\tt doMC} \citep{revolution2014domc} and {\tt plyr} \citep{hadley2011split}. When parallelized across 5 cores, we the eBayes approaches took about 2.5 hours.
+
 Figure \ref{f:gene_specific_estimates} provides point estimates from the initial \edgeR{} estimation step and after the eBayes procedure described in Section \ref{s:ebayes}. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{gene_specific_estimates.pdf}}
-\caption{Two-dimensional histogram of point estimates from \edgeR{} and eBayes (posterior means) along with the $y=x$ diagonal.}
+\caption{Two-dimensional histogram of point estimates from \edgeR{} and posterior means from eBayes using Laplace distributions along with the $y=x$ diagonal.}
 \label{f:gene_specific_estimates}
 \end{figure}
 This figure shows shrinkage for large absolute values of $\alpha$ and $\delta$ from the \edgeR{} estimation toward $\hat{\eta}_\alpha$ and $\hat{\eta}_\delta$ which are both approximately zero. The figure also shows decreased values for the overdispersion parameter with larger decreases for high and low values of overdispersion. Finally, very little, if any, shrinkage is observed for $\phi$. 
@@ -300,7 +302,7 @@ Geneticists speculate that gene expression heterosis is one possible explanation
 Although our method appears to improve upon existing methods, we believe our approach can be improved by refining the hierarchical model for the gene-specific parameter distribution. Figure \ref{f:scatterplot} shows marginal and bivariate histograms for the empirical Bayes posterior means for the gene-specific parameters. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{estimates}}
-\caption{Marginal and bivariate histograms for gene-specific parameter posterior meansfor the B73 $\times$ Mo17 maize experiment. For reference, the marginal histograms have a dashed line indicating the appropriate marginal probability density functions in the hierarchical model with the MAP estimates.}
+\caption{Marginal and bivariate histograms of posterior means for gene-specific parameters for the B73 $\times$ Mo17 maize experiment.}
 \label{f:scatterplot}
 \end{figure}
 These figures show markedly departures from marginal model assumptions, e.g. normality assumptions for $\phi_g$ and $\psi_g$, and independence assumptions, e.g. $\phi_g$ versus $\psi_g$ and $\alpha_g$ versus $\delta_g$. The plot of $\phi_g$ versus $\psi_g$ shows a pattern where the mean overdispersion decreases as the mean expression level increases. The plot of $\alpha_g$ versus $\delta_g$ shows a rotated V pattern where $\delta_g$ appears to be equal to $|\alpha_g|$. This pattern is consistent with Mendel's Law of Dominance where the hybrid has mean expression equal to the parent with higher mean expression. 
