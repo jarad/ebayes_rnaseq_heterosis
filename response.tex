@@ -21,7 +21,7 @@ Associate Editor comments:
 
 \comment{Perhaps a reference to the promise of allele specific expression analyses (Discussion section) for inferring upon gene-expression heterosis might be useful to point readers into other directions with this work (Bell et al., 2013; Wei and Wang, 2013).}
 
-\response{Added at the end of the Discussion section}
+\response{Added at the end of the Discussion section.}
 
 \comment{I realize that Ji et al.’s (2014) work was intended for microarray data, or more specifically Gaussian likelihoods, but there has been some work that suggests that Gaussian likelihood specifications in MAANOVA may, oddly enough, have better properties for the analysis of RNA-seq data than more popular methods specifically intended for count data (edgeR and DESeq).  See Reeb and Steibel (2013) and also comments from one reviewer along these lines.  Since Ji et al.’s work also derives from ISU, have you assessed its performance relative to your proposed method on RNA-seq data?}
 
@@ -29,7 +29,7 @@ Associate Editor comments:
 
 \comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing?}
 
-\response{We have provided a comparison of the computational time on the real data set using these methods.}
+\response{We have provided a comparison of the computational time on the real data set using these methods.} \todo{What else should we do?}
 
 \comment{The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
 
@@ -37,7 +37,7 @@ Associate Editor comments:
 
 \comment{Page 1.  I was instructed that heterosis is merely characterized by the hybrid performance not being equal to the average of the two parental lines.  So in your very first sentence, I might write “Heterosis, or hybrid vigor, occurs when hybrid progeny display phenotypes that are superior to the average phenotypes of their parents.” i.e., I might be only interested in the $\delta_g$’s. However, your later characterization of heterosis is really something called overdominance to me…where the hybrid performance exceeds the performance of either parent.  I wonder if you could then be more specific in your definitions in your first sentence…and also in your third sentence in this particular paragraph. lines 48-59.  Perhaps this was already captured well in the Ji et al. (2014) paper but why not simply test heterosis as the difference between the hybrid and the average parental performance (i.e. $\mu_3 - 0.5 \mu_1 - 0.5 \mu_2$).  Again, I think your issue pertains really to an overdominance test of some sort.}
 
-\response{Yes, overdominance is the scenario were are interested in. We have added the term in the introduction as well as in Section 2.3 to make this clear.}
+\response{Yes, overdominance is the scenario were are interested in. We have added the term in the introduction as well as throughout the manuscript to make this clear.}
 
 \comment{Page 2 line 35.  “We CONSIDER an…”}
 
@@ -79,7 +79,7 @@ Associate Editor comments:
 
 \comment{Page 8, line 37.  It is not obvious to me why $H_g2*$ (are the two parents the same?) is a necessary component of a heterosis (overdominance) test!?}
 
-\response{It is not necessary, but it is sufficient. If the parents are the same, then the hybrid must have overdominance.}
+\response{It is not necessary, but it is sufficient. If parental expressions are the same and the hybrid is not, then the hybrid must be exhibiting overdominance.}
 
 \comment{Page 9, lines 23-25.  In tandem with another reviewer’s comments, the real question is why?  Is it because of the suboptimality of the test that you contrived for ShrinkBayesA?}
 
@@ -95,7 +95,7 @@ Associate Editor comments:
 
 \comment{Page 11 last paragraph.  So this then begs an assessment of how good/poor these hyperparameter estimates were.}
 
-\response{As mentioned above, as we have no true values of the hyperparameters, we cannot quantitatively assess the quality of the estimates..}
+\response{As mentioned above, as we have no true values of the hyperparameters, we cannot quantitatively assess the quality of the estimates.}
 
 \comment{Page 11 last line “ASYMPTOTIC”}}
 
@@ -105,7 +105,7 @@ Reviewer \#1
 
 \comment{The authors develop a hierarchical negative binomial model for drawing inferences from a composite null hypothesis, that tests gene expression heterosis. Simulations are performed to describe the performance of this new method along with a data analysis demonstrating an application to real data. This manuscript represents a well-conceived and executed methodological development in the statistical analysis of RNA-Seq gene expression data. However, the performance of the new method is underwhelming compared to existing methods, tempering my enthusiasm for the likely impact of this paper.}
 
-\response{We assume that you mean the improvement compared to existing methods is underwhelming. To more accurately address the improvement, we calculated percentage improvement which ranges from 20\% to 100\% and discussed these in Section 3.3.}
+\response{We assume that you mean the improvement compared to existing methods is underwhelming. To more accurately address the improvement, we calculated percentage improvement in AUC which ranges from 20\% to 100\% and discussed these in Section 3.3.}
 
 \comment{(1) In the simulations, the authors should also compare the eBayes method to the method of Ji et al. (2014). Although developed for continuous microarray data, the authors could apply a simple transformation to the count data in order to make them continuous. I would be curious to know whether the eBayes method out-performs the method of Ji et al. (2014) on the transformed data.}
 
@@ -117,7 +117,7 @@ Reviewer \#1
 
 \comment{(3) In the description of the simulation results, the eBayes and ShrinkBayes methods display very similar performance. The distinction between the results on the Figures is quite minimal. The authors should attempt to quantify the difference in performance in a single metric. For instance, in Figure 1, take the average percent difference in TPR across the FPRs that were used to generate the plot.}
 
-\response{The area under the curve attempts to do exactly this, i.e. a single metric to compare the methods. We do not try to over-emphasize the difference between the ShrinkBayes and eBayes methods, which are both based on our novel model, as we do not believe there is much of a difference.}
+\response{The area under the curve attempts to do exactly this, i.e. a single metric to compare the methods. We do not try to over-emphasize the difference between the ShrinkBayes and eBayes methods, which are both based on our model, as we do not believe there is much of a difference.}
 
 
 
@@ -131,7 +131,7 @@ Reviewer \#4
 
 \response{We simulate data from the negative-binomial portion of the model, but do not simulate from the hierarchical portion of the model. Instead, we use edgeR estimates for gene-specific parameters which provide some shrinkage for the overdispersion parameters but none for the other gene-specific parameters. We have tried to make this clear in Section 3.1. In addition, we have performed the analysis by simulating entirely from our model and achieve similar results.}
 
-\response{We also tried to emphasize in Section 2 that ``our'' approach includes the implementation in ShrinkBayes as the model itself is novel and the eBayes and ShrinkBayes are just two different approaches to estimation.}
+\response{We also tried to emphasize in Section 2 that ``our'' approach includes the implementation in ShrinkBayes as the model itself is novel and eBayes and ShrinkBayes are just two different approaches to estimation.}
 
 \comment{a. How robust do you feel your method is?  There is no discussion along these lines.}
 
