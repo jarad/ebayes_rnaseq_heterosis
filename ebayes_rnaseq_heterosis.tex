@@ -297,7 +297,7 @@ The figure shows a ridge at an effect size of zero for probabilities below 0.5. 
 \section{Discussion}
 \label{s:discussion}
 
-Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic heterosis of traits, such as plant height or grain yield. Existing methods for identifying differential gene expression based on \RNAseq{} data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach, modified to allow for \RNAseq{} read counts as measures of transcript abundance. We developed an empirical Bayes approach based on obtaining estimates for hyperparameters followed by MCMC to estimate gene-specific parameters. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. Through a simulation study, we demonstrated that this method outperformed alternative methods (that are not designed to detect heterosis), and performed comparably well with a similar model in \ShrinkBayes{}, which estimates the full posterior via INLA. We then demonstrated the use of the methodology on a maize experiment in which phenotypic heterosis is well known. 
+Geneticists speculate that gene expression heterosis is one possible explanation of phenotypic heterosis of traits, such as plant height or grain yield. Existing methods for identifying differential gene expression based on \RNAseq{} data are not directly applicable for detecting heterosis genes. \cite{ji2014estimation} introduced an empirical Bayes approach based on a hierarchical model for microarray data. We followed their approach, modified to allow for \RNAseq{} read counts as measures of transcript abundance. We developed an empirical Bayes approach based on obtaining estimates for hyperparameters followed by MCMC to estimate gene-specific parameters. The empirical Bayes posteriors can be used to estimate posterior probabilities of high and low parent heterosis. Through a simulation study, we demonstrated that this method outperformed alternative methods, and performed comparably well with a similar model in \ShrinkBayes{}, which estimates the posterior via INLA. We then demonstrated the use of the methodology on a maize experiment in which phenotypic heterosis is well known. 
 
 Although our method appears to improve upon existing methods, we believe our approach can be improved by refining the hierarchical model for the gene-specific parameter distribution. Figure \ref{f:scatterplot} shows marginal and bivariate histograms for the empirical Bayes posterior means for the gene-specific parameters. 
 \begin{figure}
@@ -311,7 +311,7 @@ In addition to improving the hierarchical distribution, we believe better estima
 
 Notwithstanding these improvements, we believe our approach is a computationally efficient method that can immediately aid scientists who are interested in identifying candidate genes for a genetic mechanism of heterosis. 
 
-
+An alternative explanation for phenotypic heterosis is preferrential gene expression of alleles from certain parents for certain genes. Analyses of allele-specific expression \citep{bell2013rna,wei2013computational} could cmoplement the search for gene expression heterosis in the quest for the mechanism behind phenotypic heterosis.
 
 
 
