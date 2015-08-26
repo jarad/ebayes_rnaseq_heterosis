@@ -1,5 +1,6 @@
 depends = \
   ebayes_rnaseq_heterosis.pdf \
+  response.pdf \
   ebayes_rnaseq_heterosis.tex \
   response.tex \
   jarad.bib biom.cls biom.bst \
