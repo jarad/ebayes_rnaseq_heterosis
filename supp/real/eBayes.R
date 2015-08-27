@@ -47,7 +47,7 @@ unlink(con, force=TRUE)
 rownames(analysis) = rownames(d)
 saveRDS(analysis, file=paste0("results/",
                               method,
-                              ifelse(parallel, '-parallel', NULL),
+                              ifelse(parallel, '-parallel', ''),
                               ".rds"))
 
 q(ifelse(interactive(), "ask", "no"))
