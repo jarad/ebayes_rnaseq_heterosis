@@ -15,6 +15,11 @@ ggplot(d, aes(effectiveSize, pmax(prob_LPH, prob_HPH))) +
 ggsave("../include/volcano.pdf", width=8, height=8)
   
 
+
+
+
+
+
 ##########################################################################################
 # Hyperparameter plot
 ##########################################################################################
@@ -58,7 +63,7 @@ library(dplyr)
 library(reshape2)
 library(edgeR)
 
-d = read.csv("data.csv", row.names=1)
+d = read.csv("data/data.csv", row.names=1)
 variety = factor(gsub("_[0-9]{1,2}", "", names(d)), levels=c("B73","Mo17","B73xMo17"))
 
 # phi, alpha, delta parameterization
@@ -113,3 +118,43 @@ ggsave(file="../include/gene_specific_estimates.pdf", width=8, height=8)
 
 
 
+
+
+####################################################################################
+# All volcano plots
+####################################################################################
+
+d = readRDS("results/laplace.rds")
+laplace = data.frame(p = pmax(d$prob_LPH, d$prob_HPH),
+                     e = d$effectiveSize,
+                     method = 'laplace')
+
+d = readRDS("results/normal.rds")
+normal = data.frame(p = pmax(d$prob_LPH, d$prob_HPH),
+                     e = d$effectiveSize,
+                     method = 'normal')
+
+d = readRDS("results/ji.rds")
+ji = data.frame(p = with(d, pmax(lph.p, hph.p)),
+                e = with(d,(delta.pos - abs.alpha.pos) * (delta.pos >  abs.alpha.pos) + 
+                           (delta.pos + abs.alpha.pos) * (delta.pos < -abs.alpha.pos)),
+                method = 'ji')
+
+# Need hat from above
+d = readRDS("pvals_edgeR_1_cores.rds")
+edgeR = data.frame(p = 1-d[names(d) %in% rownames(hat)],
+                   e = with(hat, (delta-abs(alpha)) *(delta > abs(alpha)) + 
+                                 (delta+abs(alpha)) * (delta < -abs(alpha))),
+                   method = 'edgeR')
+
+d = readRDS("pvals_baySeq_1_cores.rds")
+baySeq = data.frame(p = d[names(d) %in% rownames(hat)],
+                   e = edgeR$e),
+                   method = 'baySeq')
+
+ggplot(rbind(laplace,normal,ji,edgeR,baySeq), aes(e,p)) +
+  stat_binhex() +
+  facet_wrap(~method) + 
+  theme_bw() + 
+  scale_fill_gradientn(trans='log',breaks=c(1,10,100,1000), colours=c("gray","black")) +
+  labs(x="Effect size", y="Maximum heterosis probabilities")
