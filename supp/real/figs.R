@@ -141,20 +141,33 @@ ji = data.frame(p = with(d, pmax(lph.p, hph.p)),
                 method = 'ji')
 
 # Need hat from above
-d = readRDS("pvals_edgeR_1_cores.rds")
-edgeR = data.frame(p = 1-d[names(d) %in% rownames(hat)],
-                   e = with(hat, (delta-abs(alpha)) *(delta > abs(alpha)) + 
-                                 (delta+abs(alpha)) * (delta < -abs(alpha))),
-                   method = 'edgeR')
+tmp = readRDS("pvals_edgeR_1_cores.rds")
+d = data.frame(p = 2*(1-tmp)-1+1*(tmp==1),
+               gene = names(tmp),
+               method = 'edgeR')
+edgeR = merge(d, hat[,c('alpha','delta','gene')])
+edgeR$e = with(edgeR, 
+                (delta-abs(alpha)) * (delta >  abs(alpha)) + 
+                  (delta+abs(alpha)) * (delta < -abs(alpha)))
 
-d = readRDS("pvals_baySeq_1_cores.rds")
-baySeq = data.frame(p = d[names(d) %in% rownames(hat)],
-                   e = edgeR$e),
-                   method = 'baySeq')
 
-ggplot(rbind(laplace,normal,ji,edgeR,baySeq), aes(e,p)) +
+tmp = readRDS("pvals_baySeq_1_cores.rds")
+d = data.frame(p = 1-tmp,
+               gene = names(tmp),
+               method = 'baySeq')
+baySeq = merge(d, hat[,c('alpha','delta','gene')])
+baySeq$e = with(baySeq, 
+                (delta-abs(alpha)) * (delta >  abs(alpha)) + 
+                (delta+abs(alpha)) * (delta < -abs(alpha)))
+
+ggplot(rbind(laplace,
+             normal,
+             ji,
+             edgeR[,c('p','e','method')],
+             baySeq[,c('p','e','method')]), 
+       aes(e,p)) +
   stat_binhex() +
   facet_wrap(~method) + 
   theme_bw() + 
   scale_fill_gradientn(trans='log',breaks=c(1,10,100,1000), colours=c("gray","black")) +
-  labs(x="Effect size", y="Maximum heterosis probabilities")
+  labs(x="Effect size", y="Heterosis measure")
