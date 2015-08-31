@@ -57,7 +57,7 @@ Associate Editor comments:
 
 \comment{Page 4, bottom half.  The strategy described here, also somewhat attested to by a reviewer, is a little disconcerting with respect to the “double estimation” of gene-specific parameters…first to estimate they hyperparameters and then again conditioned on the estimates of these hyperparameters.  Perhaps you should characterize that these second-stage gene-specific estimates are shrunk relative to those estimates used to estimate the hyperparameters and that they then have lead to predictions with better properties?  Ideally, I would have liked to see these hyperparameters be also formally estimated together with the gene specific parameters within one MCMC analyses…authors should address why they didn’t do this.}
 
-\response{We have added a paragraph to the beginning of Section 2.2 to share our experience with a fully MCMC analysis which took too long and had poor mixing.}
+\response{We now compare the estimated gene-specific parameters to the eBayes estimates in Figure 3. We have added a paragraph to the beginning of Section 2.2 to share our experience with a fully MCMC analysis which took too long and had poor mixing.}
 
 \comment{Page 5, lines 37-47.  Since you’re doing MCMC, why not simply tabulate the number of times samples of $\mu_3$ exceeds either $\mu_1$ or $\mu_2$….and/or the number of times that $\mu_3$ is less than $\mu_1$ or $\mu_2$.  I suspect that what your test is really doing….in which case it might be useful to explicitly state this equivalence as such.}
 
