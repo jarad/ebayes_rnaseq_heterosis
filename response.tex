@@ -17,11 +17,11 @@ Associate Editor comments:
 
 \comment{The proposed model appears to be an extension of Ji et al. (2014) albeit with a differently specified likelihood function (negative binomial or Poisson-gamma) as perceived to be more appropriate for count data relative to the Gaussian likelihood function pursued in Ji et al. (2014). Both reviewers indicate that they are little underwhelmed by the performance of your proposed procedure relative to some of the existing methods that you compare against (i.e., ShrinkBayes, edgeR and baySeq).  Furthermore, they seem somewhat concerned about an ‘apples vs. oranges’ types of comparisons since the proposed hypothesis testing strategy in the proposed method is really not an option in the other methods.}
 
-\response{We have assessed the Ji et al. approach and included it in Sections 3.2 and 3.3.}
+\response{We have assessed the Ji et al. approach and included it in Sections 3.2 and 3.3. Although the Ji et al.\ approach performed better than edgeR and baySeq, its performance was considerably worse than the performance of the methods we proposed.  Regarding the `apples vs.\ oranges comparison', we agree that the proposed hypothesis testing strategy is not available in other methods.  This was part of the motivation for developing our methods.  Our simulations show that doing the best we know how to do with existing methods is worse than doing what we proposed.  We think the comparison is relevant and answers a question that some readers would have raised had we not included methods like edgeR and baySeq in our simulation.}
 
 \comment{Perhaps a reference to the promise of allele specific expression analyses (Discussion section) for inferring upon gene-expression heterosis might be useful to point readers into other directions with this work (Bell et al., 2013; Wei and Wang, 2013).}
 
-\response{Added at the end of the Discussion section.}
+\response{Thanks for pointing out these papers.  We have added a new concluding paragraph to the paper that cites the papers you mentioned as well as two others.}
 
 \comment{I realize that Ji et al.’s (2014) work was intended for microarray data, or more specifically Gaussian likelihoods, but there has been some work that suggests that Gaussian likelihood specifications in MAANOVA may, oddly enough, have better properties for the analysis of RNA-seq data than more popular methods specifically intended for count data (edgeR and DESeq).  See Reeb and Steibel (2013) and also comments from one reviewer along these lines.  Since Ji et al.’s work also derives from ISU, have you assessed its performance relative to your proposed method on RNA-seq data?}
 
@@ -29,7 +29,7 @@ Associate Editor comments:
 
 \comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing? The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
 
-\response{We have provided a comparison of the computational time on the real data set using these methods. We have compared point estimates from edgeR to those using eBayes (laplace). }
+\response{We have added a comparison of the computing time required for each method in Section 4 of the revised manuscript.}
 
 \response{Added. See section 4.}
 
@@ -39,23 +39,23 @@ Associate Editor comments:
 
 \comment{Page 2 line 35.  “We CONSIDER an…”}
 
-\response{Fixed.}
+\response{We fixed the error.  Thanks for catching this.}}
 
 \comment{Page 3 Line 7.  I don’t it is sufficient to mention the statistical software “Stan”.  Please provide a suitable description and citation.}
 
-\response{Added citation.}
+\response{We agree and have added the appropriate citation.}}
 
 \comment{Page 3 Line 26.  There are several ways to construct a Poisson-gamma distribution, all leading to different specifications of the relationship between the mean and variance of a negative binomial.  I apologize for the admittedly vain self-citation but there is one specification, for example, that specifies the variance to be a linear function of the mean of a negative binomial…see Equation 2.12b in  Tempelman and Gianola (1996).  I guess I’m not sure why most RNA-seq data analysts gravitate to a specification where the variance is specified to be linear and quadratic function of the mean as you do here.}
 
-\response{We cannot answer why most RNAseq data analysts gravitate to this specification. We appreciate the reference and will consider the alternative specification in the future.}
+\response{You have raised in interesting point.  If $y_i|\lambda_i$ is Poisson with mean $\lambda_i$, and $\lambda_i$ is ${\rm gamma}(\alpha_i,\beta)$ for all $i=1,\ldots, n$, then (for all $i$) the marginal distribution of $y_i$ is negative binomial with mean $\mu_i$ and variance $\phi\mu_i$, where $\mu_i=\alpha_i\beta$ and $\phi=1+\beta$.  Thus, if we assume the $\beta$ parameter is constant across observations, we have a linear mean-variance relationship.  On the other hand, if $y_i|\lambda_i$ is Poisson with mean $\lambda_i$, and $\lambda_i$ is ${\rm gamma}(\alpha,\beta_i)$ for all $i=1,\ldots, n$, then (for all $i$) the marginal distribution of $y_i$ is negative binomial with mean $\mu_i$ and variance $\mu_i+\phi\mu_i^2$, where $\mu_i=\alpha\beta_i$ and $\phi=1/\alpha$.  Thus, if we assume the $\alpha$ parameter is constant across observations, we have a quadratic mean-variance relationship.  Past research suggests that RNA-seq data that includes biological (rather than only technical) variation tends to exhibit a quadratic mean-variance relationship.  Thus, we have focused on the latter type of negative binomial model specification.  It is conceivable that the linear mean-variance relationship could be appropriate for some subset of genes in an RNA-seq dataset.  That is an interesting model selection question, but one that we think should be left for future work focused specifically on this issue. }
 
 \comment{Page 3. Bottom.  Shouldn’t you at least provide a justification when one would use a normal prior and when one would or should use a Laplace prior?}
 
-\response{We have assessed the use of normal distributions see Section 3.3 and also provided rationale for why Laplace distributions would be expected to perform better in this scenario at the end of Section 2.1.}
+\response{We have assessed the use of normal distributions see Section 3.3 and also provided rationale for why Laplace distributions would be expected to perform better in this scenario at the end of Section 2.1. Our simulation results in Figure 2 show that our Laplace model specification is preferred over the normal model specification.}
 
 \comment{Page 4, bottom half.  The strategy described here, also somewhat attested to by a reviewer, is a little disconcerting with respect to the “double estimation” of gene-specific parameters…first to estimate they hyperparameters and then again conditioned on the estimates of these hyperparameters.  Perhaps you should characterize that these second-stage gene-specific estimates are shrunk relative to those estimates used to estimate the hyperparameters and that they then have lead to predictions with better properties?  Ideally, I would have liked to see these hyperparameters be also formally estimated together with the gene specific parameters within one MCMC analyses…authors should address why they didn’t do this.}
 
-\response{We now compare the estimated gene-specific parameters to the eBayes estimates in Figure 3. We have added a paragraph to the beginning of Section 2.2 to share our experience with a fully MCMC analysis which took too long and had poor mixing.}
+\response{We have added a paragraph to the beginning of Section 2.2 to share our experience with a fully MCMC analysis which took too long and had poor mixing. We have added a new Figure 3, which shows that the second-stage gene-specific estimates are shrunk relative to the original edgeR estimates.}
 
 \comment{Page 5, lines 37-47.  Since you’re doing MCMC, why not simply tabulate the number of times samples of $\mu_3$ exceeds either $\mu_1$ or $\mu_2$….and/or the number of times that $\mu_3$ is less than $\mu_1$ or $\mu_2$.  I suspect that what your test is really doing….in which case it might be useful to explicitly state this equivalence as such.}
 
@@ -63,11 +63,11 @@ Associate Editor comments:
 
 \comment{Page 6, top.  Is it possible then to assess your proposed method using Laplace versus normal priors to assess if that seems to be contributing to any differences between ShrinkBayes and your proposed method?  Maybe that is the real reason for the small improvements?...., and not the differences in sophistication of the constructed statistical tests?}
 
-\response{We have assessed the use of normal distributions, see Section 3.3.}
+\response{We have now assessed the use of normal distributions. The results in Section 3.3 and Figure 2 show that there is an advantage to using Laplace distributions instead of normals.  Our eBayes implementation of our model performs quite similarly to our ShrinkBayes implementation of our model.}
 
 \comment{Page 7, line 15.  Why delete the low counts?  Data quality issues?}
 
-\response{ShrinkBayes failed for us when too many zeros were present. We do not believe the comparison of other methods would change if we did not remove the low counts.}
+\response{ShrinkBayes failed for us when too many zeros were present. We do not believe the comparison of other methods would change if we did not remove genes with low counts.  In practice, it is common to remove low count genes from RNA-seq datasets prior to analysis because these genes contain little information about differential expression and lead to computational difficulties for some methods. With that being said, we did not remove any genes from the real data analysis.}
 
 %\todo{During the course of our research, we were initially estimating hyperparameters based on moment matching of gene-specific parameters estimated using negative binomial regression independently for all genes. This procedure had issues whenever a gene-variety combination had counts that were all zeros, thus leading to an unidentified regression parameter, or too little variability, leading to an unidentified overdispersion parameter. This cut off appeared to fix the problem. None of the current methods suffer from this problem, in particular the edgeR based parameter estimations have a built shrinkage to estimate parameters. We did not change the simulations we were using and thus report the deletion of low counts for reproducible accuracy. We do not believe removing this deletion would change any of our results.}
 
@@ -77,7 +77,7 @@ Associate Editor comments:
 
 \comment{Page 8, line 37.  It is not obvious to me why $H_g2*$ (are the two parents the same?) is a necessary component of a heterosis (overdominance) test!?}
 
-\response{It is not necessary, but it is sufficient. If parental expressions are the same and the hybrid is not, then the hybrid must be exhibiting overdominance.}
+\response{It is not necessary, but it is sufficient. If parental expressions are the same and the hybrid is not, then the hybrid must be exhibiting either LPH or HPH.}
 
 \comment{Page 9, lines 23-25.  In tandem with another reviewer’s comments, the real question is why?  Is it because of the suboptimality of the test that you contrived for ShrinkBayesA?}
 
@@ -85,7 +85,7 @@ Associate Editor comments:
 
 \comment{Page 10, Line 29.  Don’t you mean “nadir” rather than peak?}
 
-\response{No, although we do mean ridge rather than peak, i.e. the count is high for effect size of zero and probabilities below 0.5.}
+\response{No, although we do mean ridge rather than peak, i.e. there are many genes with effect size of zero and probabilities below 0.5.}
 
 \comment{Page 11 line 39.  Is it really “independence” or nearly non-identifiability that is the issue?}
 
