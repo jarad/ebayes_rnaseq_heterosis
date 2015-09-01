@@ -27,11 +27,9 @@ Associate Editor comments:
 
 \response{We have included Ji et al.'s work as another alternative method, see Sections 3.2 and 3.3.} 
 
-\comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing?}
+\comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing? The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
 
-\response{We have provided a comparison of the computational time on the real data set using these methods.} \todo{What else should we do?}
-
-\comment{The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
+\response{We have provided a comparison of the computational time on the real data set using these methods. We have compared point estimates from edgeR to those using eBayes (laplace). }
 
 \response{Added. See section 4.}
 
@@ -125,7 +123,7 @@ Reviewer \#4
 
 \comment{1. The authors propose a method to assess "gene expression heterosis."   While it is mentioned that this type of heterosis is a possible explanation for phenotypic heterosis, I'd like more discussion regarding this point.  The two references seem a bit outdated (for bioinformatics) so I'm wondering if this explanation is still being considered.  If it is, than I'd like to see more discussion about how the analytic results would be used to investigate this explanation.   Wouldn't scientists have specific phenotypic traits in mind and know of genes associated with these traits?  I'm a little confused why the search through the whole genome for this type of heterosis if they're looking to draw inference on the association.}
 
-\response{Even though scientists may have specific candidates. An exploratory analysis to suggest other genes seems useful.} \todo{Updated references.}
+\response{We now include a reference to Chen (2013), a Nature Reviews Genetics article entitled ``Genomic and epigenetic insights into the molecular bases of heterosis''. Even though scientists may have specific candidates. An exploratory analysis to suggest other genes seems useful.} 
 
 \comment{2. The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.}
 
