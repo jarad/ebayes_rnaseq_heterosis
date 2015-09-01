@@ -253,14 +253,14 @@ There also appears to be a pattern of the eBayes approach with Laplace distribut
 
 We used our method to analyze a maize data set \citep{paschold2012complementation} of \RNAseq{} gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17). Each variety had four biological replicates measured with Illumina methodology and equipment. Reads were mapped to the whole reference genome using the short reads aligner, NOVOALIGN. For more specifics, please see \cite{paschold2012complementation}. 
 
-We analyzed the data using all the methods compared in the previous section. The computation time on a Dell Precision T3600 with a 3.6GHz intel Xeon processor was 14 seconds for \edgeR{}, 1.3 minutes for \citeauthor{ji2014estimation}, 10 hours for the eBayes approaches, and 17 hours for \baySeq{}. In the eBayes approach, the vast majority of the time is spent on independent MCMC analysis for each gene. Thus we parallelized this step using {\tt doMC} \citep{revolution2014domc} and {\tt plyr} \citep{hadley2011split}. When parallelized across 5 cores, the eBayes approaches took about 2.5 hours. 
+We analyzed the data using all the methods compared in the previous section. The computation time on a Dell Precision T3600 with a 3.6GHz Intel Xeon processor was 14 seconds for \edgeR{}, 1.3 minutes for \citeauthor{ji2014estimation}, 10 hours for the eBayes approaches, and 17 hours for \baySeq{}. In the eBayes approach, the vast majority of the time is spent on independent MCMC analysis for each gene. Thus we parallelized this step using {\tt doMC} \citep{revolution2014domc} and {\tt plyr} \citep{hadley2011split}. When parallelized across 5 cores, the eBayes approaches took about 2.5 hours. 
 
 For the eBayes approach with the Laplace distributions, we estimated the hyperparameters to be $\hat{\eta}_\phi = 3.44$, $\hat{\sigma}_\phi = 2.74$, $\hat{\eta}_\alpha = -0.05$, $\hat{\sigma}_\alpha=0.36$, $\hat{\eta}_\delta = 0.08$, $\hat{\sigma}_\delta=0.33$, $\hat{\eta}_\psi = -2.35$, and $\hat{\sigma}_\psi=0.60$. We then performed independent MCMC analysis for each gene conditional on these hyperparameters. As with the simulation study, we ran 4 chains simultaneously and doubled the number of MCMC iterations until each gene-specific parameter had an effective sample size above 1,000. 
 
 Figure \ref{f:gene_specific_estimates} provides point estimates of the gene-specific parameters from the initial \edgeR{} estimation step and after the eBayes with Laplace distribution procedure described in Section \ref{s:ebayes}. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{gene_specific_estimates.pdf}}
-\caption{Two-dimensional histogram of point estimates from \edgeR{} and posterior means from eBayes using Laplace distributions along with the $y=x$ diagonal.}
+\caption{Two-dimensional histogram of point estimates from \edgeR{} and posterior means from eBayes (Laplace) along with the $y=x$ diagonal.}
 \label{f:gene_specific_estimates}
 \end{figure}
 This figure shows shrinkage for large absolute values of $\alpha$ and $\delta$ from the \edgeR{} estimation toward $\hat{\eta}_\alpha$ and $\hat{\eta}_\delta$ which are both approximately zero. The figure also shows decreased values for the overdispersion parameter with larger decreases for high and low values of overdispersion. Finally, very little, if any, shrinkage is observed for $\phi$. 
@@ -289,7 +289,7 @@ Thus, the estimated effect size is the difference between hybrid mean and the ne
 Figure \ref{f:volcano} provides a volcano plot, in this case a bivariate histogram, to visualize the maximum of the probabilities of LPH and HPH versus estimated effect size. 
 \begin{figure}
 \centerline{\includegraphics[width=\textwidth]{volcano}}
-\caption{A bivariate histogram of the maximum of the LPH and HPH probabilities versus estimated effect size defined in equation \eqref{e:effect_size} for the B73 $\times$ Mo17 maize experiment.}
+\caption{A bivariate histogram of the maximum of the LPH and HPH probabilities versus estimated effect size defined in equation \eqref{e:effect_size} for the B73 $\times$ Mo17 maize experiment using eBayes (Laplace).}
 \label{f:volcano}
 \end{figure}
 The figure shows a ridge at an effect size of zero for probabilities below 0.5. Above a probability of 0.5, we see a prototypical volcano pattern, with increased EH probability corresponding to larger estimated effect sizes and no estimated effect sizes near zero for genes with high EH probability. We also see asymmetry, with larger negative effect sizes than positive effect sizes due to genes with hybrid counts near zero and relatively high parental counts. Genes with high estimated posterior probabilities of EH and large estimated effect sizes are candidates for further investigation.
