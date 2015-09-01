@@ -39,11 +39,11 @@ Associate Editor comments:
 
 \comment{Page 2 line 35.  “We CONSIDER an…”}
 
-\response{We fixed the error.  Thanks for catching this.}}
+\response{We fixed the error.  Thanks for catching this.}
 
 \comment{Page 3 Line 7.  I don’t it is sufficient to mention the statistical software “Stan”.  Please provide a suitable description and citation.}
 
-\response{We agree and have added the appropriate citation.}}
+\response{We agree and have added the appropriate citation.}
 
 \comment{Page 3 Line 26.  There are several ways to construct a Poisson-gamma distribution, all leading to different specifications of the relationship between the mean and variance of a negative binomial.  I apologize for the admittedly vain self-citation but there is one specification, for example, that specifies the variance to be a linear function of the mean of a negative binomial…see Equation 2.12b in  Tempelman and Gianola (1996).  I guess I’m not sure why most RNA-seq data analysts gravitate to a specification where the variance is specified to be linear and quadratic function of the mean as you do here.}
 
@@ -59,7 +59,7 @@ Associate Editor comments:
 
 \comment{Page 5, lines 37-47.  Since you’re doing MCMC, why not simply tabulate the number of times samples of $\mu_3$ exceeds either $\mu_1$ or $\mu_2$….and/or the number of times that $\mu_3$ is less than $\mu_1$ or $\mu_2$.  I suspect that what your test is really doing….in which case it might be useful to explicitly state this equivalence as such.}
 
-\response{Yes, that is what the test is doing. We have now stated the case for LPH, i.e. ``$\delta_g < -|\alpha_g|$ (equivalently $\mu_{g3} < \min\{\mu_{g1},\mu_{g2}\}$).''
+\response{Yes, that is what the test is doing. We have now stated the equivalence for both LPH and HPH, e.g. for LPH: $\delta_g < -|\alpha_g|$ is equivalent to $\mu_{g3} < \min(\mu_{g1},\mu_{g2})$.}
 
 \comment{Page 6, top.  Is it possible then to assess your proposed method using Laplace versus normal priors to assess if that seems to be contributing to any differences between ShrinkBayes and your proposed method?  Maybe that is the real reason for the small improvements?...., and not the differences in sophistication of the constructed statistical tests?}
 
@@ -77,7 +77,7 @@ Associate Editor comments:
 
 \comment{Page 8, line 37.  It is not obvious to me why $H_g2*$ (are the two parents the same?) is a necessary component of a heterosis (overdominance) test!?}
 
-\response{It is not necessary, but it is sufficient. If parental expressions are the same and the hybrid is not, then the hybrid must be exhibiting either LPH or HPH.}
+\response{Yes, that is the hypothesis that the two parents are the same, but the hybrid is different. It is not necessary, but it is sufficient. If parental expressions are the same and the hybrid is not, then the hybrid must be exhibiting either LPH or HPH.}
 
 \comment{Page 9, lines 23-25.  In tandem with another reviewer’s comments, the real question is why?  Is it because of the suboptimality of the test that you contrived for ShrinkBayesA?}
 
@@ -95,7 +95,7 @@ Associate Editor comments:
 
 \response{As mentioned above, as we have no true values of the hyperparameters, we cannot quantitatively assess the quality of the estimates.}
 
-\comment{Page 11 last line “ASYMPTOTIC”}}
+\comment{Page 11 last line “ASYMPTOTIC”}
 
 \response{Fixed.}
 
@@ -123,7 +123,7 @@ Reviewer \#4
 
 \comment{1. The authors propose a method to assess "gene expression heterosis."   While it is mentioned that this type of heterosis is a possible explanation for phenotypic heterosis, I'd like more discussion regarding this point.  The two references seem a bit outdated (for bioinformatics) so I'm wondering if this explanation is still being considered.  If it is, than I'd like to see more discussion about how the analytic results would be used to investigate this explanation.   Wouldn't scientists have specific phenotypic traits in mind and know of genes associated with these traits?  I'm a little confused why the search through the whole genome for this type of heterosis if they're looking to draw inference on the association.}
 
-\response{We now include a reference to Chen (2013), a Nature Reviews Genetics article entitled ``Genomic and epigenetic insights into the molecular bases of heterosis''. Even though scientists may have specific candidates. An exploratory analysis to suggest other genes seems useful.} 
+\response{We now include a reference to Chen (2013), a Nature Reviews Genetics article entitled ``Genomic and epigenetic insights into the molecular bases of heterosis'' as well as three other articles published in 2012 or later. Even though scientists may have specific candidates. An exploratory analysis to suggest other genes seems useful.} 
 
 \comment{2. The model appears reasonable and is adapted from on used with microarrays.  To support their approach, they simulate data using their model (ideal case) and find that their approach does slightly better than ShrinkBayes.}
 
@@ -133,7 +133,7 @@ Reviewer \#4
 
 \comment{a. How robust do you feel your method is?  There is no discussion along these lines.}
 
-\todo{Add robustness discussion?}
+\response{In the discussion, we mention the departures from model assumptions observed. Despite these violations, the results seems reasonable and thus suggest some level of robustness. We believe that further analysis of robustness is better left to future work specifically devoted to addressing this question.}
 
 \comment{b.      Why is there more of an improvement over ShrinkBayes with more replicates?  Is it because of the method used to calculate the posterior probabilities?  I'd like to see some discussion on this.}
 
