@@ -29,9 +29,9 @@ Associate Editor comments:
 
 \comment{One seemingly glaring omission from this work is any comparative assessment of the proposed versus other methods (e.g. ShrinkBayes) on the actual maize dataset in Section 4.  Why is that missing? The comments made by one reviewer regarding a relative assessment of computing time relative to the other methods deserves attention.}
 
-\response{We have added a comparison of the computing time required for each method in Section 4 of the revised manuscript.}
+\response{We have added a comparison of the computing time required for each method in Section 4 of the revised manuscript. We have also added a comparison of edgeR estimates to eBayes (Laplace) in Figure 3 which show shrinkage for half-parental differences and hybrid effects.}
 
-\response{Added. See section 4.}
+\response{Added in Section 4. The bottom line is edgeR takes seconds, Ji et al. takes minutes, the other methods take hours.}
 
 \comment{Page 1.  I was instructed that heterosis is merely characterized by the hybrid performance not being equal to the average of the two parental lines.  So in your very first sentence, I might write “Heterosis, or hybrid vigor, occurs when hybrid progeny display phenotypes that are superior to the average phenotypes of their parents.” i.e., I might be only interested in the $\delta_g$’s. However, your later characterization of heterosis is really something called overdominance to me…where the hybrid performance exceeds the performance of either parent.  I wonder if you could then be more specific in your definitions in your first sentence…and also in your third sentence in this particular paragraph. lines 48-59.  Perhaps this was already captured well in the Ji et al. (2014) paper but why not simply test heterosis as the difference between the hybrid and the average parental performance (i.e. $\mu_3 - 0.5 \mu_1 - 0.5 \mu_2$).  Again, I think your issue pertains really to an overdominance test of some sort.}
 
@@ -69,11 +69,9 @@ Associate Editor comments:
 
 \response{ShrinkBayes failed for us when too many zeros were present. We do not believe the comparison of other methods would change if we did not remove genes with low counts.  In practice, it is common to remove low count genes from RNA-seq datasets prior to analysis because these genes contain little information about differential expression and lead to computational difficulties for some methods. With that being said, we did not remove any genes from the real data analysis.}
 
-%\todo{During the course of our research, we were initially estimating hyperparameters based on moment matching of gene-specific parameters estimated using negative binomial regression independently for all genes. This procedure had issues whenever a gene-variety combination had counts that were all zeros, thus leading to an unidentified regression parameter, or too little variability, leading to an unidentified overdispersion parameter. This cut off appeared to fix the problem. None of the current methods suffer from this problem, in particular the edgeR based parameter estimations have a built shrinkage to estimate parameters. We did not change the simulations we were using and thus report the deletion of low counts for reproducible accuracy. We do not believe removing this deletion would change any of our results.}
-
 \comment{Page 7, lines 17-22.  Can you provide us any information on how well the hyperparameters were estimated based on your empirical Bayes strategy?}
 
-\response{Since we did not simulate data from our model, there are no true values of the hyperparameters and therefore we cannot directly compare our estimates to a truth.  We did try to point out in the Discussion that we believe these estimates could be improved.}
+\response{We have assessed the hyperparameter estimates in Section 3.4 and Table 1 where the estimates seem reasonable and improve with increased number of replicates per variety.}
 
 \comment{Page 8, line 37.  It is not obvious to me why $H_g2*$ (are the two parents the same?) is a necessary component of a heterosis (overdominance) test!?}
 
@@ -85,7 +83,7 @@ Associate Editor comments:
 
 \comment{Page 10, Line 29.  Don’t you mean “nadir” rather than peak?}
 
-\response{No, although we do mean ridge rather than peak, i.e. there are many genes with effect size of zero and probabilities below 0.5.}
+\response{No, although we do mean ridge rather than peak, i.e. there are many genes with effect size of zero and probabilities below 0.5, and have updated the manuscript accordingly.}
 
 \comment{Page 11 line 39.  Is it really “independence” or nearly non-identifiability that is the issue?}
 
@@ -93,7 +91,7 @@ Associate Editor comments:
 
 \comment{Page 11 last paragraph.  So this then begs an assessment of how good/poor these hyperparameter estimates were.}
 
-\response{As mentioned above, as we have no true values of the hyperparameters, we cannot quantitatively assess the quality of the estimates.}
+\response{We have assessed the hyperparameter estimates in Section 3.4 and Table 1 where the estimates seem reasonable and improve with increased number of replicates per variety.}
 
 \comment{Page 11 last line “ASYMPTOTIC”}
 
@@ -103,7 +101,7 @@ Reviewer \#1
 
 \comment{The authors develop a hierarchical negative binomial model for drawing inferences from a composite null hypothesis, that tests gene expression heterosis. Simulations are performed to describe the performance of this new method along with a data analysis demonstrating an application to real data. This manuscript represents a well-conceived and executed methodological development in the statistical analysis of RNA-Seq gene expression data. However, the performance of the new method is underwhelming compared to existing methods, tempering my enthusiasm for the likely impact of this paper.}
 
-\response{We assume that you mean the improvement compared to existing methods is underwhelming. To more accurately address the improvement, we calculated percentage improvement in AUC which ranges from 20\% to 100\% and discussed these in Section 3.3.}
+\response{We assume that you mean the improvement compared to existing methods is underwhelming. To more accurately address the improvement, we calculated percentage improvement in AUC which ranges from 20\% to 100\% and discuss these in Section 3.3.}
 
 \comment{(1) In the simulations, the authors should also compare the eBayes method to the method of Ji et al. (2014). Although developed for continuous microarray data, the authors could apply a simple transformation to the count data in order to make them continuous. I would be curious to know whether the eBayes method out-performs the method of Ji et al. (2014) on the transformed data.}
 
@@ -111,7 +109,7 @@ Reviewer \#1
 
 \comment{(2) The authors should provide more details on the computational price of the eBayes method? How long (in comparison to edgeR, baySeq, ShrinkBayes) did the eBayes method take to run? Are these methods comparable in terms of computational cost?}
 
-\response{Added. See section 4.}
+\response{Added in Section 4. The bottom line is edgeR takes seconds, Ji et al. takes minutes, the other methods take hours.}
 
 \comment{(3) In the description of the simulation results, the eBayes and ShrinkBayes methods display very similar performance. The distinction between the results on the Figures is quite minimal. The authors should attempt to quantify the difference in performance in a single metric. For instance, in Figure 1, take the average percent difference in TPR across the FPRs that were used to generate the plot.}
 
