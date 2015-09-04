@@ -92,7 +92,7 @@ where NB$(\xi,e^\psi)$ indicates a negative binomial distribution with expectati
 Following \cite{ji2014estimation}, we reparameterize the gene-variety mean structure into the gene-specific parental average ($\phi_g$), half-parental difference ($\alpha_g$), and hybrid effect ($\delta_g$). For our heterosis study where $V=3$, we let $v=1,2$ indicate the two parental varieties and $v=3$ indicate the hybrid. The reparameterization is  
 \[ \phi_g = \frac{\mu_{g1}+\mu_{g2}}{2}, \quad 
 \alpha_g = \frac{\mu_{g1}-\mu_{g2}}{2}, \quad \mbox{and} \quad
-\delta_g = \phi_g-\mu_{g3}. \]
+\delta_g = \mu_{g3}-\phi_g. \]
 
 We assume a hierarchical model for the gene-specific mean parameters and overdispersion parameters. Initially, we assume the parental averages, half-parental differences, hybrid effect, and overdispersion parameters follow normal distributions, i.e.
 \[ 
@@ -247,49 +247,31 @@ With 4 replicates per variety, there does not appear to be much of a difference 
 
 There also appears to be a pattern of the eBayes (Laplace) systematically performing better than eBayes (normal). We suspect this is because the Laplace distributions are better approximations to the true underlying distribution for these parameters, and we discuss this in Section \ref{s:discussion}.
 
-\subsection{Hyperparameter estimation}
-
-As described in Section \ref{s:simulation}, we simulated data only from the negative-binomial portion of the model, but not from the hierarchical distributions. Thus, there are no true values for the hyperparameters to compare against. But, we can compute means and standard deviations of the gene-specific parameters that were used in the simulation study and compare these to the estimated hyperparameter values. 
-\begin{table}
-\caption{Empirical values calculated from the gene-specific parameters used in the simulation and mean of estimated values across the 10 simulations within replicate number. Maximum standard deviation in the estimates across the 10 simulations was 0.004.}
-\label{t:hyperparameter}
-\begin{tabular}{l|c|ccc|}
-& \multicolumn{1}{c|}{Empirical} & \multicolumn{3}{c}{Number of replicates}\\
-Parameter & value & 4 & 8 & 16 \\
-\hline
-% with (SD)
-% $\eta_\phi$ & 4.675 & 4.681 (0.004) & 4.741 (0.002) & 4.817 (0.003) \\
-% $\eta_\alpha$ & -0.017 & -0.023 (0.002) & -0.018 (0.003) & -0.014 (0.002)  \\
-% $\eta_\delta$ & -0.046 & -0.046 (0.002) & -0.031 (0.002) & -0.022 (0.003)  \\
-% $\eta_\phi$ & -2.713 & -2.290 (0.004) &  -2.335 (0.003) & -2.387 (0.002)\\
-% \hline
-% $\sigma_\phi$ & 1.815 & 1.821 (0.002) & 1.779 (0.002) & 1.726 (0.003)\\
-% $\sigma_\alpha$ & 0.364 & 0.459 (0.002) & 0.399 (0.002) & 0.357 (0.002) \\
-% $\sigma_\delta$ & 0.145 & 0.389 (0.002) & 0.317 (0.002) & 0.268 (0.001) \\
-% $\sigma_\psi$ & 0.737 & 0.401 (0.001) & 0.493 (0.001) & 0.542 (0.001) \\
-% 3 decimal places
-% $\eta_\phi$ & 4.675 & 4.681 & 4.741  & 4.817  \\
-% $\eta_\alpha$ & -0.017 & -0.023  & -0.018 & -0.014  \\
-% $\eta_\delta$ & -0.046 & -0.046 & -0.031  & -0.022   \\
-% $\eta_\phi$ & -2.713 & -2.290  &  -2.335  & -2.387\\
-% \hline
-% $\sigma_\phi$ & 1.815 & 1.821  & 1.779  & 1.726 \\
-% $\sigma_\alpha$ & 0.364 & 0.459  & 0.399  & 0.357  \\
-% $\sigma_\delta$ & 0.145 & 0.389  & 0.317  & 0.268  \\
-% $\sigma_\psi$ & 0.737 & 0.401 & 0.493 & 0.542 \\
-$\eta_\phi$ & 4.7\phantom{00} & 4.7\phantom{00} & 4.7\phantom{00}  & 4.8\phantom{00}  \\
-$\eta_\alpha$ & -0.017 & -0.023  & -0.018 & -0.014  \\
-$\eta_\delta$ & -0.046 & -0.046 & -0.031  & -0.022   \\
-$\eta_\psi$ & -2.7\phantom{00} & -2.3\phantom{00}  &  -2.3\phantom{00}  & -2.4\phantom{00} \\
-\hline
-$\sigma_\phi$ & 1.8\phantom{00} & 1.8\phantom{00}  & 1.8\phantom{00}  & 1.7\phantom{00} \\
-$\sigma_\alpha$ & 0.36\phantom{0} & 0.46\phantom{0}  & 0.40\phantom{0}  & 0.36\phantom{0}  \\
-$\sigma_\delta$ & 0.15\phantom{0} & 0.39\phantom{0}  & 0.32\phantom{0}  & 0.27\phantom{0}  \\
-$\sigma_\psi$ & 0.74\phantom{0} & 0.40\phantom{0} & 0.49\phantom{0} & 0.54\phantom{0} \\
-\hline
-\end{tabular}
-\end{table}
-Table \ref{t:hyperparameter} provides the computed means and standard deviations from the gene-specific parameter values, called empirical values, and compares these values against the mean of estimated hyperparameters across the 10 simulations within replicate number. For the mean parameters, there is reasonable agreement amongst the different numbers of replicates with a somewhat high estimate for the mean of the overdispersion parameter $(\eta_\psi)$ and, perhaps, a trend for the mean of the hybrid effect ($\eta_\delta$), although we would not have expected this. For the standard deviation parameters, $\sigma_\phi$ is consistent across the replicate numbers, $\sigma_\alpha$ and $\sigma_\delta$ mean estimates are decreasing toward the empirical values as the number of replicates increases, and $\sigma_\phi$ is increasing toward the empirical value as the number of replicates increases. %We expect this pattern for $\sigma_\alpha$ and $\sigma_\delta$ since these are based on moment matching of independent gene-specific parameter estimates. For low numbers of replicates, these independent estimates will have relatively large sampling variability that will cause a bias toward larger values for the moment-matched standard deviation estimates.
+% \subsection{Hyperparameter estimation}
+% 
+% As described in Section \ref{s:simulation}, we simulated data only from the negative-binomial portion of the model, but not from the hierarchical distributions. Thus, there are no true values for the hyperparameters to compare against. But, we can compute means and standard deviations of the gene-specific parameters that were used in the simulation study and compare these to the estimated hyperparameter values. 
+% \include{include/rmse}
+% \include{include/rae}
+% % \begin{table}
+% % \caption{Empirical values calculated from the gene-specific parameters used in the simulation and mean of estimated values across the 10 simulations within replicate number. Maximum standard deviation in the estimates across the 10 simulations was 0.004.}
+% % \label{t:hyperparameter}
+% % \begin{tabular}{c|c|ccc|}
+% % & \multicolumn{1}{c|}{Empirical} & \multicolumn{3}{c}{Number of replicates}\\
+% % Parameter & value & 4 & 8 & 16 \\
+% % \hline
+% % $\eta_\phi$ & \phantom{-}4.6\phantom{00} & \phantom{-}4.7\phantom{00} & \phantom{-}4.7\phantom{00}  & \phantom{-}4.8\phantom{00}  \\
+% % $\eta_\alpha$ & -0.028 & -0.023  & -0.018 & -0.014  \\
+% % $\eta_\delta$ & \phantom{-}0.070 & \phantom{-}0.046 & \phantom{-}0.031  & \phantom{-}0.022   \\
+% % $\eta_\psi$ & -2.4\phantom{00} & -2.3\phantom{00}  &  -2.3\phantom{00}  & -2.4\phantom{00} \\
+% % \hline
+% % $\sigma_\phi$ & \phantom{-}1.8\phantom{00} & \phantom{-}1.8\phantom{00}  & \phantom{-}1.8\phantom{00}  & \phantom{-}1.7\phantom{00} \\
+% % $\sigma_\alpha$ & \phantom{-}0.45\phantom{0} & \phantom{-}0.46\phantom{0}  & \phantom{-}0.40\phantom{0}  & \phantom{-}0.36\phantom{0}  \\
+% % $\sigma_\delta$ & \phantom{-}0.31\phantom{0} & \phantom{-}0.39\phantom{0}  & \phantom{-}0.32\phantom{0}  & \phantom{-}0.27\phantom{0}  \\
+% % $\sigma_\psi$ & \phantom{-}0.59\phantom{0} & \phantom{-}0.40\phantom{0} & \phantom{-}0.49\phantom{0} & \phantom{-}0.54\phantom{0} \\
+% % \hline
+% % \end{tabular}
+% % \end{table}
+% Table \ref{t:hyperparameter} provides the computed means and standard deviations from the gene-specific parameter values, called empirical values, and compares these values against the mean of estimated hyperparameters across the 10 simulations within replicate number. For the mean parameters, there is reasonable agreement amongst the different numbers of replicates with a somewhat high estimate for the mean of the overdispersion parameter $(\eta_\psi)$ and, perhaps, a trend for the mean of the hybrid effect ($\eta_\delta$), although we would not have expected this. For the standard deviation parameters, $\sigma_\phi$ is consistent across the replicate numbers, $\sigma_\alpha$ and $\sigma_\delta$ mean estimates are decreasing toward the empirical values as the number of replicates increases, and $\sigma_\phi$ is increasing toward the empirical value as the number of replicates increases. %We expect this pattern for $\sigma_\alpha$ and $\sigma_\delta$ since these are based on moment matching of independent gene-specific parameter estimates. For low numbers of replicates, these independent estimates will have relatively large sampling variability that will cause a bias toward larger values for the moment-matched standard deviation estimates.
 
 
 
