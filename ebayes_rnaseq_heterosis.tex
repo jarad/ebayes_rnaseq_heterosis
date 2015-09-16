@@ -9,10 +9,9 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-\newcommand{\blind}{1} % 0 = not blind, 1 = blind
+\newcommand{\blind}{0} % 0 = not blind, 1 = blind
 
-%\newcommand{\Stan}{{\tt Stan}}
-\newcommand{\Stan}{Stan}
+\newcommand{\Stan}{{\tt Stan}}
 \newcommand{\RStan}{{\tt RStan}}
 \newcommand{\edgeR}{{\tt edgeR}}
 \newcommand{\baySeq}{{\tt baySeq}}
@@ -46,11 +45,11 @@ Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
 
 \begin{abstract}
 An important type of heterosis, known as hybrid vigor, refers to the enhancements in the phenotype of hybrid progeny relative to their inbred parents. Although hybrid vigor is extensively utilized in agriculture, its molecular basis  is still largely unknown. In an effort to understand phenotypic heterosis at the molecular level, researchers are measuring transcript abundance levels of thousands of genes in parental inbred lines and their hybrid offspring using RNA sequencing (\RNAseq{}) technology.  The resulting data allow researchers to search for evidence of gene expression heterosis as one potential molecular mechanism underlying heterosis of agriculturally important traits.  The null hypotheses of greatest interest in testing for gene expression heterosis are composite null hypotheses that are difficult to test with standard statistical approaches for \RNAseq{} analysis. To address these shortcomings, we develop a hierarchical negative binomial model and draw inferences using a computationally tractable empirical Bayes approach to inference. We demonstrate improvements over alternative methods via a simulation study based on a maize experiment and then analyze that maize experiment with our newly proposed methodology. 
-% This article has supplementary material online.
+This article has supplementary material online.
 \end{abstract}
 
 \begin{keywords}
-Hierarchical model; Negative binomial; \RNAseq{}; Bayesian LASSO; Parallel computing; \Stan{}.
+Hierarchical model; Negative binomial; \RNAseq{}; Bayesian LASSO; Parallel computing; hybrid vigor.
 \end{keywords}
 
 \maketitle
@@ -107,18 +106,18 @@ Empirical plots of estimated values of $\alpha_g$ and $\delta_g$ for our maize d
 \alpha_g \stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \qquad \mbox{and} \qquad
 \delta_g \stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) 
 \]
-where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $La(\alpha;\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$ with expectation $\eta$ and variance $2\sigma^2$. Whether using normal or Laplace distributions, we assume \emph{a priori} independence amongst the parental averages, half parental differences, hybrid effects, and overdispersion parameters.
+where $\alpha\sim La(\eta,\sigma)$ has a probability density function given by $La(\alpha;\eta,\sigma) = \exp(-|\alpha-\eta|/\sigma)/2\sigma$ with expectation $\eta$ and variance $2\sigma^2$. Whether using normal or Laplace distributions, we assume \emph{a priori} independence amongst the parental averages, half parental differences, hybrid effects, and overdispersion parameters. 
 
 \subsection{Empirical Bayes}
 \label{s:ebayes}
 
-Initial attempts to perform a fully Bayesian analysis via Markov chain Monte Carlo (MCMC) failed due to high computational costs and poor mixing in the resulting chains. For example, we implemented the model in the statistical software \Stan{} (discussed at the end of this section), ran the MCMC on a simulated data set with 10,000 genes for 2 months on a state-of-the-art linux server, and obtained potential scale reduction factors that suggested we would need to run at least ten times as long to obtain convergence. Although there are certainly improvements that could be made to decrease computational costs and improve mixing, we opted for an empirical Bayes approach. This approach may be a reasonable approximation to a fully Bayesian approach when estimating models with large numbers of genes as the posterior distributions for the hyperparameters may be tightly peaked. 
+Initial attempts to perform a fully Bayesian analysis via Markov chain Monte Carlo (MCMC) failed due to high computational costs and poor mixing in the resulting chains. For example, we implemented the model in the statistical software \Stan{} (discussed at the end of this section), ran the MCMC on a simulated data set with 10,000 genes for 2 months on a state-of-the-art linux server, and obtained potential scale reduction factors \citep{Gelm:Rubi:infe:1992} that suggested we would need to run at least ten times as long to obtain convergence. Although there are certainly improvements that could be made to decrease computational costs and improve mixing, we opted for an empirical Bayes approach. This approach may be a reasonable approximation to a fully Bayesian approach when estimating models with large numbers of genes as the posterior distributions for the hyperparameters may be tightly peaked. 
 
 We categorize the parameters of the model in Section \ref{s:model} into gene-specific parameters $\theta = (\theta_1,\ldots,\theta_G)$ where $\theta_g = (\phi_g,\alpha_g,\delta_g,\psi_g)$, normalization factors $\gamma = (\gamma_{11},\ldots,\gamma_{Vn_V})$, and hyperparameters $\pi = (\eta, \sigma)$ where $\eta=(\eta_\phi,\eta_\alpha,\eta_\delta, \eta_\psi)$ and $\sigma=(\sigma_\phi,\sigma_\alpha,\sigma_\delta,\sigma_\psi)$. We obtain estimates for the hyperparameters and then base gene-specific inference on the posterior conditional on these estimates. 
 
 To obtain normalization factors $\hat{\gamma}$, we use the weighted trimmed mean of $M$ values (TMM) method of \cite{robinson2010scaling}. We use \edgeR{} to obtain genewise dispersion estimates, $\hat{\psi}_g$, and the generalized linear model methods to obtain estimates for the remaining gene-specific parameters, i.e. $\hat{\phi}_g$, $\hat{\alpha}_g$, and $\hat{\delta}_g$ \citep{robinson2010edgeR}. Using $\hat{\theta}_g = (\hat{\phi}_g,\hat{\alpha}_g,\hat{\delta}_g,\hat{\psi}_g)$, we estimate hyperparameters for the location and scale parameters in the hierarchical model using a central method of moments approach. For example, $\hat{\eta}_\phi = \sum_{g=1}^G \hat{\phi}_g/G$ and $\hat{\sigma}_\phi^2 = \sum_{g=1}^G (\hat{\phi}_g - \hat{\eta}_\phi)^2/(G-1)$ (and similarly for $\hat{\eta}_\psi$ and $\hat{\sigma}_\psi$) and $\hat{\eta}_\alpha = \sum_{g=1}^G \hat{\alpha}_g/G$ and $2\hat{\sigma}_\alpha^2 = \sum_{g=1}^G (\hat{\alpha}_g - \hat{\eta}_\alpha)^2/(G-1)$ (and similarly for $\hat{\eta}_\delta$ and $\hat{\sigma}_\delta$) for the model assuming Laplace distributions. 
 
-Conditional on the estimated normalization factors $\hat{\gamma}$ and hyperparameters $\hat{\pi}$, we perform a Bayesian analysis to re-estimate the gene-specific parameters and describe their uncertainty. Conditional on $\hat{\gamma}$ and $\hat{\pi}$ the gene-specific parameters are independent, i.e.
+Conditional on the estimated normalization factors $\hat{\gamma}$ and hyperparameters $\hat{\pi}$, we perform a Bayesian analysis to re-estimate the gene-specific parameters and describe their uncertainty. Equation \ref{e:condind} shows that conditional on $\hat{\gamma}$ and $\hat{\pi}$ the gene-specific parameters are independent and therefore conditional posterior inference across the genes can be parallelized. In this equation, the densities for $\alpha_g$ and $\delta_g$ will depend on whether we are assuming normal or Laplace distributions. 
 \begin{equation}
 \begin{split}
 p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right) 
@@ -128,16 +127,15 @@ p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right)
 &\times 
 \left. \vphantom{\prod_{v=1}^V}
 N(\phi_g;\hat{\eta}_\phi, \hat{\sigma}_\phi^2)
-La(\alpha_g;\hat{\eta}_\alpha, \hat{\sigma}_\alpha)
-La(\delta_g;\hat{\eta}_\delta, \hat{\sigma}_\delta)
+p(\alpha_g;\hat{\eta}_\alpha, \hat{\sigma}_\alpha)
+p(\delta_g;\hat{\eta}_\delta, \hat{\sigma}_\delta)
 N(\psi_g;\hat{\eta}_\psi, \hat{\sigma}_\psi^2) 
 \right]
 \label{e:condind}
 \end{split}
 \end{equation}
-Thus, conditional posterior inference across the genes can be obtained independently and in parallel.
 
-To perform this Bayesian analysis, we used the statistical software \Stan{} \citep{stan-software:2014} executed through the \RStan{} interface \citep{rstan-software:2014} in R \citep{R2014}. \Stan{} implements a variant of MCMC called Hamiltonion Monte Carlo \citep{neal2011mcmc} to obtain samples from the posterior in equation \eqref{e:condind}. We ran 4 simultaneous chains with random initial starting values for 1000 burn-in (and tuning) iterations followed by another 1000 iterations thinned by 4 (to reduce storage space) for inference. We monitored convergence using the potential scale reduction factor and effective sample size (ESS) for $\phi_g$, $\alpha_g$, $\delta_g$, and $\psi_g$ \citep{Gelm:Rubi:infe:1992}. If the minimum ESS was less than 1000, we reran the chains with double the iterations for both burn-in and inference. We continued this restarting and doubling until we obtained minimum ESS greater than 1000 for all parameters.
+To perform the conditional posterior inference on the gene-specific parameters, we used the statistical software \Stan{} \citep{stan-software:2014} executed through the \RStan{} interface \citep{rstan-software:2014} in R \citep{R2014}. \Stan{} implements a variant of MCMC called Hamiltonion Monte Carlo \citep{neal2011mcmc} to obtain samples from the posterior in equation \eqref{e:condind}. We ran 4 simultaneous chains with random initial starting values for 1000 burn-in (and tuning) iterations followed by another 1000 iterations retaining every fourth sample (to reduce storage space) for inference. We monitored convergence using the potential scale reduction factor and effective sample size (ESS) for $\phi_g$, $\alpha_g$, $\delta_g$, and $\psi_g$ \citep{Gelm:Rubi:infe:1992}. If the minimum ESS was less than 1000, we reran the chains with double the iterations for both burn-in and inference. We continued this restarting and doubling until we obtained minimum ESS greater than 1000 for all parameters.
 
 \subsection{Gene expression heterosis}
 \label{s:gene_heterosis}
@@ -167,8 +165,6 @@ P\left(\left.\delta_g < -|\alpha_g|\right|y, \hat{\pi},\hat{\gamma}\right) \appr
 \end{equation}
 where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. HPH probability is defined similarly with the inequality reversed and without the negative sign. We construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities. Geneticists can use this list to prioritize future experiments to understand the molecular genetic mechanisms for heterosis.  
 
-We will use the term eBayes to refer to the approaches defined in Sections \ref{s:model}--\ref{s:gene_heterosis} and add parenthetical labels ``normal'' and ``Laplace'' to distinguish between the two eBayes approaches.
-
 \subsection{Implementation in \ShrinkBayes{}} \label{s:shrinkbayes}
 
 In addition to the approach above, we utilized \ShrinkBayes{} to estimate EH probabilities with two modifications described here. \ShrinkBayes{} utilizes integrated nested Laplace approximation (INLA) \citep{rue2009approximate} in combination with empirical Bayes ideas \citep{van2014shrinkbayes}. One limitation with inferential methods based on INLA is that all distributions, except for the data distribution, must have tails as light or lighter than the normal density. Thus, we cannot implement the Laplace priors for the half-parental difference ($\alpha_g$) and the hybrid effect ($\delta_g$) and instead use normal priors in this situation. An additional limitation is that INLA provides approximations to marginal posteriors for parameters or linear combinations of parameters, but not an approximation to the full posterior. Since we are interested in non-linear quantities such as $P(\delta_g > |\alpha_g||y)$, we cannot compute these directly using \ShrinkBayes{}. Instead, for \ShrinkBayes{}, we calculate EH probabilities conditional on posterior means for the half-parental difference and hybrid effect, i.e. $\hat{\delta}_g$ and $\hat{\alpha}_g$. For example,  
@@ -188,7 +184,7 @@ P_{\ShrinkBayes{}}(\mbox{LPH}_g|y) \equiv P(\delta_g<-\alpha_g|y)\mathrm{I}\left
 HPH probability is defined similarly with all inequalities reversed. As before, we construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities.
 %the heterosis probability for gene $g$ is zero if $|\hat{\delta}_g| \le |\hat{\alpha}_g|$, $P(\delta_g>\alpha_g|y)$ if $\hat{\delta}_g > -\hat{\alpha}_g \ge 0$, $P(\delta_g - \alpha_g > 0 |y)$ if $\hat{\delta}_g > \hat{\alpha}_g \ge 0$, $P(\delta_g - \alpha_g < 0 |y)$ if $\hat{\delta}_g < \hat{\alpha}_g \le 0$, and $P(\delta_g + \alpha_g < 0 |y)$ if $\hat{\delta}_g < -\hat{\alpha}_g \le 0$.  
 
-
+We will use the term eBayes to refer to the approach defined in Sections \ref{s:model}--\ref{s:gene_heterosis} and add parenthetical labels ``normal'' and ``Laplace'' to specify whether we are assuming normal or Laplace distributions for half-parental differences and hybrid effects.
 
 \section{Simulation study based on a maize experiment}
 \label{s:simulation}
@@ -215,7 +211,7 @@ We compared our method to that of \cite{ji2014estimation}, which assumes normali
 
 In addition to the approach of \citeauthor{ji2014estimation}, we modified two existing \RNAseq{} approaches, \edgeR{} and \baySeq{}, for use in the heterosis context. For each method, we attempted to provide a measure of the strength of EH for each gene such that large values of this measure indicate support for EH. 
 
-\edgeR{} can be used to test for differential expression between any two varieties based on the fit of a negative binomial log-linear model \citep{robinson2007moderated, robinson2010edgeR}. To construct a measure of EH, we computed the maximum likelihood estimates of the $\mu_{gv}$ parameters for all genes using \edgeR{}'s built-in Fisher scoring algorithm, and then used likelihood ratio tests to calculate two $p$-values for each gene: $p_{g1}$  for testing $H_{g01}:\mu_{g1}=\mu_{g3}$ and $p_{g2}$ for testing $H_{g02}:\mu_{g2}=\mu_{g3}$. Then, for each gene, we defined a new $p$-value denoted as $p_g$ and set to $p_g=1$ if the estimate of $\mu_{g3}$ falls between the estimates of $\mu_{g1}$ and $\mu_{g2}$ and $p_g=\max\{p_{g1},p_{g2}\}/2$ otherwise.  (For all relevant significance thresholds $\omega$ near 0, it can be shown that rejecting the null hypothesis of no EH for gene $g$ whenever $p_g\leq \omega$ results in a test that is asymptotically size $\omega$.)  We then use $1-p_g$ as a final measure positively associated with strength of evidence for EH. 
+\edgeR{} can be used to test for differential expression between any two varieties based on the fit of a negative binomial log-linear model \citep{robinson2007moderated, robinson2010edgeR}. To construct a measure of EH, we computed the maximum likelihood estimates of the $\mu_{gv}$ parameters for all genes using \edgeR{}'s built-in Fisher scoring algorithm, and then used likelihood ratio tests to calculate two $p$-values for each gene: $p_{g1}$  for testing $H_{g01}:\mu_{g1}=\mu_{g3}$ and $p_{g2}$ for testing $H_{g02}:\mu_{g2}=\mu_{g3}$. Then, for each gene, we defined a new $p$-value denoted as $p_g$ and set to $p_g=1$ if the estimate of $\mu_{g3}$ falls between the estimates of $\mu_{g1}$ and $\mu_{g2}$ and $p_g=\max\{p_{g1},p_{g2}\}/2$ otherwise. For all relevant significance thresholds $\omega$ near 0, it can be shown that rejecting the null hypothesis of no EH for gene $g$ whenever $p_g\leq \omega$ results in a test that is asymptotically size $\omega$.  We then use $1-p_g$ as a final measure positively associated with strength of evidence for EH. 
 
 \baySeq{} allows for a wider range of hypotheses for each gene, including $H^*_{g1}: \mu_{g1}=\mu_{g2}=\mu_{g3}$, $H^*_{g 2}: \mu_{g1}=\mu_{g2}$, $H^*_{g 3}: \mu_{g1}=\mu_{g3}$, $H^*_{g 4}: \mu_{g2}=\mu_{g3}$, and $H^*_{g 5}:$ all $\mu_g$'s are distinct. In a technique similar to our application of \edgeR{}, we used the posterior probabilities of these hypotheses to construct a measure of EH for each gene. We set this measure to zero if the maximum likelihood estimate, calculated using \edgeR{}, of $\mu_{g3}$ is between the maximum likelihood estimates of $\mu_{g1}$ and $\mu_{g2}$. Otherwise, the measure is the sum of the posterior probabilities of $H^*_{g 2}$ and $H^*_{g 5}$, the two hypotheses that allow for EH.
 
@@ -357,9 +353,9 @@ The authors thank Andrew Lithio for help in implementing our model in \ShrinkBay
 %  include this section!!  See Instructions for Authors at the journal
 %  website http://www.biometrics.tibs.org
 
-%\section*{Supplementary Materials}
-%The supplementary materials include three plain text files: the maize experiment data ({\tt data.csv}), a script to run our method ({\tt script.R}) on this data, and the \Stan{} model ({\tt model.stan}).  
+\section*{Supplementary Materials}
 
+The supplementary materials include links to the data as well as code to reproduce the analysis in this manuscript.
 \bibliography{jarad}
 \bibliographystyle{biom}
 
