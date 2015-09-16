@@ -9,7 +9,7 @@
 \newcommand{\VS}{V\&S}
 \newcommand{\tr}{\mbox{tr}}
 
-\newcommand{\blind}{0} % 0 = not blind, 1 = blind
+\newcommand{\blind}{1} % 0 = not blind, 1 = blind
 
 \newcommand{\Stan}{{\tt Stan}}
 \newcommand{\RStan}{{\tt RStan}}
@@ -264,7 +264,7 @@ Although our method appears to hold some advantage over existing methods, we bel
 \caption{Marginal and bivariate histograms of posterior means for gene-specific parameters for the B73 $\times$ Mo17 maize experiment.}
 \label{f:scatterplot}
 \end{figure}
-These figures show markedly departures from marginal model assumptions, e.g. normality assumptions for $\phi_g$ and $\psi_g$, and independence assumptions for $(\phi_g,\psi_g)$ and $(\alpha_g,\delta_g)$. The plot of $\phi_g$ versus $\psi_g$ shows a pattern where the mean overdispersion decreases as the mean expression level increases. The plot of $\alpha_g$ versus $\delta_g$ shows a rotated V pattern where $\delta_g$ appears to be equal to $|\alpha_g|$. This V pattern is consistent with Mendel's Law of Dominance where the hybrid has mean expression equal to the parent with higher mean expression. 
+These figures show departures from marginal model assumptions, e.g. normality assumptions for $\phi_g$ and $\psi_g$, and independence assumptions for $(\phi_g,\psi_g)$ and $(\alpha_g,\delta_g)$. The plot of $\phi_g$ versus $\psi_g$ shows a pattern where the mean overdispersion decreases as the mean expression level increases. The plot of $\alpha_g$ versus $\delta_g$ shows a rotated V pattern where $\delta_g$ appears to be equal to $|\alpha_g|$. This V pattern is consistent with Mendel's Law of Dominance where the hybrid has mean expression equal to the parent with higher mean expression. 
 
 In addition to improving the hierarchical distribution, we believe better estimates of the parameters of this distribution, i.e. the hyperparameters, will also improve detection of gene-expression heterosis. Our current method, based on moment matching of essentially independently estimated gene-specific parameters, provides consistent estimators as the number of replicates per variety increases. But typically the number of replicates per variety is quite small. In our data there are only four replicates per variety, and therefore asymptotic justifications are deficient. There are a variety of alternative estimation approaches to explore, e.g. expectation-maximization algorithms or fully Bayesian approaches. Notwithstanding these improvements, we believe our approach is a computationally efficient method that can immediately aid scientists who are interested in identifying candidate genes involved in a genetic mechanism of heterosis. 
 

@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{color}
+
+\usepackage[parfill]{parskip}
+
+\newcommand{\comment}[1]{\textit{#1}}
+\newcommand{\response}[1]{#1}
+\newcommand{\todo}[1]{{\color{red} #1}}
+
+\begin{document}
+
+\response{We thank the AE for additional editorial feedback. In addition to addressing all feedback, we have added Supplementary Material that provides URLs to code and data used in the manuscript. Our changes due to feedback are shown below.}
+
+\comment{Are you sure you want to include a software product as a keyword?}
+
+\response{Replaced Stan with ``Hybrid vigor''.}
+
+\comment{Your call but wouldn't you like to put software names / functions, etc. in a different font for emphasis}
+
+\response{Changed Stan to {\tt Stan}.}
+
+\comment{You probably should cite Gelmand and Rubin here, I think.}
+
+\response{Added a citation to Gelman and Rubin.}
+
+\comment{Ok...but you're contradicting yourself then on page 15 where you seem to cast doubt on your EB approach.}
+
+\response{Here we state ``This approach may be a reasonable approximation'', but in the Discussion we openly express our doubts about whether it is a reasonable approximation.}
+
+\comment{Does this mean you're saving every 4 iterations?? Maybe this expression is obvious to most Bayesians but I'm not sure.}
+
+\response{Changed ``thinned by 4'' to ``retaining every fourth sample''.}
+
+\comment{I'm not sure that you've adequately characterized what the two approaches are up until now? For example, which of the two are represented in Equation (2)?}
+
+\response{Equation (2) has been updated to 
+\begin{equation}
+\begin{split}
+p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right) 
+\propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} \mbox{NB}\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
+&\times 
+\left. \vphantom{\prod_{v=1}^V}
+N(\phi_g;\hat{\eta}_\phi, \hat{\sigma}_\phi^2)
+p(\alpha_g;\hat{\eta}_\alpha, \hat{\sigma}_\alpha)
+p(\delta_g;\hat{\eta}_\delta, \hat{\sigma}_\delta)
+N(\psi_g;\hat{\eta}_\psi, \hat{\sigma}_\psi^2) 
+\right]
+\label{e:condind}
+\end{split}
+\end{equation}
+with the accompanying sentence ``In this equation, the densities for $\alpha_g$ and $\delta_g$ will depend on whether we are assuming normal or Laplace distributions.'' And the last sentence of section 2.3 has been changed to ``We will use the term eBayes to refer to the approach defined in Sections 2.1--2.3 and add parenthetical labels ``normal'' and ``Laplace'' to specify whether we are assuming normal or Laplace distributions for half-parental differences and hybrid effects.''}
+
+\comment{Is it really necessary to include the parentheses?}
+
+\response{Removed the parentheses.}
+
+\comment{Delete ``markedly''.}
+
+\response{Deleted ``markedly''.}
+
+
+
+
+\end{document}
