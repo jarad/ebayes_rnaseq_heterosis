@@ -1,0 +1,54 @@
+\documentclass[useAMS,usenatbib,referee]{biom}
+
+\usepackage{amsmath}
+\usepackage[figuresright]{rotating}
+
+\graphicspath{{include/}}
+
+\def\bSig\mathbf{\Sigma}
+\newcommand{\VS}{V\&S}
+\newcommand{\tr}{\mbox{tr}}
+
+\newcommand{\blind}{0} % 0 = not blind, 1 = blind
+
+\newcommand{\Stan}{{\tt Stan}}
+\newcommand{\RStan}{{\tt RStan}}
+\newcommand{\edgeR}{{\tt edgeR}}
+\newcommand{\baySeq}{{\tt baySeq}}
+\newcommand{\ShrinkBayes}{{\tt ShrinkBayes}}
+\newcommand{\RNAseq}{RNA-seq}
+
+
+\title{Empirical Bayes analysis of \RNAseq{} data for detection of gene expression heterosis}
+
+\if0\blind{
+\author{Jarad Niemi$^*$\email{niemi@iastate.edu}, 
+Eric Mittman, 
+Will Landau, and 
+Dan Nettleton \\
+Department of Statistics, Iowa State University, Ames, Iowa, U.S.A.}
+} \fi
+
+\begin{document}
+
+\pagerange{\pageref{firstpage}--\pageref{lastpage}} 
+\volume{VV}
+\pubyear{YYYY}
+\artmonth{MM}
+\doi{x}
+
+\label{firstpage}
+
+\begin{abstract}
+An important type of heterosis, known as hybrid vigor, refers to the enhancements in the phenotype of hybrid progeny relative to their inbred parents. Although hybrid vigor is extensively utilized in agriculture, its molecular basis  is still largely unknown. In an effort to understand phenotypic heterosis at the molecular level, researchers are measuring transcript abundance levels of thousands of genes in parental inbred lines and their hybrid offspring using RNA sequencing (\RNAseq{}) technology.  The resulting data allow researchers to search for evidence of gene expression heterosis as one potential molecular mechanism underlying heterosis of agriculturally important traits.  The null hypotheses of greatest interest in testing for gene expression heterosis are composite null hypotheses that are difficult to test with standard statistical approaches for \RNAseq{} analysis. To address these shortcomings, we develop a hierarchical negative binomial model and draw inferences using a computationally tractable empirical Bayes approach to inference. We demonstrate improvements over alternative methods via a simulation study based on a maize experiment and then analyze that maize experiment with our newly proposed methodology. 
+This article has supplementary material online.
+\end{abstract}
+
+\begin{keywords}
+Hierarchical model; Negative binomial; \RNAseq{}; Bayesian LASSO; Parallel computing; Hybrid vigor.
+\end{keywords}
+
+\maketitle
+
+
+\end{document}
