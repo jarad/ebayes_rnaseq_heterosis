@@ -18,8 +18,6 @@
 \newcommand{\ShrinkBayes}{{\tt ShrinkBayes}}
 \newcommand{\RNAseq}{RNA-seq}
 
-%\renewcommand{\gamma}{c}
-
 
 \title{Empirical Bayes analysis of \RNAseq{} data for detection of gene expression heterosis}
 
@@ -95,7 +93,6 @@ Following \cite{ji2014estimation}, we reparameterize the gene-variety mean struc
 
 We assume a hierarchical model for the gene-specific mean parameters and overdispersion parameters. Initially, we assume the parental averages, half-parental differences, hybrid effect, and overdispersion parameters follow normal distributions, i.e.
 \[ 
-%\gamma_{vi} \stackrel{ind}{\sim} N(0,\sigma_\gamma^2), \quad 
 \phi_g \stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2), \,
 \alpha_g \stackrel{ind}{\sim} N(\eta_\alpha, \sigma_\alpha^2), \,
 \delta_g \stackrel{ind}{\sim} N(\eta_\delta, \sigma_\delta^2), \, \mbox{ and } \,
@@ -121,8 +118,6 @@ Conditional on the estimated normalization factors $\hat{\gamma}$ and hyperparam
 \begin{equation}
 \begin{split}
 p\left(\theta\left|y,\hat{\pi},\hat{\gamma}\right.\right) 
-%&= \prod_{g=1}^G p\left(\theta_g\left|y_g,\hat{\pi}\right.\right) = \prod_{g=1}^G p\left(y_g\left|\theta_g,\hat{\gamma}\right.\right) p\left(\theta_g\left|\hat{\pi}\right.\right) \nonumber \\
-%&\propto \prod_{g=1}^G \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi}\left|e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right.\right) \right] p(\theta_g|\hat{\eta},\hat{\sigma}) \\
 \propto \prod_{g=1}^G & \left[ \,\prod_{v=1}^V \prod_{i=1}^{n_v} \mbox{NB}\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}},e^{\psi_g}\right)  \right. \\
 &\times 
 \left. \vphantom{\prod_{v=1}^V}
@@ -142,24 +137,9 @@ To perform the conditional posterior inference on the gene-specific parameters, 
 
 In the maize context that motivates this work, we are interested in extreme heterosis (EH), i.e. either low-parent heterosis (LPH) or high-parent heterosis (HPH), in gene expression. 
 For a specific gene $g$, LPH occurs when expected expression in the hybrid is less than the expected expression of either parent, i.e. $\mu_{g3} < \min\{\mu_{g1},\mu_{g2}\}$ or, equivalently, $\delta_g < -|\alpha_g|$, and HPH occurs when expected expression in the hybrid is greater than the exptected expression of either parent, i.e. $\mu_{g3} > \max\{\mu_{g1},\mu_{g2}\}$ or, equivalently, $\delta_g > |\alpha_g|$. 
-% and high-parent  heterosis (HPH) of gene expression occurs when $\max(\mu_{g1},\mu_{g2}) < \mu_{g3}$. For simplicity, we define \emph{heterosis} of gene expression to be the event of LPH or HPH. The most important hypotheses are
-% \begin{align}
-% H_{g0}:&\mu_{g1}\le \mu_{g3}\le \mu_{g2} \mbox{ or } \mu_{g1}\ge \mu_{g3}\ge \mu_{g2} \mbox{\ \ vs.\ \ } \nonumber \\
-% H_{g1}:&\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3},
-% \label{e:hypotheses}
-% \end{align}
-% where $H_{g0}$ indicates no heterosis for gene $g$ and $H_{g1}$ indicates  heterosis for gene $g$. 
-% We evaluate these hypotheses based on empirical Bayes estimates of their posterior probabilities, e.g., 
-% \begin{align}
-% P\left(H_{g1}|y, \hat{\pi}_{MAP}\right) &= P\left(\left.\mu_{g3}< \min(\mu_{g1},\mu_{g2}) \mbox{ or } \max(\mu_{g1},\mu_{g2}) < \mu_{g3}\right| y, \hat{\pi}_{MAP}\right) \nonumber \\
-% &\approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\mu_{g3}^{(m)}< \min\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) \mbox{ or } \max\left(\mu_{g1}^{(m)},\mu_{g2}^{(m)}\right) < \mu_{g3}^{(m)}\right), \label{e:probs}
-% \end{align}
-% where $\mu_g^{(m)} = \left(\mu_{g1}^{(m)},\mu_{g2}^{(m)},\mu_{g3}^{(m)}\right)$ is the $m^{th}$ MCMC sample from the empirical Bayes posterior, and $\mathrm{I}(A)$ is 1 if A is true and 0 otherwise. 
 We evaluate these probabilities based on empirical Bayes estimates of their posterior probabilities, e.g., 
 \begin{equation}
-%P(LPH_g|y) \approx 
 P(\mbox{LPH}_g|y,\hat{\pi},\hat{\gamma}) = 
-%P\left(\left. \mu_{g3} < \min\{\mu_{g1},\mu_{g2}\}\right|y,\hat{\pi},\hat{\gamma}\right) = 
 P\left(\left.\delta_g < -|\alpha_g|\right|y, \hat{\pi},\hat{\gamma}\right) \approx \frac{1}{M} \sum_{m=1}^M \mathrm{I}\left(\delta_g^{(m)} < -\left|\alpha_g^{(m)}\right|\right), 
 \label{e:probs}
 \end{equation}
@@ -169,28 +149,14 @@ where $\left(\delta_g^{(m)},\alpha_g^{(m)}\right)$ is the $m^{th}$ MCMC sample f
 
 In addition to the approach above, we utilized \ShrinkBayes{} to estimate EH probabilities with two modifications described here. \ShrinkBayes{} utilizes integrated nested Laplace approximation (INLA) \citep{rue2009approximate} in combination with empirical Bayes ideas \citep{van2014shrinkbayes}. One limitation with inferential methods based on INLA is that all distributions, except for the data distribution, must have tails as light or lighter than the normal density. Thus, we cannot implement the Laplace priors for the half-parental difference ($\alpha_g$) and the hybrid effect ($\delta_g$) and instead use normal priors in this situation. An additional limitation is that INLA provides approximations to marginal posteriors for parameters or linear combinations of parameters, but not an approximation to the full posterior. Since we are interested in non-linear quantities such as $P(\delta_g > |\alpha_g||y)$, we cannot compute these directly using \ShrinkBayes{}. Instead, for \ShrinkBayes{}, we calculate EH probabilities conditional on posterior means for the half-parental difference and hybrid effect, i.e. $\hat{\delta}_g$ and $\hat{\alpha}_g$. For example,  
 \[ 
-% P_{\ShrinkBayes{}}(LPH_g|y) \equiv \left\{ \begin{array}{ll}
-% P(\delta_g>-\alpha_g|y) & \mbox{if } \hat{\delta}_g > -\hat{\alpha}_g \ge 0 \\
-% P(\delta_g>\phantom{-}\alpha_g|y) & \mbox{if } \hat{\delta}_g > \phantom{-}\hat{\alpha}_g \ge 0 \\
-% 0 & \mbox{otherwise}
-% \end{array} \right.
 P_{\ShrinkBayes{}}(\mbox{LPH}_g|y) \equiv P(\delta_g<-\alpha_g|y)\mathrm{I}\left(\hat{\delta}_g < -\hat{\alpha}_g \le 0\right) + P(\delta_g<\alpha_g|y) \mathrm{I}\left(\hat{\delta}_g < \hat{\alpha}_g \le 0\right).
-%P_{\ShrinkBayes{}}(HPH|y) \equiv \left\{ \begin{array}{ll}
-%P(\delta_g<-\alpha_g|y) & \mbox{if } \hat{\delta}_g > -\hat{\alpha}_g \ge 0 \\
-%(\delta_g<\phantom{-}\alpha_g|y) & \mbox{if } \hat{\delta}_g > \phantom{-}\hat{\alpha}_g \ge 0 \\
-%0 & \mbox{otherwise}
-%\end{array} \right.
 \]
 HPH probability is defined similarly with all inequalities reversed. As before, we construct a ranked list of genes according to the maximum of the gene's LPH and HPH heterosis probabilities.
-%the heterosis probability for gene $g$ is zero if $|\hat{\delta}_g| \le |\hat{\alpha}_g|$, $P(\delta_g>\alpha_g|y)$ if $\hat{\delta}_g > -\hat{\alpha}_g \ge 0$, $P(\delta_g - \alpha_g > 0 |y)$ if $\hat{\delta}_g > \hat{\alpha}_g \ge 0$, $P(\delta_g - \alpha_g < 0 |y)$ if $\hat{\delta}_g < \hat{\alpha}_g \le 0$, and $P(\delta_g + \alpha_g < 0 |y)$ if $\hat{\delta}_g < -\hat{\alpha}_g \le 0$.  
 
 We will use the term eBayes to refer to the approach defined in Sections \ref{s:model}--\ref{s:gene_heterosis} and add parenthetical labels ``normal'' and ``Laplace'' to specify whether we are assuming normal or Laplace distributions for half-parental differences and hybrid effects.
 
 \section{Simulation study based on a maize experiment}
 \label{s:simulation}
-
-% \subsection{Coverage for our model}
-% \input{../temp/analyze-heterosis/FIGURES/coverage}
 
 To assess the efficacy of our method to identify genes demonstrating EH, we used a maize data set with parental varieties B73 and Mo17 and the hybrid variety (B73 $\times$ Mo17) \citep{paschold2012complementation} to determine realistic parameter values for a simulation study. Section \ref{s:maize} describes the maize dataset in detail. We compared our method to approaches using the R packages \edgeR{} , \baySeq{} \citep{hardcastle2010bayseq, hardcastle2012baySeq}, and \ShrinkBayes{} \citep{van2014shrinkbayes}.
 
@@ -220,7 +186,6 @@ In addition to the approach of \citeauthor{ji2014estimation}, we modified two ex
 \subsection{Results}
 
 For the methods in Sections \ref{s:method} and \ref{s:alternative}, we sorted genes according to the computed measure of the strength of evidence for EH. From these sorted lists, we constructed receiver-operating characteristic (ROC) curves to evaluate the ability of these methods to distinguish genes with EH, as defined in Section \ref{s:sim_data}, 
-% From Dan, "why this citation?"
 from those without EH. A representative set of ROC curves is shown in Figure \ref{f:roc}. 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\textwidth]{exampleROC0_1}}
@@ -243,33 +208,6 @@ With 4 replicates per variety, there does not appear to be much of a difference 
 
 There also appears to be a pattern of the eBayes (Laplace) systematically performing better than eBayes (normal). We suspect this is because the Laplace distributions are better approximations to the true underlying distribution for these parameters, and we discuss this in Section \ref{s:discussion}.
 
-% \subsection{Hyperparameter estimation}
-% 
-% As described in Section \ref{s:simulation}, we simulated data only from the negative-binomial portion of the model, but not from the hierarchical distributions. Thus, there are no true values for the hyperparameters to compare against. But, we can compute means and standard deviations of the gene-specific parameters that were used in the simulation study and compare these to the estimated hyperparameter values. 
-% \include{include/rmse}
-% \include{include/rae}
-% % \begin{table}
-% % \caption{Empirical values calculated from the gene-specific parameters used in the simulation and mean of estimated values across the 10 simulations within replicate number. Maximum standard deviation in the estimates across the 10 simulations was 0.004.}
-% % \label{t:hyperparameter}
-% % \begin{tabular}{c|c|ccc|}
-% % & \multicolumn{1}{c|}{Empirical} & \multicolumn{3}{c}{Number of replicates}\\
-% % Parameter & value & 4 & 8 & 16 \\
-% % \hline
-% % $\eta_\phi$ & \phantom{-}4.6\phantom{00} & \phantom{-}4.7\phantom{00} & \phantom{-}4.7\phantom{00}  & \phantom{-}4.8\phantom{00}  \\
-% % $\eta_\alpha$ & -0.028 & -0.023  & -0.018 & -0.014  \\
-% % $\eta_\delta$ & \phantom{-}0.070 & \phantom{-}0.046 & \phantom{-}0.031  & \phantom{-}0.022   \\
-% % $\eta_\psi$ & -2.4\phantom{00} & -2.3\phantom{00}  &  -2.3\phantom{00}  & -2.4\phantom{00} \\
-% % \hline
-% % $\sigma_\phi$ & \phantom{-}1.8\phantom{00} & \phantom{-}1.8\phantom{00}  & \phantom{-}1.8\phantom{00}  & \phantom{-}1.7\phantom{00} \\
-% % $\sigma_\alpha$ & \phantom{-}0.45\phantom{0} & \phantom{-}0.46\phantom{0}  & \phantom{-}0.40\phantom{0}  & \phantom{-}0.36\phantom{0}  \\
-% % $\sigma_\delta$ & \phantom{-}0.31\phantom{0} & \phantom{-}0.39\phantom{0}  & \phantom{-}0.32\phantom{0}  & \phantom{-}0.27\phantom{0}  \\
-% % $\sigma_\psi$ & \phantom{-}0.59\phantom{0} & \phantom{-}0.40\phantom{0} & \phantom{-}0.49\phantom{0} & \phantom{-}0.54\phantom{0} \\
-% % \hline
-% % \end{tabular}
-% % \end{table}
-% Table \ref{t:hyperparameter} provides the computed means and standard deviations from the gene-specific parameter values, called empirical values, and compares these values against the mean of estimated hyperparameters across the 10 simulations within replicate number. For the mean parameters, there is reasonable agreement amongst the different numbers of replicates with a somewhat high estimate for the mean of the overdispersion parameter $(\eta_\psi)$ and, perhaps, a trend for the mean of the hybrid effect ($\eta_\delta$), although we would not have expected this. For the standard deviation parameters, $\sigma_\phi$ is consistent across the replicate numbers, $\sigma_\alpha$ and $\sigma_\delta$ mean estimates are decreasing toward the empirical values as the number of replicates increases, and $\sigma_\phi$ is increasing toward the empirical value as the number of replicates increases. %We expect this pattern for $\sigma_\alpha$ and $\sigma_\delta$ since these are based on moment matching of independent gene-specific parameter estimates. For low numbers of replicates, these independent estimates will have relatively large sampling variability that will cause a bias toward larger values for the moment-matched standard deviation estimates.
-
-
 
 \section{Searching for gene expression heterosis in the maize experiment}
 \label{s:maize}
@@ -290,13 +228,6 @@ This figure shows shrinkage for large absolute estimates of $\alpha_g$ and $\del
 
 With posteriors for all parameters, we can calculate empirical Bayes posterior probabilities for LPH and HPH. For each gene, the quantity of interest is the maximum of these two probabilities. For each gene with a high probability of either HPH or LPH, the magnitude of the effect is of interest, thus we calculate 
 \begin{equation}
-% \mbox{estimated effect size}_g = \left\{ 
-% \begin{array}{ll}
-% \hat{\mu}_{g3} - \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} < \min(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
-% \hat{\mu}_{g3} - \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) & \mbox{if } \hat{\mu}_{g3} > \max(\hat{\mu}_{g1},\hat{\mu}_{g2}) \\
-% 0 & \mbox{otherwise},
-% \end{array} 
-% \right. 
 \mbox{estimated effect size}_g \equiv \left\{ 
 \begin{array}{ll}
 \hat{\delta}_g - |\hat{\alpha}_g| & \mbox{if } \hat{\delta}_g > \phantom{-}|\alpha_g| \\
