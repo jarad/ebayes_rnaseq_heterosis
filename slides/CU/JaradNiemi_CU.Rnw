@@ -1,0 +1,432 @@
+\documentclass[handout]{beamer}
+
+\usecolortheme[RGB={0,0,144}]{structure}
+\usetheme{AnnArbor}\usecolortheme{beaver}
+
+\usepackage{verbatim,xmpmulti,color,multicol,multirow}
+\setlength{\unitlength}{\textwidth}  % measure in textwidths
+\usepackage[normalem]{ulem}
+
+\graphicspath{{../figs/}{../../include/}{../KState/}}
+
+%\usepackage{beamerthemesplit}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{enumerate subitem}{\alph{enumii}.}
+\setbeamertemplate{enumerate subsubitem}{\roman{enumiii}.}
+\setkeys{Gin}{width=0.6\textwidth}
+
+\title[Bayesian analysis for heterosis detection in RNAseq data]{Bayesian analysis for heterosis detection in RNAseq data}
+\author[Jarad Niemi]{Dr. Jarad Niemi \\ joint with Eric Mittman, Will Landau, and Dr. Dan Nettleton}
+\institute[Iowa State]{Iowa State University}
+\date{\today}
+
+\begin{document}
+
+%\section{Temp??} \begin{comment}
+
+<<chunk_options, echo=FALSE, message=FALSE>>=
+opts_chunk$set(fig.width=6, 
+               fig.height=5, 
+               out.width='.8\\linewidth', 
+               fig.align='center', 
+               size='tiny',
+               echo=FALSE)
+library(ggplot2)
+@
+
+\frame{\titlepage  
+{\footnotesize
+This research was supported by National Institute of General Medical Sciences (NIGMS) of the National Institutes of Health and the joint National Science Foundation / NIGMS Mathematical Biology Program under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health or the National Science Foundation.
+}}
+
+\begin{frame}
+\frametitle{Outline}
+
+\begin{itemize}
+\item Data
+  \begin{itemize}
+  \item Phenotypic heterosis
+  \item RNAseq
+  \end{itemize}
+\item Methodology
+  \begin{itemize}
+  \item Model
+  \item Empircal Bayes
+  \item Stan
+  \end{itemize}
+\item Results
+  \begin{itemize}
+  \item Simulation study vs {\tt edgeR}, {\tt baySeq}, {\tt ShrinkBayes}
+  \item Real data analysis
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+
+\section{Data}
+\subsection{Phenotypic heterosis}
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in maize}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{heterosis_corn}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in cattle}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\vspace{-0.1in}
+
+\begin{center}
+\includegraphics{heterosis_cattle1}
+
+\includegraphics{heterosis_cattle2}
+\end{center}
+\end{frame}
+
+\subsection{RNAseq experiment}
+\begin{frame}
+\frametitle{RNAseq experiment}
+\setkeys{Gin}{width=0.55\textwidth}
+
+\begin{center}
+\includegraphics{rnaseq_experiment}
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Phenotypic heterosis in RNAseq}
+\setkeys{Gin}{width=0.8\textwidth}
+\begin{center}
+\includegraphics{heterosis_rnaseq}
+\end{center}
+\end{frame}
+
+
+\section{Method}
+\subsection{Model}
+
+\begin{frame}
+\frametitle{RNAseq model}
+
+Let $Y_{gvi}$ be the count for 
+\begin{itemize}
+\item gene $g=1,\ldots,G$, 
+\item variety $v=1,\ldots,V$, and 
+\item replicate $i=1,\ldots,n_v$. 
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+We assume
+\[
+Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) 
+\]
+\pause
+where 
+\begin{itemize}
+\item $E[Y_{gvi}] = \zeta_{gvi} = e^{\mu_{gv}+\gamma_{vi}}$, \pause 
+\item $V[Y_{gvi}] = \zeta_{gvi}+e^{\psi_g}\zeta_{gvi}^2$, \pause and 
+\item $\gamma_{vi}$ controls sequencing depth (normalization factors).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Reparameterization}
+\setkeys{Gin}{width=\textwidth}
+
+Convert the variety specific parameters for parent 1 ($\mu_{g1}$), parent 2 ($\mu_{g2}$), and the hybrid ($\mu_{g3}$) \pause to 
+
+\begin{itemize}[<+->]
+\item Parental average: $\phi_g = (\mu_{g1}+\mu_{g2})/2$
+\item Half-parental difference: $\alpha_g = (\mu_{g2}-\mu_{g1})/2$
+\item Hybrid effect: $\delta_g = \mu_{g3}-\phi_g$
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+and thus 
+\[ \begin{array}{rl}
+\mu_{g1} &= \phi_g + \alpha_g \\
+\mu_{g2} &= \phi_g - \alpha_g \\
+\mu_{g3} &= \phi_g + \delta_g
+\end{array}\]
+
+\pause
+\begin{center}
+\includegraphics{pad}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Gene heterosis}
+\setkeys{Gin}{width=\textwidth}
+
+\begin{center}
+\includegraphics{pad}
+\end{center}
+\pause
+We define \alert{gene heterosis}:
+
+\[ \begin{array}{rll}
+H_{g,HPH}: & \delta_g > \phantom{-}|\alpha_g|  & \mbox{high parent heterosis} \pause \\
+H_{g,LPH}: & \delta_g < -|\alpha_g|  & \mbox{low parent heterosis} \pause \\
+H_{g0}: & |\delta_g| \le  |\alpha_g| 
+\end{array} \]
+
+\pause
+
+We are interested in identifying genes with high posterior probabilities for LPH and HPH, i.e. 
+\begin{itemize}
+\item $P(H_{g,HPH}|y) = P(\delta_g > \phantom{-}|\alpha_g|\, |y)$ and 
+\item $P(H_{g,LPH}|y) = P(\delta_g < -|\alpha_g|\, |y)$. 
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Hierarchical model}
+\setkeys{Gin}{width=\textwidth}
+\begin{itemize}
+\item Data model:
+\[ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) \]
+\[ \mu_{g1} = \phi_g + \alpha_g, \mu_{g2} = \phi_g-\alpha_g, \mu_{g3} = \phi_g + \delta_g \]
+
+\pause
+
+\item Hierarchical structure:
+\begin{columns}
+\begin{column}{0.5\linewidth}
+\[ \begin{array}{rl}
+\phi_g &\stackrel{ind}{\sim} N(\eta_\phi, \sigma_\phi^2) \\
+\alpha_g &\stackrel{ind}{\sim} La(\eta_\alpha, \sigma_\alpha) \\
+\delta_g &\stackrel{ind}{\sim} La(\eta_\delta, \sigma_\delta) \\
+\psi_g &\stackrel{ind}{\sim} N(\eta_\psi, \sigma_\psi^2) 
+\end{array} \]
+\end{column} \pause
+\begin{column}{0.5\linewidth}
+<<>>=
+source("../../sandbox/Laplace.R")
+x = seq(-4,4,by=0.1)
+d = data.frame(rbind(data.frame(density="normal", x=x, y=dnorm(x)),
+                     data.frame(density="Laplace", x=x, y=dlaplace(x,0,1/sqrt(2)))))
+ggplot(d, aes(x=x,y=y,color=density)) + 
+  geom_line(size=2) + 
+  labs(y="f(x)")
+@
+\end{column}
+\end{columns}
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}[fragile]
+% \frametitle{Normal vs Laplace}
+% <<>>=
+% source("../../sandbox/Laplace.R")
+% x = seq(-4,4,by=0.1)
+% d = data.frame(rbind(data.frame(density="normal", x=x, y=dnorm(x)),
+%                      data.frame(density="Laplace", x=x, y=dlaplace(x,0,sqrt(2)))))
+% ggplot(d, aes(x=x,y=y,color=density)) + 
+%   geom_line() + 
+%   labs(y="f(x)")
+% @
+% \end{frame}
+
+\subsection{Empirical Bayes}
+\begin{frame}
+\frametitle{Empirical Bayes}
+
+\begin{enumerate}
+\item Estimate hyperparameter, $\pi=(\eta,\sigma,\gamma)$: 
+
+  \begin{enumerate}
+  \item Use {\tt edgeR} to obtain $\hat{\gamma}$ and $\hat{\theta}_g = (\hat{\phi}_g,\hat{\alpha}_g,\hat{\delta}_g,\hat{\psi}_g)$.
+  \item Use moment matching, to obtain $\hat{\eta}$ and $\hat{\sigma}$.
+  \end{enumerate}
+
+\pause
+\item Empirical Bayes posterior
+
+\[ p(\theta|y, \hat{\pi}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\pi}) \]
+where $y_g$ is all observations from gene $g$ \pause and 
+{\footnotesize
+\[ p(\theta_g|y_g,\hat{\pi}) \propto \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}}, e^{\psi_g}\right) \right] p\left(\theta_g;\hat{\eta},\hat{\sigma}\right) \]
+}
+\end{enumerate}
+\end{frame}
+
+
+
+
+
+\subsection{Stan}
+\begin{frame}
+\frametitle{Stan}
+\setkeys{Gin}{width=1\textwidth}
+
+\begin{center}
+\includegraphics{stan}
+\end{center}
+
+For more information, go to \url{http://mc-stan.org/}.
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[containsverbatim]
+\frametitle{}
+
+{\tiny
+\begin{verbatim}
+data {
+  int<lower=1> S;
+  int<lower=0> count[S]; 
+  int<lower=1,upper=3> variety[S];
+  real   eta_phi; real   eta_alpha; real   eta_delta; real   eta_psi; 
+  real sigma_phi; real sigma_alpha; real sigma_delta; real sigma_psi;
+  vector[S] gamma;                     // lane sequencing depth
+}
+transformed data {
+  matrix[S,3] X;
+  for (s in 1:S) {
+    if (variety[s] == 1) { X[s,1] <-  1; X[s,2] <- -1; X[s,3] <-  0; }
+    if (variety[s] == 2) { X[s,1] <-  1; X[s,2] <-  1; X[s,3] <-  0; }
+    if (variety[s] == 3) { X[s,1] <-  1; X[s,2] <-  0; X[s,3] <-  1; }
+  }
+}
+parameters {
+  real phi; real alpha; real delta; real psi;          
+}
+transformed parameters {
+  vector[3] pad;
+
+  pad[1] <- phi;
+  pad[2] <- alpha;
+  pad[3] <- delta;
+}
+model {
+  phi   ~ normal(            eta_phi,   sigma_phi);
+  alpha ~ double_exponential(eta_alpha, sigma_alpha); // Laplace
+  delta ~ double_exponential(eta_delta, sigma_delta); // Laplace
+  psi   ~ normal(            eta_psi,   sigma_psi);
+
+  count ~ neg_binomial_2_log(X*pad+gamma, 1/exp(psi));
+}
+\end{verbatim}
+}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{RStan}
+
+<<echo=TRUE, eval=FALSE>>=
+# set up data
+# ...
+# ...
+
+# get hyperparameter estimates
+hyperparameter = get_indep_est(counts.t,group,geneid.t)
+
+# change data to long format
+data_stan = w.to.l(counts.t,group)
+
+# compile Stan model (this can take some time, but only needs to be done once)
+sg_model = stan_model("sg_model.txt")
+
+# use initial values to obtain hyperparameter estimates
+# ...
+# ...
+
+# loop over all genes
+posterior = dlply(stan_data, .(gene), function(x) {
+  dat = list(x, hyperparameter)
+  sampling(sg_model, dat, chains=4, iter=2000)
+}, .parallel=TRUE)
+@
+
+\end{frame}
+
+
+\section{Results}
+\subsection{Simulation study}
+\begin{frame}
+\frametitle{Simulation study}
+
+Compared our method to {\tt edgeR}, {\tt baySeq}, {\tt ShrinkBayes} (not fair)
+
+\vspace{0.2in} \pause
+
+Simulation study:
+\begin{enumerate}[<+->]
+\item Used {\tt edgeR} to estimate $\theta_g$ and $\gamma$ (about 30\% have heterosis)
+\item Simulated data from a negative binomial model using the estimated $\theta_g$ and $\gamma$
+\item Used each method to rank genes according to plausibility of heterosis
+\item Compared methods based on receiving operating characteristic (ROC) curves
+\end{enumerate}
+\end{frame}
+
+
+
+\subsection{ROC curves}
+\begin{frame}
+\frametitle{Example ROC curve}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{exampleROC0_1}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Area under ROC curve}
+\setkeys{Gin}{width=\textwidth}
+\begin{center}
+\includegraphics{auc-facet-TRUE}
+\end{center}
+\end{frame}
+
+
+\subsection{Real data analysis}
+\begin{frame}
+\frametitle{}
+{\tiny
+\input{../../include/rmse}
+}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Volcano plot for real data}
+\setkeys{Gin}{width=0.6\textwidth}
+\begin{center}
+\includegraphics{volcano}
+\end{center}
+\end{frame}
+
+
+
+
+
+
+
+\end{document}
