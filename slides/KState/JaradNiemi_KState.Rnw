@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[handout]{beamer}
 
 \usecolortheme[RGB={0,0,144}]{structure}
 \usetheme{AnnArbor}\usecolortheme{beaver}
@@ -7,7 +7,7 @@
 \setlength{\unitlength}{\textwidth}  % measure in textwidths
 \usepackage[normalem]{ulem}
 
-\graphicspath{{../figs/}}
+\graphicspath{{../figs/}{../../include/}}
 
 %\usepackage{beamerthemesplit}
 \setbeamertemplate{navigation symbols}{}
@@ -407,7 +407,7 @@ Simulation study:
 \begin{frame}
 \frametitle{}
 {\tiny
-\input{../../include/map-laplace}
+\input{../../include/rmse}
 }
 \end{frame}
 
@@ -416,7 +416,7 @@ Simulation study:
 \frametitle{Volcano plot for real data}
 \setkeys{Gin}{width=0.6\textwidth}
 \begin{center}
-\includegraphics{maize_volcano}
+\includegraphics{volcano}
 \end{center}
 \end{frame}
 
