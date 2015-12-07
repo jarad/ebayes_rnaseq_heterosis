@@ -1,4 +1,4 @@
-\documentclass[handout]{beamer}
+\documentclass{beamer}
 
 \usecolortheme[RGB={0,0,144}]{structure}
 \usetheme{AnnArbor}\usecolortheme{beaver}
@@ -7,7 +7,7 @@
 \setlength{\unitlength}{\textwidth}  % measure in textwidths
 \usepackage[normalem]{ulem}
 
-\graphicspath{{../figs/}{../../include/}{../KState/}}
+\graphicspath{{../../include/}{../figs/}{../KState/}}
 
 %\usepackage{beamerthemesplit}
 \setbeamertemplate{navigation symbols}{}
@@ -16,7 +16,17 @@
 \setbeamertemplate{enumerate subsubitem}{\roman{enumiii}.}
 \setkeys{Gin}{width=0.6\textwidth}
 
-\title[Bayesian analysis for heterosis detection in RNAseq data]{Bayesian analysis for heterosis detection in RNAseq data}
+
+\providecommand{\e}{\varepsilon}
+\providecommand{\nv}{{}^{-1}}
+\providecommand{\ov}[1]{\overline{#1}}
+\providecommand{\q}{$\quad$ \newline}
+\providecommand{\rt}{\rightarrow}
+\providecommand{\vc}[1]{\boldsymbol{#1}}
+\providecommand{\wh}[1]{\widehat{#1}}
+
+
+\title[Bayesian RNAseq heterosis ]{Bayesian analysis for heterosis detection in RNAseq data}
 \author[Jarad Niemi]{Dr. Jarad Niemi \\ joint with Eric Mittman, Will Landau, and Dr. Dan Nettleton}
 \institute[Iowa State]{Iowa State University}
 \date{\today}
@@ -36,7 +46,7 @@ library(ggplot2)
 @
 
 \frame{\titlepage  
-{\footnotesize
+{\tiny
 This research was supported by National Institute of General Medical Sciences (NIGMS) of the National Institutes of Health and the joint National Science Foundation / NIGMS Mathematical Biology Program under award number R01GM109458. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health or the National Science Foundation.
 }}
 
@@ -129,14 +139,14 @@ Let $Y_{gvi}$ be the count for
 
 We assume
 \[
-Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) 
+Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+c_{vi}},e^{\psi_g}\right) 
 \]
 \pause
 where 
 \begin{itemize}
-\item $E[Y_{gvi}] = \zeta_{gvi} = e^{\mu_{gv}+\gamma_{vi}}$, \pause 
+\item $E[Y_{gvi}] = \zeta_{gvi} = e^{\mu_{gv}+c_{vi}}$, \pause 
 \item $V[Y_{gvi}] = \zeta_{gvi}+e^{\psi_g}\zeta_{gvi}^2$, \pause and 
-\item $\gamma_{vi}$ controls sequencing depth (normalization factors).
+\item $c_{vi}$ controls sequencing depth (normalization factors).
 \end{itemize}
 \end{frame}
 
@@ -172,14 +182,14 @@ and thus
 
 
 \begin{frame}
-\frametitle{Gene heterosis}
+\frametitle{Gene expression heterosis}
 \setkeys{Gin}{width=\textwidth}
 
 \begin{center}
 \includegraphics{pad}
 \end{center}
 \pause
-We define \alert{gene heterosis}:
+We define \alert{gene expression heterosis}:
 
 \[ \begin{array}{rll}
 H_{g,HPH}: & \delta_g > \phantom{-}|\alpha_g|  & \mbox{high parent heterosis} \pause \\
@@ -203,7 +213,7 @@ We are interested in identifying genes with high posterior probabilities for LPH
 \setkeys{Gin}{width=\textwidth}
 \begin{itemize}
 \item Data model:
-\[ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+\gamma_{vi}},e^{\psi_g}\right) \]
+\[ Y_{gvi} \stackrel{ind}{\sim} NB\left(e^{\mu_{gv}+c_{vi}},e^{\psi_g}\right) \]
 \[ \mu_{g1} = \phi_g + \alpha_g, \mu_{g2} = \phi_g-\alpha_g, \mu_{g3} = \phi_g + \delta_g \]
 
 \pause
@@ -252,10 +262,10 @@ ggplot(d, aes(x=x,y=y,color=density)) +
 \frametitle{Empirical Bayes}
 
 \begin{enumerate}
-\item Estimate hyperparameter, $\pi=(\eta,\sigma,\gamma)$: 
+\item Estimate hyperparameter, $\pi=(\eta,\sigma,c)$: 
 
   \begin{enumerate}
-  \item Use {\tt edgeR} to obtain $\hat{\gamma}$ and $\hat{\theta}_g = (\hat{\phi}_g,\hat{\alpha}_g,\hat{\delta}_g,\hat{\psi}_g)$.
+  \item Use {\tt edgeR} to obtain $\hat{c}$ and $\hat{\theta}_g = (\hat{\phi}_g,\hat{\alpha}_g,\hat{\delta}_g,\hat{\psi}_g)$.
   \item Use moment matching, to obtain $\hat{\eta}$ and $\hat{\sigma}$.
   \end{enumerate}
 
@@ -265,7 +275,7 @@ ggplot(d, aes(x=x,y=y,color=density)) +
 \[ p(\theta|y, \hat{\pi}) = \prod_{g=1}^G p(\theta_g|y_g,\hat{\pi}) \]
 where $y_g$ is all observations from gene $g$ \pause and 
 {\footnotesize
-\[ p(\theta_g|y_g,\hat{\pi}) \propto \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{\gamma}_{vi}}, e^{\psi_g}\right) \right] p\left(\theta_g;\hat{\eta},\hat{\sigma}\right) \]
+\[ p(\theta_g|y_g,\hat{\pi}) \propto \left[ \prod_{v=1}^V \prod_{i=1}^{n_v} NB\left(y_{gvi};e^{\mu_{gv}+\hat{c}_{vi}}, e^{\psi_g}\right) \right] p\left(\theta_g;\hat{\eta},\hat{\sigma}\right) \]
 }
 \end{enumerate}
 \end{frame}
@@ -358,6 +368,9 @@ sg_model = stan_model("sg_model.txt")
 # ...
 
 # loop over all genes
+library(doMC)
+registerDoMC() 
+
 posterior = dlply(stan_data, .(gene), function(x) {
   dat = list(x, hyperparameter)
   sampling(sg_model, dat, chains=4, iter=2000)
@@ -372,17 +385,24 @@ posterior = dlply(stan_data, .(gene), function(x) {
 \begin{frame}
 \frametitle{Simulation study}
 
-Compared our method to {\tt edgeR}, {\tt baySeq}, {\tt ShrinkBayes} (not fair)
+Simulation study:
+\begin{enumerate}[<+->]
+\item Used {\tt edgeR} to estimate $\theta_g$ and $c$ (about 30\% have heterosis)
+\item Simulated data from a negative binomial model using the estimated $\theta_g$ and $c$
+\item Used each method below to rank genes according to plausibility of heterosis
+\item Compared methods based on receiving operating characteristic (ROC) curves
+\end{enumerate}
 
 \vspace{0.2in} \pause
 
-Simulation study:
-\begin{enumerate}[<+->]
-\item Used {\tt edgeR} to estimate $\theta_g$ and $\gamma$ (about 30\% have heterosis)
-\item Simulated data from a negative binomial model using the estimated $\theta_g$ and $\gamma$
-\item Used each method to rank genes according to plausibility of heterosis
-\item Compared methods based on receiving operating characteristic (ROC) curves
-\end{enumerate}
+Compared our method to 
+\begin{itemize}
+\item {\tt edgeR} (not fair), 
+\item {\tt baySeq} (not fair), 
+\item Ji et. al. log(count+1)
+\item {\tt ShrinkBayes} - INLA
+\end{itemize}
+
 \end{frame}
 
 
@@ -406,13 +426,65 @@ Simulation study:
 \end{frame}
 
 
-\subsection{Real data analysis}
 \begin{frame}
-\frametitle{}
+\frametitle{Evaluation of empirical Bayes estimates}
+
+In this simulation study, we have no true hyperparameters. \pause But we can evaluate how good our hyperparameters are in estimating means and standard deviations of the gene-specific parameters, \pause e.g. 
+\[ 
+\eta_\alpha^{\mbox{truth}} \equiv \frac{1}{G} \sum_{g=1}^G \alpha_g^{\mbox{truth}} \pause \qquad 
+\sigma_\alpha^{2\mbox{truth}} \equiv \frac{1}{G} \sum_{g=1}^G \left( \alpha_g^{\mbox{truth}} - \eta_\alpha^{\mbox{truth}}\right)^{2}
+\]
+
+\pause
+
 {\tiny
-\input{../../include/rmse}
+\input{rmse_with_truth}
 }
 \end{frame}
+
+
+
+
+
+
+\subsection{Real data analysis}
+\begin{frame}
+\frametitle{Real data analysis}
+
+We used our method to analyze a maize data set of RNA-seq gene expression in parental lines B73 and Mo17 and the hybrid genotype (B73$\times$Mo17) with a total of 39,656 genes.
+
+\vspace{0.2in} \pause
+
+Analysis proceeds by 
+\begin{itemize}
+\item Estimate hyperparameters $\hat{\pi}$
+\item In parallel, gene-specific analyses for certain genes\pause, e.g. 
+\[ 
+\left| \delta_g^{edgeR}\right| \le \left| \alpha_g^{edgeR}\right| 
+\]
+which was 30\% of the original genes.
+\end{itemize}
+\end{frame}
+
+
+
+
+
+\begin{frame}
+\frametitle{Shrinkage}
+\begin{center}
+\includegraphics{gene_specific_estimates}
+\end{center}
+\end{frame}
+
+% \begin{frame}
+% \frametitle{Estimates}
+% \begin{center}
+% \includegraphics{estimates}
+% \end{center}
+% \end{frame}
+
+
 
 
 \begin{frame}
@@ -424,7 +496,75 @@ Simulation study:
 \end{frame}
 
 
+\section{Fully Bayesian analysis}
+\begin{frame}
+\frametitle{Fully Bayesian analysis}
 
+An MCMC implementation:
+\begin{itemize}
+\item Independently, sample $\phi_g \sim (\phi_g|\ldots)$ for $g=1,\ldots,G$.
+\item Independently, sample $\alpha_g \sim (\alpha_g|\ldots)$ for $g=1,\ldots,G$.
+\item Independently, sample $\delta_g \sim (\delta_g|\ldots)$ for $g=1,\ldots,G$.
+\item Independently, sample $\psi_g \sim (\psi_g|\ldots)$ for $g=1,\ldots,G$. 
+
+\vspace{0.1in} \pause
+
+\item Sample hyperparameters:
+\begin{itemize} 
+\item $\eta_\phi,\sigma_\phi^2$ depend on summary \emph{statistics} of $(\phi_1,\ldots,\phi_G)$.
+\item $\eta_\alpha,\sigma_\alpha^2$ depend on summary \emph{statistics} of $(\alpha_1,\ldots,\alpha_G)$.
+\item $\eta_\delta,\sigma_\delta^2\,$ depend on summary \emph{statistics} of $(\delta_1,\ldots,\delta_G)$.
+\item $\eta_\psi,\sigma_\psi^2$ depend on summary \emph{statistics} of $(\psi_1,\ldots,\psi_G)$.
+\end{itemize}
+\end{itemize}
+
+\vspace{0.1in} \pause
+
+The problem is that $G$ is large, i.e. ~40k. 
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Computational tractibility via parallelism}
+
+Amdahl's Law:
+\[ 
+\mbox{speedup} = \frac{1}{1-P+\frac{P}{S}} 
+\]
+\pause
+where 
+\begin{itemize}
+\item $P$ is the proportion of the execution time that would benefit from speed up
+\item $S$ is the speedup of that proportion
+\end{itemize}
+
+\vspace{0.2in} \pause
+
+Parallel hardware
+\begin{itemize}[<+->]
+\item Multi-CPU/multi-core
+\item Cluster
+\item Graphical processing units (GPUs)
+\begin{itemize}
+\item Minimize memory transfer between host (CPU) and device (GPU)
+\item Only have uniform and normal samplers
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Minimizing data transfer}
+Assessing convergence
+\end{frame}
+
+
+\section{Disease outbreaks}
+\begin{frame}
+\url{https://michaud.shinyapps.io/CDCPlot/}
+\end{frame}
 
 
 
