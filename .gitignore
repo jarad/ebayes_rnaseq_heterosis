@@ -29,3 +29,7 @@
 
 shiny/*
 *.pdf
+
+sandbox/
+response.tex
+response2.tex
